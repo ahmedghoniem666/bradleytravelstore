@@ -3100,9 +3100,11 @@
             
             if (type === 'hotel') {
                 const roomType = item.querySelector('.room-type').value || 'N/A';
+                const rooms = parseInt(item.querySelector('.rooms').value) || 1;
                 const boardBasis = item.querySelector('.board-basis').value || 'N/A';
                 const cancelDeadline = item.querySelector('.cancellation-deadline');
                 supplierData.roomType = roomType;
+                supplierData.rooms = rooms;
                 supplierData.boardBasis = boardBasis;
                 supplierData.cancelDeadline = cancelDeadline ? cancelDeadline.value : '';
                 
@@ -3121,6 +3123,10 @@
                     <div class="supplier-summary-row">
                         <span class="supplier-summary-label">Room:</span>
                         <span class="supplier-summary-value">${roomType}</span>
+                    </div>
+                    <div class="supplier-summary-row">
+                        <span class="supplier-summary-label">Rooms:</span>
+                        <span class="supplier-summary-value">${rooms}</span>
                     </div>
                     <div class="supplier-summary-row">
                         <span class="supplier-summary-label">Board:</span>
@@ -3304,6 +3310,10 @@
                     <div class="form-group">
                         <label>Room Type</label>
                         <input type="text" class="form-control room-type" placeholder="Room Type" onchange="updateEmailTemplate(); saveState();">
+                    </div>
+                    <div class="form-group">
+                        <label>Rooms</label>
+                        <input type="number" class="form-control rooms" min="1" value="1" onchange="updateEmailTemplate(); saveState();">
                     </div>
                     <div class="form-group">
                         <label>Board Basis</label>
@@ -3870,6 +3880,7 @@
                 
                 if (includeInEmail && includeInEmail.checked) {
                     const roomTypeInput = item.querySelector('.room-type');
+                    const roomsInput = item.querySelector('.rooms');
                     const boardBasisInput = item.querySelector('.board-basis');
                     const cancelPolicySelect = item.querySelector('.cancellation-policy');
                     const cancelFeeInput = item.querySelector('.cancellation-fee');
@@ -3879,6 +3890,7 @@
                     const supplierHotelNameInput = item.querySelector('.supplier-hotel-name');
                     
                     const roomType = roomTypeInput ? roomTypeInput.value : '[Room Type]';
+                    const rooms = parseInt(roomsInput ? roomsInput.value : '1') || 1;
                     const boardBasis = boardBasisInput ? boardBasisInput.value : '[Board Basis]';
                     const upgradeDesc = upgradeDescInput ? upgradeDescInput.value : '';
                     const upgradeAmount = parseFloat(upgradeAmountInput ? upgradeAmountInput.value : '0') || 0;
@@ -3899,10 +3911,10 @@
                     }
                     
                     if (isUpgrade) {
-                        const upgradeText = upgradeDesc || `${roomType}, ${boardBasis}`;
+                        const upgradeText = upgradeDesc || `${roomType} (${rooms} room${rooms > 1 ? 's' : ''}), ${boardBasis}`;
                         optionText += `Upgrade to ${boldWrap(upgradeText)} add ${boldWrap('£' + Math.round(upgradeAmount).toFixed(0))} per family\n`;
                     } else {
-                        optionText += `${boldWrap(roomType)} on ${boldWrap(boardBasis)} Basis\n`;
+                        optionText += `${boldWrap(roomType + ' (' + rooms + ' room' + (rooms > 1 ? 's' : '') + ')')} on ${boldWrap(boardBasis)} Basis\n`;
                     }
                     
                     if (cancelText) {
@@ -4432,6 +4444,7 @@
             if (type === 'hotel') {
                 data.supplierHotelName = item.querySelector('.supplier-hotel-name').value;
                 data.roomType = item.querySelector('.room-type').value;
+                data.rooms = parseInt(item.querySelector('.rooms').value) || 1;
                 data.boardBasis = item.querySelector('.board-basis').value;
             } else {
                 data.airline = item.querySelector('.airline').value;
@@ -4632,6 +4645,7 @@
             item.querySelector('.cancellation-deadline').value = data.cancellationDeadline || '';
             item.querySelector('.cancellation-fee').value = (data.cancellationFee || 0).toFixed(2);
             item.querySelector('.room-type').value = data.roomType || '';
+            item.querySelector('.rooms').value = data.rooms || 1;
             item.querySelector('.board-basis').value = data.boardBasis || 'Room Only';
             item.querySelector('.net-price').value = (data.netPrice || 0).toFixed(2);
             item.querySelector('.commission-rate').value = data.commissionRate || '';
@@ -4682,6 +4696,10 @@
                 <div class="supplier-summary-row">
                     <span class="supplier-summary-label">Room:</span>
                     <span class="supplier-summary-value">${data.roomType || 'N/A'}</span>
+                </div>
+                <div class="supplier-summary-row">
+                    <span class="supplier-summary-label">Rooms:</span>
+                    <span class="supplier-summary-value">${data.rooms || 1}</span>
                 </div>
                 <div class="supplier-summary-row">
                     <span class="supplier-summary-label">Board:</span>
