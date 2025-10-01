@@ -286,6 +286,9 @@
             margin: 20px 0;
             white-space: pre-line;
             line-height: 1.8;
+            min-height: 300px;
+            border: 1px solid #ddd;
+            border-radius: var(--border-radius);
         }
         
         .delivery-options {
@@ -819,7 +822,6 @@
     </section>
 
     <div class="container">
-        <!-- Customer Information Section -->
         <section id="customer" class="card customer-info-section">
             <div class="section-toggle" onclick="toggleSection('customer')">
                 <h2 class="section-title">Customer Information</h2>
@@ -837,7 +839,6 @@
                         <input type="text" id="destination" class="form-control" placeholder="Destination" onchange="validateCustomerInfo(); updateEmailTemplate();">
                     </div>
                 </div>
-                <!-- ADDED: Deposit input field -->
                 <div class="form-row">
                     <div class="form-group">
                         <label for="deposit-amount">Deposit (£ per person)</label>
@@ -857,11 +858,11 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="source-amount">Amount to Convert</label>
-                        <input type="number" id="source-amount" class="form-control" placeholder="Enter amount" step="0.01">
+                        <input type="number" id="source-amount" class="form-control" placeholder="Enter amount" step="0.01" onchange="saveState()">
                     </div>
                     <div class="form-group">
                         <label for="source-currency">From Currency</label>
-                        <select id="source-currency" class="form-control">
+                        <select id="source-currency" class="form-control" onchange="saveState()">
                             <option value="EUR">EUR (€)</option>
                             <option value="USD">USD ($)</option>
                             <option value="CAD">CAD (C$)</option>
@@ -871,7 +872,7 @@
                     </div>
                     <div class="form-group">
                         <label for="conversion-rate">Conversion Rate (1 unit = X GBP)</label>
-                        <input type="number" id="conversion-rate" class="form-control" value="1.0" step="0.01">
+                        <input type="number" id="conversion-rate" class="form-control" value="1.0" step="0.01" onchange="saveState()">
                     </div>
                 </div>
                 
@@ -917,7 +918,12 @@
                     <div class="form-group">
                         <label for="balance-due-date">Balance Due Date</label>
                         <input type="text" id="balance-due-date" class="form-control" placeholder="Select balance due date" onchange="updateEmailTemplate()">
-                    </div></div>
+                    </div>
+                    <div class="form-group">
+                        <label for="excludes-note">Excludes Note (e.g., local taxes)</label>
+                        <input type="text" id="excludes-note" class="form-control" placeholder="e.g., Climate Resilience Tax EUR15 per room, per night, pay locally" onchange="updateEmailTemplate()">
+                    </div>
+                </div>
                 
                 <div class="people-selector">
                     <div class="people-type">
@@ -948,19 +954,16 @@
                 </div>
                 
                 <div id="hotel-child-ages" class="child-ages-container">
-                    <!-- Child ages will be added here dynamically -->
                 </div>
                 
                 <h3>Hotel Options</h3>
                 <div id="hotel-comparison" class="supplier-comparison">
-                    <!-- Hotel comparison items will be added here dynamically -->
                 </div>
                 <div class="comparison-controls" id="hotel-controls">
                     <button class="btn" onclick="addHotelSupplier()"><i class="fas fa-plus"></i> Add Hotel Option</button>
                     <button class="btn btn-secondary" onclick="highlightBestHotelPrice()"><i class="fas fa-star"></i> Highlight Best Price</button>
                 </div>
                 
-                <!-- Hotel Section Totals -->
                 <div class="section-totals">
                     <h3>Hotel Totals (Saved Options Only)</h3>
                     <div class="totals-row">
@@ -1022,19 +1025,16 @@
                 </div>
                 
                 <div id="flight-child-ages" class="child-ages-container">
-                    <!-- Child ages will be added here dynamically -->
                 </div>
                 
                 <h3>Flight Options</h3>
                 <div id="flight-comparison" class="supplier-comparison">
-                    <!-- Flight comparison items will be added here dynamically -->
                 </div>
                 <div class="comparison-controls" id="flight-controls">
                     <button class="btn" onclick="addFlightSupplier()"><i class="fas fa-plus"></i> Add Flight Option</button>
                     <button class="btn btn-secondary" onclick="highlightBestFlightPrice()"><i class="fas fa-star"></i> Highlight Best Price</button>
                 </div>
                 
-                <!-- Flight Section Totals -->
                 <div class="section-totals">
                     <h3>Flight Totals (Saved Options Only)</h3>
                     <div class="totals-row">
@@ -1100,6 +1100,7 @@
                         <label for="booking-type">Booking Type</label>
                         <select id="booking-type" class="form-control" onchange="updateEmailTemplate()">
                             <option value="hotel">Hotel Only</option>
+                            <option value="flight">Flight Only</option>
                             <option value="package">Package (Flight + Hotel)</option>
                         </select>
                     </div>
@@ -1117,6 +1118,13 @@
                     <div class="delivery-option" onclick="selectDeliveryOption(this, 'messenger')">
                         <i class="fab fa-facebook-messenger"></i>
                         <p>Messenger</p>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="quote-reference">Quote Reference #</label>
+                        <input type="text" id="quote-reference" class="form-control" placeholder="Enter quote reference number" onchange="updateEmailTemplate()">
                     </div>
                 </div>
                 
@@ -1153,13 +1161,13 @@
                     </div>
                     <div class="form-group">
                         <label for="agent-phone">Agent Phone</label>
-                        <input type="text" id="agent-phone" class="form-control" value="0203 633 0210">
+                        <input type="text" id="agent-phone" class="form-control" value="020 3355 5060">
                     </div>
                 </div>
                 
                 <div class="form-group">
                     <label for="email-template">Email Template</label>
-                    <textarea id="email-template" class="form-control" rows="15"></textarea>
+                    <div id="email-template" class="email-template">Email template will be generated here</div>
                 </div>
                 
                 <div class="output-format-buttons">
@@ -1200,13 +1208,12 @@
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
-        // Global variables
         let currentDeliveryOption = 'email';
         let convertedAmount = 0;
         let savedHotelSuppliers = [];
         let savedFlightSuppliers = [];
         let AIRPORTS = {
-            'AAR': 'Aarhus, Denmark',
+                        'AAR': 'Aarhus, Denmark',
             'ABD': 'Abadan, Iran',
             'AEH': 'Abeche, Chad',
             'ABZ': 'Aberdeen, United Kingdom',
@@ -2532,13 +2539,35 @@
             'ZRH': 'Zurich (Zürich) - Kloten, Switzerland',
             'LHR': 'London - Heathrow, UK'
         };
-        // Commission normalization map
+
         const inputNormalizationMap = {
             "0.89": 0.11
         };
 
-        // Initialize date pickers
-        flatpickr("#hotel-checkin", {
+        const agentDetails = {
+            'Adam': { phone: '020 3355 5060', email: 'reservations@bradleytravelstore.com', website: 'bradleytravelstore.com' },
+            'Tara': { phone: '07956 263778', email: 'tara@bradleytravelstore.com', website: 'bradleytravelstore.com/tara-yadid' },
+            'Monique': { phone: '07887 953005', email: 'monique@bradleytravelstore.com', website: 'bradleytravelstore.com/monique-plein' },
+            'Dalia': { phone: '07922 794683', email: 'dalia@bradleytravelstore.com', website: 'bradleytravelstore.com/dalia-cohen' },
+            'Jayne': { phone: '07712 836610', email: 'jayne@bradleytravelstore.com', website: 'bradleytravelstore.com/jaynelandsman' },
+            'Laura': { phone: '07962 394030', email: 'laura@bradleytravelstore.com', website: 'bradleytravelstore.com/laura-myers' },
+            'Francine': { phone: '07944 187054', email: 'francine@bradleytravelstore.com', website: 'bradleytravelstore.com/francine-ryan' },
+            'Ilana': { phone: '+972 54 873 4585', email: 'ilana@bradleytravelstore.com', website: 'bradleytravelstore.com/ilanashalev' },
+            'Deborah': { phone: '07956 454680', email: 'deborah@bradleytravelstore.com', website: 'bradleytravelstore.com/deborah-roberts' },
+            'Cayra': { phone: '07761 757630', email: 'cayra@bradleytravelstore.com', website: 'bradleytravelstore.com/cayra-gaskin-morris' },
+            'Alicia': { phone: '07864 998282', email: 'alicia@bradleytravelstore.com', website: 'bradleytravelstore.com/alicia-wyles' },
+            'Andy': { phone: '07825 349055', email: 'andy@bradleytravelstore.com', website: 'bradleytravelstore.com/andy-cromar' },
+            'Rebecca': { phone: '07909 913997', email: 'rebecca@bradleytravelstore.com', website: 'bradleytravelstore.com/rebecca-johnstone' },
+            'Emma': { phone: '07881 487081', email: 'Emma@bradleytravelstore.com', website: 'bradleytravelstore.com/Emma-Morris' },
+            'Bronwen': { phone: '07712 607356', email: 'Bronwen@bradleytravelstore.com', website: 'bradleytravelstore.com/Bronwen-Smith' },
+            'Angel': { phone: '020 3355 5060', email: 'reservations@bradleytravelstore.com', website: 'bradleytravelstore.com' },
+            'Gianny': { phone: '020 3355 5060', email: 'reservations@bradleytravelstore.com', website: 'bradleytravelstore.com' },
+            'Joseph': { phone: '020 3355 5060', email: 'reservations@bradleytravelstore.com', website: 'bradleytravelstore.com' },
+            'Tracey': { phone: '07743 025088', email: 'Tracey@bradleytravelstore.com', website: 'bradleytravelstore.com/Tracey-Borthwick' },
+            'Trudy': { phone: '07864 255166', email: 'Trudy@bradleytravelstore.com', website: 'bradleytravelstore.com/Trudy-Stewart' }
+        };
+
+        const hotelCheckinFp = flatpickr("#hotel-checkin", {
             mode: "range",
             dateFormat: "Y-m-d",
             onChange: function(selectedDates, dateStr, instance) {
@@ -2550,18 +2579,15 @@
             }
         });
 
-        flatpickr("#balance-due-date", {
+        const balanceDueFp = flatpickr("#balance-due-date", {
             dateFormat: "Y-m-d",
             onChange: function(selectedDates, dateStr, instance) {
                 updateEmailTemplate();
             }
         });
 
-        
-        // Initialize all supplier-level cancellation deadline pickers
         function initCancellationPickers(root=document) {
             root.querySelectorAll('.cancellation-deadline').forEach(function(input) {
-                // only initialise once
                 if (!input._flatpickr) {
                     flatpickr(input, {
                         dateFormat: "Y-m-d",
@@ -2572,7 +2598,8 @@
                 }
             });
         }
-flatpickr("#flight-dates", {
+
+        const flightDatesFp = flatpickr("#flight-dates", {
             mode: "range",
             dateFormat: "Y-m-d",
             onChange: function(selectedDates, dateStr, instance) {
@@ -2580,41 +2607,28 @@ flatpickr("#flight-dates", {
             }
         });
 
-        // Initialize with some sample data
         document.addEventListener('DOMContentLoaded', function() {
             updateChildAges('hotel');
             updateChildAges('flight');
             updateCommission();
+            updateAgentSignature();
             updateEmailTemplate();
-            initCancellationPickers();
-            addHotelSupplier();
-            addFlightSupplier();
+            loadState();
         });
 
-        // Toggle section visibility
         function toggleSection(sectionId) {
             const section = document.getElementById(sectionId);
             const content = section.querySelector('.section-content');
-            const icon = section.querySelector('.section-toggle i');
             
             if (content.classList.contains('expanded')) {
                 content.classList.remove('expanded');
                 content.classList.add('collapsed');
-                section.classList.remove('expanded');
-                section.classList.add('collapsed');
-                icon.classList.remove('fa-chevron-up');
-                icon.classList.add('fa-chevron-down');
             } else {
                 content.classList.remove('collapsed');
                 content.classList.add('expanded');
-                section.classList.remove('collapsed');
-                section.classList.add('expanded');
-                icon.classList.remove('fa-chevron-down');
-                icon.classList.add('fa-chevron-up');
             }
         }
 
-        // Change people count
         function changeCount(type, delta) {
             const countElement = document.getElementById(`${type}-count`);
             let count = parseInt(countElement.textContent);
@@ -2632,7 +2646,6 @@ flatpickr("#flight-dates", {
             updateEmailTemplate();
         }
 
-        // Update child ages inputs
         function updateChildAges(type) {
             const count = parseInt(document.getElementById(`${type}-children-count`).textContent);
             const container = document.getElementById(`${type}-child-ages`);
@@ -2655,7 +2668,6 @@ flatpickr("#flight-dates", {
             updateEmailTemplate();
         }
 
-        // Validate child ages
         function validateChildAges() {
             const childInputs = document.querySelectorAll('.child-age-input');
             let allValid = true;
@@ -2673,7 +2685,6 @@ flatpickr("#flight-dates", {
             return allValid;
         }
 
-        // Validate customer info
         function validateCustomerInfo() {
             const customerName = document.getElementById('customer-name').value.trim();
             const destination = document.getElementById('destination').value.trim();
@@ -2681,21 +2692,28 @@ flatpickr("#flight-dates", {
             return customerName !== '' && destination !== '';
         }
 
-        // Select delivery option
         function selectDeliveryOption(element, option) {
             document.querySelectorAll('.delivery-option').forEach(el => {
                 el.classList.remove('selected');
             });
             element.classList.add('selected');
             currentDeliveryOption = option;
-        }
-
-        // Update agent signature
-        function updateAgentSignature() {
             updateEmailTemplate();
         }
 
-        // Update commission display
+        function updateAgentSignature() {
+            const select = document.getElementById('agent-name');
+            const agent = select.value;
+            if (agent !== 'custom') {
+                const details = agentDetails[agent];
+                if (details) {
+                    document.getElementById('agent-email').value = details.email;
+                    document.getElementById('agent-phone').value = details.phone;
+                }
+            }
+            updateEmailTemplate();
+        }
+
         function updateCommission() {
             const commissionInput = document.getElementById('commission-rate').value;
             const commissionRate = parseCommissionRate(commissionInput);
@@ -2708,7 +2726,6 @@ flatpickr("#flight-dates", {
                 document.getElementById('commission-interpretation').textContent = 
                     `Interpreted rate: ${(commissionRate * 100).toFixed(2)}% (${commissionRate.toFixed(3)})`;
                 
-                // Update all supplier prices
                 document.querySelectorAll('.supplier-comparison-item').forEach(item => {
                     updateSupplierPrice(item.id);
                 });
@@ -2718,38 +2735,31 @@ flatpickr("#flight-dates", {
             }
         }
 
-        // Parse commission rate with normalization
         function parseCommissionRate(s) {
             if (!s) return null;
             
             s = s.trim();
             let value;
             
-            // Check if input contains '%'
             if (s.includes('%')) {
                 value = parseFloat(s.replace('%', '')) / 100;
             } else {
                 value = parseFloat(s);
             }
             
-            // Check for NaN
             if (isNaN(value)) {
                 alert('Invalid commission rate. Please enter a valid number or percentage.');
                 return null;
             }
             
-            // Check normalization map
             if (inputNormalizationMap.hasOwnProperty(s)) {
                 console.log(`Commission input "${s}" was remapped to ${inputNormalizationMap[s]}`);
                 return inputNormalizationMap[s];
             }
             
-            // Determine if value is percent or decimal
             if (value > 1 && value <= 100) {
-                // Treat as percent
                 return value / 100;
             } else if (value >= 0 && value <= 1) {
-                // Treat as decimal
                 return value;
             } else {
                 alert('Commission must be between 0% and 100%.');
@@ -2757,7 +2767,6 @@ flatpickr("#flight-dates", {
             }
         }
 
-        // Calculate commission and selling price
         function calculateCommission(baseAmount, commissionRate) {
             const commissionAmount = roundToTwo(baseAmount * commissionRate);
             const sellingPrice = roundToTwo(baseAmount + commissionAmount);
@@ -2768,31 +2777,26 @@ flatpickr("#flight-dates", {
             };
         }
 
-        // Round to two decimal places
         function roundToTwo(num) {
             return Math.round(num * 100) / 100;
         }
 
-        // Get cancellation text based on policy
         function getCancellationText(cancelPolicy, cancelFee, cancellationDeadline) {
             if (cancelPolicy === 'non-refundable') {
                 return "Non-refundable";
             } else if (cancelPolicy === 'refundable') {
-                return `Free cancellation until ${cancellationDeadline}`;
+                return `Free cancellation until ${formatDate(cancellationDeadline)}`;
             } else if (cancelPolicy === 'refundable-with-fee') {
                 return `Refundable with a fee of £${parseFloat(cancelFee).toFixed(2)}`;
             }
             return "";
         }
 
-        // Save individual supplier
         function saveSupplier(id, type) {
             const item = document.getElementById(id);
             
-            // Mark as saved
             item.classList.add('saved');
             
-            // Get values for summary
             const supplierName = item.querySelector('.supplier-name').value || 'Unnamed Supplier';
             const netPrice = item.querySelector('.net-price').value || '0.00';
             const sellingPrice = item.querySelector('.selling-price').value || '0.00';
@@ -2811,14 +2815,14 @@ flatpickr("#flight-dates", {
             if (type === 'hotel') {
                 const roomType = item.querySelector('.room-type').value || 'N/A';
                 const boardBasis = item.querySelector('.board-basis').value || 'N/A';
+                const cancelDeadline = item.querySelector('.cancellation-deadline');
                 supplierData.roomType = roomType;
                 supplierData.boardBasis = boardBasis;
+                supplierData.cancelDeadline = cancelDeadline ? cancelDeadline.value : '';
                 
-                // Add to saved array
                 savedHotelSuppliers.push(supplierData);
                 
-                // Create summary
-                let cancelPolicyText = getCancellationText(cancelPolicy, cancelFee, (item.querySelector('.cancellation-deadline') ? item.querySelector('.cancellation-deadline').value : ''));
+                let cancelPolicyText = getCancellationText(cancelPolicy, cancelFee, supplierData.cancelDeadline);
                 
                 let summary = item.querySelector('.supplier-summary');
                 if (!summary) {
@@ -2853,34 +2857,60 @@ flatpickr("#flight-dates", {
                 const airline = item.querySelector('.airline').value || 'N/A';
                 const depAirport = item.querySelector('.departure-airport').value || 'N/A';
                 const arrAirport = item.querySelector('.arrival-airport').value || 'N/A';
+                const includeReturnCheckbox = item.querySelector('input[id$="-include-return"]');
+                const includeReturn = includeReturnCheckbox ? includeReturnCheckbox.checked : false;
+                const returnDepAirport = includeReturn ? (item.querySelector('.return-departure-airport').value || '') : '';
+                const returnArrAirport = includeReturn ? (item.querySelector('.return-arrival-airport').value || '') : '';
                 const baggage = item.querySelector('.baggage-allowance').value || 'N/A';
+                const outboundDepTime = item.querySelector('.outbound-departure-time').value || '';
+                const outboundArrTime = item.querySelector('.outbound-arrival-time').value || '';
+                const returnDepTime = includeReturn ? (item.querySelector('.return-departure-time').value || '') : '';
+                const returnArrTime = includeReturn ? (item.querySelector('.return-arrival-time').value || '') : '';
+                const cancelDeadline = item.querySelector('.cancellation-deadline');
+                
                 supplierData.airline = airline;
                 supplierData.depAirport = depAirport;
                 supplierData.arrAirport = arrAirport;
+                supplierData.returnDepAirport = returnDepAirport;
+                supplierData.returnArrAirport = returnArrAirport;
                 supplierData.baggage = baggage;
+                supplierData.outboundDepTime = outboundDepTime;
+                supplierData.outboundArrTime = outboundArrTime;
+                supplierData.returnDepTime = returnDepTime;
+                supplierData.returnArrTime = returnArrTime;
+                supplierData.includeReturn = includeReturn;
+                supplierData.cancelDeadline = cancelDeadline ? cancelDeadline.value : '';
                 
-                // Add to saved array
                 savedFlightSuppliers.push(supplierData);
                 
-                // Create summary
-                let cancelPolicyText = getCancellationText(cancelPolicy, cancelFee, (item.querySelector('.cancellation-deadline') ? item.querySelector('.cancellation-deadline').value : ''));
+                let cancelPolicyText = getCancellationText(cancelPolicy, cancelFee, supplierData.cancelDeadline);
                 
-                let summary = item.querySelector('.supplier-summary');
-                if (!summary) {
-                    summary = document.createElement('div');
-                    summary.className = 'supplier-summary';
-                    item.querySelector('.supplier-comparison-header').after(summary);
-                }
-                
-                summary.innerHTML = `
+                let summaryHTML = `
                     <div class="supplier-summary-row">
                         <span class="supplier-summary-label">Airline:</span>
                         <span class="supplier-summary-value">${airline}</span>
                     </div>
                     <div class="supplier-summary-row">
-                        <span class="supplier-summary-label">Route:</span>
+                        <span class="supplier-summary-label">Outbound:</span>
                         <span class="supplier-summary-value">${depAirport} → ${arrAirport}</span>
                     </div>
+                `;
+                if (includeReturn && returnDepAirport && returnArrAirport) {
+                    summaryHTML += `
+                    <div class="supplier-summary-row">
+                        <span class="supplier-summary-label">Return:</span>
+                        <span class="supplier-summary-value">${returnDepAirport} → ${returnArrAirport}</span>
+                    </div>
+                    `;
+                } else {
+                    summaryHTML += `
+                    <div class="supplier-summary-row">
+                        <span class="supplier-summary-label">Route:</span>
+                        <span class="supplier-summary-value">One-way</span>
+                    </div>
+                    `;
+                }
+                summaryHTML += `
                     <div class="supplier-summary-row">
                         <span class="supplier-summary-label">Baggage:</span>
                         <span class="supplier-summary-value">${baggage}</span>
@@ -2898,6 +2928,15 @@ flatpickr("#flight-dates", {
                         <span class="supplier-summary-value">£${parseFloat(sellingPrice).toFixed(2)}</span>
                     </div>
                 `;
+                
+                let summary = item.querySelector('.supplier-summary');
+                if (!summary) {
+                    summary = document.createElement('div');
+                    summary.className = 'supplier-summary';
+                    item.querySelector('.supplier-comparison-header').after(summary);
+                }
+                
+                summary.innerHTML = summaryHTML;
             }
             
             updateTotals();
@@ -2905,12 +2944,10 @@ flatpickr("#flight-dates", {
             alert(`${supplierName} saved successfully!`);
         }
 
-        // Edit supplier
         function editSupplier(id, type) {
             const item = document.getElementById(id);
             item.classList.remove('saved');
             
-            // Remove from saved arrays
             if (type === 'hotel') {
                 savedHotelSuppliers = savedHotelSuppliers.filter(s => s.id !== id);
             } else {
@@ -2921,7 +2958,6 @@ flatpickr("#flight-dates", {
             updateEmailTemplate();
         }
 
-        // Add hotel supplier
         function addHotelSupplier() {
             const comparison = document.getElementById('hotel-comparison');
             const id = 'hotel-' + Date.now();
@@ -2941,9 +2977,8 @@ flatpickr("#flight-dates", {
                             <input type="checkbox" id="${id}-upgrade" onchange="toggleUpgrade('${id}')">
                             <label for="${id}-upgrade">Include as Upgrade</label>
                         </div>
-                        <!-- ADDED: Include in Email checkbox -->
                         <div class="checkbox-group include-in-email-group">
-                            <input type="checkbox" id="${id}-include-email" checked onchange="updateEmailTemplate()">
+                            <input type="checkbox" id="${id}-include-email" onchange="updateEmailTemplate()">
                             <label for="${id}-include-email">Include in Email</label>
                         </div>
                     </div>
@@ -2953,8 +2988,13 @@ flatpickr("#flight-dates", {
                 </div>
                 <div class="form-row">
                     <div class="form-group">
+                        <label>Hotel Name (leave blank to use global)</label>
+                        <input type="text" class="form-control supplier-hotel-name" placeholder="Use global hotel name" onchange="updateEmailTemplate()">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
                         <label>Cancellation Policy</label>
-                        <!-- CHANGED: Default to "non-refundable" -->
                         <select class="form-control cancellation-policy" onchange="toggleCancellationFee('${id}'); updateEmailTemplate();">
                             <option value="non-refundable" selected>Non-Refundable</option>
                             <option value="refundable">Refundable</option>
@@ -3029,9 +3069,10 @@ flatpickr("#flight-dates", {
             
             comparison.appendChild(supplierItem);
             updateSupplierPrice(id);
-        initCancellationPickers(supplierItem);}
+            initCancellationPickers(supplierItem);
+            saveState();
+        }
 
-        // Add flight supplier
         function addFlightSupplier() {
             const comparison = document.getElementById('flight-comparison');
             const id = 'flight-' + Date.now();
@@ -3051,10 +3092,13 @@ flatpickr("#flight-dates", {
                             <input type="checkbox" id="${id}-upgrade" onchange="toggleUpgrade('${id}')">
                             <label for="${id}-upgrade">Include as Upgrade</label>
                         </div>
-                        <!-- ADDED: Include in Email checkbox -->
                         <div class="checkbox-group include-in-email-group">
                             <input type="checkbox" id="${id}-include-email" checked onchange="updateEmailTemplate()">
                             <label for="${id}-include-email">Include in Email</label>
+                        </div>
+                        <div class="checkbox-group include-in-email-group">
+                            <input type="checkbox" id="${id}-include-return" onchange="toggleReturnDetails('${id}'); updateEmailTemplate()">
+                            <label for="${id}-include-return">Include Return</label>
                         </div>
                     </div>
                     <div>
@@ -3064,7 +3108,6 @@ flatpickr("#flight-dates", {
                 <div class="form-row">
                     <div class="form-group">
                         <label>Cancellation Policy</label>
-                        <!-- CHANGED: Default to "non-refundable" -->
                         <select class="form-control cancellation-policy" onchange="toggleCancellationFee('${id}'); updateEmailTemplate();">
                             <option value="non-refundable" selected>Non-Refundable</option>
                             <option value="refundable">Refundable</option>
@@ -3086,24 +3129,36 @@ flatpickr("#flight-dates", {
                         <input type="text" class="form-control airline" placeholder="Airline" onchange="updateEmailTemplate()">
                     </div>
                     <div class="form-group">
-                        <label>Departure Airport</label>
-                        <input type="text" class="form-control airport-input departure-airport" placeholder="Departure (IATA)" oninput="displayAirport(this)" onchange="updateEmailTemplate()">
+                        <label>Outbound Departure Airport</label>
+                        <input type="text" class="form-control airport-input departure-airport" placeholder="Outbound Dep (IATA)" oninput="displayAirport(this)" onchange="updateEmailTemplate()">
                         <div class="airport-display"></div>
                     </div>
                     <div class="form-group">
-                        <label>Arrival Airport</label>
-                        <input type="text" class="form-control airport-input arrival-airport" placeholder="Arrival (IATA)" oninput="displayAirport(this)" onchange="updateEmailTemplate()">
+                        <label>Outbound Arrival Airport</label>
+                        <input type="text" class="form-control airport-input arrival-airport" placeholder="Outbound Arr (IATA)" oninput="displayAirport(this)" onchange="updateEmailTemplate()">
                         <div class="airport-display"></div>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Departure Time</label>
-                        <input type="time" class="form-control departure-time" onchange="updateEmailTemplate()">
+                        <label>Return Departure Airport</label>
+                        <input type="text" class="form-control airport-input return-departure-airport" placeholder="Return Dep (IATA)" oninput="displayAirport(this)" onchange="updateEmailTemplate()">
+                        <div class="airport-display"></div>
                     </div>
                     <div class="form-group">
-                        <label>Arrival Time</label>
-                        <input type="time" class="form-control arrival-time" onchange="updateEmailTemplate()">
+                        <label>Return Arrival Airport</label>
+                        <input type="text" class="form-control airport-input return-arrival-airport" placeholder="Return Arr (IATA)" oninput="displayAirport(this)" onchange="updateEmailTemplate()">
+                        <div class="airport-display"></div>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Outbound Departure Time</label>
+                        <input type="time" class="form-control outbound-departure-time" onchange="updateEmailTemplate()">
+                    </div>
+                    <div class="form-group">
+                        <label>Outbound Arrival Time</label>
+                        <input type="time" class="form-control outbound-arrival-time" onchange="updateEmailTemplate()">
                     </div>
                     <div class="form-group">
                         <label>Baggage Allowance</label>
@@ -3117,14 +3172,20 @@ flatpickr("#flight-dates", {
                         </select>
                     </div>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Baggage Price (£)</label>
-                        <input type="number" class="form-control baggage-price" placeholder="0.00" step="0.01" onchange="updateEmailTemplate()">
-                    </div>
-                    <div class="form-group">
-                        <label>Baggage Amount</label>
-                        <input type="number" class="form-control baggage-amount" placeholder="0" min="0" onchange="updateEmailTemplate()">
+                <div style="margin: 10px 0;">
+                    <button id="${id}-add-return-btn" class="btn btn-sm" onclick="document.getElementById('${id}-include-return').checked = true; toggleReturnDetails('${id}');">Add Return Details</button>
+                    <button id="${id}-remove-return-btn" class="btn btn-sm btn-danger" style="display: none;" onclick="removeReturnDetails('${id}')">Remove Return Details</button>
+                </div>
+                <div id="${id}-return-section" style="display: none;">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Return Departure Time</label>
+                            <input type="time" class="form-control return-departure-time" onchange="updateEmailTemplate()">
+                        </div>
+                        <div class="form-group">
+                            <label>Return Arrival Time</label>
+                            <input type="time" class="form-control return-arrival-time" onchange="updateEmailTemplate()">
+                        </div>
                     </div>
                 </div>
                 <div class="form-row">
@@ -3170,14 +3231,27 @@ flatpickr("#flight-dates", {
             
             comparison.appendChild(supplierItem);
             updateSupplierPrice(id);
-        initCancellationPickers(supplierItem);}
+            initCancellationPickers(supplierItem);
+            saveState();
+        }
 
-        // Remove supplier
+        function removeReturnDetails(id) {
+            document.getElementById(id + '-include-return').checked = false;
+            const section = document.getElementById(id + '-return-section');
+            const addBtn = document.getElementById(id + '-add-return-btn');
+            const removeBtn = document.getElementById(id + '-remove-return-btn');
+            section.style.display = 'none';
+            addBtn.style.display = 'inline-block';
+            removeBtn.style.display = 'none';
+            // Clear the input values
+            section.querySelectorAll('input').forEach(input => input.value = '');
+            updateEmailTemplate();
+        }
+
         function removeSupplier(id) {
             if (confirm('Are you sure you want to remove this supplier option?')) {
                 const element = document.getElementById(id);
                 if (element) {
-                    // Remove from saved arrays if it was saved
                     savedHotelSuppliers = savedHotelSuppliers.filter(s => s.id !== id);
                     savedFlightSuppliers = savedFlightSuppliers.filter(s => s.id !== id);
                     
@@ -3188,8 +3262,6 @@ flatpickr("#flight-dates", {
             }
         }
 
-        // Toggle cancellation fee field
-        
         function toggleCancellationFee(id) {
             const item = document.getElementById(id);
             const policySelect = item.querySelector('.cancellation-policy');
@@ -3204,16 +3276,13 @@ flatpickr("#flight-dates", {
             } else if (policySelect.value === 'refundable') {
                 if (feeGroup) feeGroup.style.display = 'none';
                 if (deadlineGroup) deadlineGroup.style.display = 'block';
-            } else { // non-refundable
+            } else {
                 if (feeGroup) feeGroup.style.display = 'none';
                 if (deadlineGroup) deadlineGroup.style.display = 'none';
             }
-            // initialize any pickers inside this item if they became visible
             initCancellationPickers(item);
         }
-    
 
-        // Toggle best price
         function toggleBestPrice(id) {
             const checkbox = document.getElementById(`${id}-best`);
             const item = document.getElementById(id);
@@ -3226,7 +3295,6 @@ flatpickr("#flight-dates", {
             updateEmailTemplate();
         }
 
-        // Toggle upgrade
         function toggleUpgrade(id) {
             const checkbox = document.getElementById(`${id}-upgrade`);
             const badge = document.querySelector(`#${id} .upgrade-badge`);
@@ -3241,7 +3309,23 @@ flatpickr("#flight-dates", {
             updateEmailTemplate();
         }
 
-        // Update supplier price
+        function toggleReturnDetails(id) {
+            const checkbox = document.getElementById(id + '-include-return');
+            const section = document.getElementById(id + '-return-section');
+            const addBtn = document.getElementById(id + '-add-return-btn');
+            const removeBtn = document.getElementById(id + '-remove-return-btn');
+            if (checkbox.checked) {
+                section.style.display = 'block';
+                addBtn.style.display = 'none';
+                removeBtn.style.display = 'inline-block';
+            } else {
+                section.style.display = 'none';
+                addBtn.style.display = 'inline-block';
+                removeBtn.style.display = 'none';
+            }
+            updateEmailTemplate();
+        }
+
         function updateSupplierPrice(id) {
             const item = document.getElementById(id);
             if (!item) return;
@@ -3255,7 +3339,6 @@ flatpickr("#flight-dates", {
             const netPrice = parseFloat(netPriceInput.value) || 0;
             let commissionRate;
             
-            // Use supplier-specific commission rate if provided, otherwise use global
             if (commissionRateInput.value.trim() !== '') {
                 commissionRate = parseCommissionRate(commissionRateInput.value);
                 if (commissionRate === null) {
@@ -3270,16 +3353,13 @@ flatpickr("#flight-dates", {
             sellingPriceInput.value = sellingPrice.toFixed(2);
             commissionAmountInput.value = commissionAmount.toFixed(2);
             
-            // Update calculation display
             calculationDiv.textContent = `${netPrice.toFixed(2)} × ${commissionRate.toFixed(3)} = ${commissionAmount.toFixed(2)} → Selling Price £${sellingPrice.toFixed(2)}`;
             
             updateTotals();
             updateEmailTemplate();
         }
 
-        // Update all totals
         function updateTotals() {
-            // Hotel totals - only count saved options
             let hotelNetTotal = 0;
             let hotelSellingExact = 0;
             let hotelSellingRounded = 0;
@@ -3301,7 +3381,6 @@ flatpickr("#flight-dates", {
             document.getElementById('hotel-total-selling-exact').textContent = `£${hotelSellingExact.toFixed(2)}`;
             document.getElementById('hotel-total-selling-rounded').textContent = `£${hotelSellingRounded.toFixed(2)}`;
             
-            // Flight totals - only count saved options
             let flightNetTotal = 0;
             let flightSellingExact = 0;
             let flightSellingRounded = 0;
@@ -3323,7 +3402,6 @@ flatpickr("#flight-dates", {
             document.getElementById('flight-total-selling-exact').textContent = `£${flightSellingExact.toFixed(2)}`;
             document.getElementById('flight-total-selling-rounded').textContent = `£${flightSellingRounded.toFixed(2)}`;
             
-            // Overall totals
             const totalNet = hotelNetTotal + flightNetTotal;
             const totalSellingExact = hotelSellingExact + flightSellingExact;
             const totalSellingRounded = hotelSellingRounded + flightSellingRounded;
@@ -3333,17 +3411,14 @@ flatpickr("#flight-dates", {
             document.getElementById('total-selling-rounded').textContent = `£${totalSellingRounded.toFixed(2)}`;
         }
 
-        // Highlight best hotel price
         function highlightBestHotelPrice() {
             highlightBestPrice('hotel');
         }
 
-        // Highlight best flight price
         function highlightBestFlightPrice() {
             highlightBestPrice('flight');
         }
 
-        // Highlight best price (common function)
         function highlightBestPrice(type) {
             const items = document.querySelectorAll(`#${type}-comparison .supplier-comparison-item`);
             let bestItem = null;
@@ -3359,7 +3434,6 @@ flatpickr("#flight-dates", {
                         bestPrice = sellingPrice;
                         bestItem = item;
                     } else if (sellingPrice === bestPrice && bestPrice > 0) {
-                        // Tie-breaker: lower commission amount
                         const currentCommission = parseFloat(item.querySelector('.commission-amount').value) || 0;
                         const bestCommission = parseFloat(bestItem.querySelector('.commission-amount').value) || 0;
                         
@@ -3371,16 +3445,16 @@ flatpickr("#flight-dates", {
             });
             
             if (bestItem) {
-                // Uncheck all "Mark Best" checkboxes
                 items.forEach(item => {
                     const checkbox = item.querySelector('input[type="checkbox"][id$="-best"]');
                     checkbox.checked = false;
                     item.classList.remove('best-price');
                 });
                 
-                // Check the best item
                 const bestCheckbox = bestItem.querySelector('input[type="checkbox"][id$="-best"]');
+                const includeEmailCheckbox = bestItem.querySelector('input[type="checkbox"][id$="-include-email"]');
                 bestCheckbox.checked = true;
+                includeEmailCheckbox.checked = true;
                 bestItem.classList.add('best-price');
                 
                 updateEmailTemplate();
@@ -3389,7 +3463,6 @@ flatpickr("#flight-dates", {
             }
         }
 
-        // Convert currency
         function convertCurrency() {
             const amount = parseFloat(document.getElementById('source-amount').value);
             const rate = parseFloat(document.getElementById('conversion-rate').value);
@@ -3411,9 +3484,9 @@ flatpickr("#flight-dates", {
                 <div class="converter-raw-value">(raw: ${raw.toFixed(2)})</div>
             `;
             resultDiv.style.display = 'block';
+            saveState();
         }
 
-        // Add converted amount to hotel
         function addConvertedToHotel() {
             if (convertedAmount > 0) {
                 addHotelSupplier();
@@ -3427,7 +3500,6 @@ flatpickr("#flight-dates", {
             }
         }
 
-        // Add converted amount to flight
         function addConvertedToFlight() {
             if (convertedAmount > 0) {
                 addFlightSupplier();
@@ -3441,7 +3513,6 @@ flatpickr("#flight-dates", {
             }
         }
 
-        // Display airport name
         function displayAirport(input) {
             const displayDiv = input.nextElementSibling;
             const code = input.value.toUpperCase().trim();
@@ -3455,7 +3526,6 @@ flatpickr("#flight-dates", {
             }
         }
 
-        // Format date to DD-MMM-YY
         function formatDate(dateString) {
             if (!dateString) return '';
             const date = new Date(dateString);
@@ -3463,10 +3533,9 @@ flatpickr("#flight-dates", {
             const day = date.getDate().toString().padStart(2, '0');
             const month = months[date.getMonth()];
             const year = date.getFullYear().toString().slice(-2);
-            return `${day}-${month}-${year}`;
+            return `${day}${month}${year}`;
         }
 
-        // Get child ages list
         function getChildAgesList(type) {
             const childInputs = document.querySelectorAll(`#${type}-child-ages .child-age-input`);
             const ages = [];
@@ -3475,10 +3544,17 @@ flatpickr("#flight-dates", {
                     ages.push(input.value);
                 }
             });
-            return ages.length > 0 ? ages.join(', ') + ' years old' : '';
+            return ages;
         }
 
-        // Update email template
+        function boldWrap(text) {
+            if (currentDeliveryOption === 'whatsapp') {
+                return `*${text}*`;
+            } else {
+                return `<b>${text}</b>`;
+            }
+        }
+
         function updateEmailTemplate() {
             const bookingType = document.getElementById('booking-type').value;
             const customerName = document.getElementById('customer-name').value || '[Customer Name]';
@@ -3487,11 +3563,11 @@ flatpickr("#flight-dates", {
             const agentName = document.getElementById('agent-name').value;
             const agentEmail = document.getElementById('agent-email').value;
             const agentPhone = document.getElementById('agent-phone').value;
+            const excludesNote = document.getElementById('excludes-note').value;
+            const quoteReference = document.getElementById('quote-reference').value || '[quote_reference]';
             
-            // Get deposit amount
             const depositAmount = document.getElementById('deposit-amount').value || '[deposit]';
             
-            // Get hotel dates
             const hotelCheckinInput = document.getElementById('hotel-checkin').value;
             let startDate = '', endDate = '';
             if (hotelCheckinInput) {
@@ -3501,368 +3577,344 @@ flatpickr("#flight-dates", {
             }
             const nights = document.getElementById('hotel-nights').value || '0';
             
-            // Get people counts
             const hotelAdults = document.getElementById('hotel-adults-count').textContent;
             const hotelChildren = document.getElementById('hotel-children-count').textContent;
-            const hotelInfants = document.getElementById('hotel-infants-count').textContent;
             const flightAdults = document.getElementById('flight-adults-count').textContent;
             const flightChildren = document.getElementById('flight-children-count').textContent;
-            const flightInfants = document.getElementById('flight-infants-count').textContent;
             
-            // Get child ages
             const hotelChildAges = getChildAgesList('hotel');
             const flightChildAges = getChildAgesList('flight');
             
-            // Get balance due date and cancellation deadline
             const balanceDueInput = document.getElementById('balance-due-date').value;
             const balanceDueDate = balanceDueInput ? formatDate(balanceDueInput) : '[balance_due_date]';
             
-            const cancellationDeadline = '[cancellation_deadline]'; // supplier-level deadline will be used when available
+            const flightDatesInput = document.getElementById('flight-dates').value;
+            let departDate = '', returnDate = '';
+            if (flightDatesInput) {
+                const dates = flightDatesInput.split(' to ');
+                departDate = dates[0] ? formatDate(dates[0]) : '';
+                returnDate = dates[1] ? formatDate(dates[1]) : '';
+            }
             
-            // Get best hotel option
-            let roomType = '[Room Type]';
-            let boardBasis = '[Board Basis]';
-            let hotelCancellationText = '';
+            // Hotel header logic
             const hotelItems = document.querySelectorAll('#hotel-comparison .supplier-comparison-item');
-            
-            let bestHotelFound = false;
-            hotelItems.forEach(item => {
-                const bestCheckbox = item.querySelector('input[type="checkbox"][id$="-best"]');
-                const upgradeCheckbox = item.querySelector('input[type="checkbox"][id$="-upgrade"]');
-                const includeInEmail = item.querySelector('input[type="checkbox"][id$="-include-email"]');
-                
-                if (bestCheckbox && upgradeCheckbox && includeInEmail && bestCheckbox.checked && !upgradeCheckbox.checked && includeInEmail.checked) {
-                    bestHotelFound = true;
-                    const roomTypeInput = item.querySelector('.room-type');
-                    const boardBasisInput = item.querySelector('.board-basis');
-                    const cancelPolicySelect = item.querySelector('.cancellation-policy');
-                    const cancelFeeInput = item.querySelector('.cancellation-fee');
-                    
-                    if (roomTypeInput) roomType = roomTypeInput.value || roomType;
-                    if (boardBasisInput) boardBasis = boardBasisInput.value || boardBasis;
-                    
-                    // Get cancellation policy
-                    if (cancelPolicySelect) {
-                        const cancelPolicy = cancelPolicySelect.value;
-                        const cancelFee = cancelFeeInput ? (cancelFeeInput.value || '0.00') : '0.00';
-                        hotelCancellationText = getCancellationText(cancelPolicy, cancelFee, cancellationDeadline);
-                    }
-                }
-            });
-            
-            // If no best hotel marked, use first non-upgrade supplier's policy
-            if (!bestHotelFound && hotelItems.length > 0) {
-                for (let i = 0; i < hotelItems.length; i++) {
-                    const item = hotelItems[i];
-                    const upgradeCheckbox = item.querySelector('input[type="checkbox"][id$="-upgrade"]');
-                    const includeInEmail = item.querySelector('input[type="checkbox"][id$="-include-email"]');
-                    
-                    if (!upgradeCheckbox.checked && includeInEmail.checked) {
-                        const roomTypeInput = item.querySelector('.room-type');
-                        const boardBasisInput = item.querySelector('.board-basis');
-                        const cancelPolicySelect = item.querySelector('.cancellation-policy');
-                        const cancelFeeInput = item.querySelector('.cancellation-fee');
-                        const deadlineInput = item.querySelector('.cancellation-deadline');
-
-                        if (roomTypeInput) roomType = roomTypeInput.value || roomType;
-                        if (boardBasisInput) boardBasis = boardBasisInput.value || boardBasis;
-
-                        const cancelPolicy = cancelPolicySelect ? cancelPolicySelect.value : '';
-                        const cancelFee = cancelFeeInput ? cancelFeeInput.value : '0.00';
-                        const deadlineVal = deadlineInput ? deadlineInput.value : '';
-
-                        if (cancelPolicy === 'refundable') {
-                            hotelCancellationText = deadlineVal
-                                ? 'Free cancellation until ' + formatDate(deadlineVal)
-                                : 'Free cancellation until [cancellation_deadline]';
-                        } else if (cancelPolicy === 'non-refundable') {
-                            hotelCancellationText = 'Non-refundable.';
-                        } else if (cancelPolicy === 'refundable-with-fee') {
-                            hotelCancellationText = 'Refundable with a fee of £' + (parseFloat(cancelFee || 0)).toFixed(2);
-                        }
-                        break;
-                    }
+            const includedHotelItems = Array.from(hotelItems).filter(item => item.querySelector('input[id$="-include-email"]').checked);
+            const numIncludedHotels = includedHotelItems.length;
+            let headerHotelName = hotelName;
+            if (numIncludedHotels === 1) {
+                const singleItem = includedHotelItems[0];
+                const specificName = singleItem.querySelector('.supplier-hotel-name').value.trim();
+                if (specificName) {
+                    headerHotelName = specificName;
                 }
             }
             
-            // Get upgrades
-            let optionalExtras = '';
+            let hotelOptions = '';
+            let hotelOptionsCount = 0;
             hotelItems.forEach(item => {
-                const upgradeCheckbox = item.querySelector('input[type="checkbox"][id$="-upgrade"]');
                 const includeInEmail = item.querySelector('input[type="checkbox"][id$="-include-email"]');
+                const upgradeCheckbox = item.querySelector('input[type="checkbox"][id$="-upgrade"]');
                 
-                if (upgradeCheckbox && upgradeCheckbox.checked && includeInEmail.checked) {
+                if (includeInEmail && includeInEmail.checked) {
                     const roomTypeInput = item.querySelector('.room-type');
                     const boardBasisInput = item.querySelector('.board-basis');
-                    const sellingPriceInput = item.querySelector('.selling-price');
-                    const upgradeDescInput = item.querySelector('.upgrade-desc');
                     const cancelPolicySelect = item.querySelector('.cancellation-policy');
                     const cancelFeeInput = item.querySelector('.cancellation-fee');
+                    const deadlineInput = item.querySelector('.cancellation-deadline');
+                    const upgradeDescInput = item.querySelector('.upgrade-desc');
+                    const upgradeAmountInput = item.querySelector('.upgrade-amount');
+                    const supplierHotelNameInput = item.querySelector('.supplier-hotel-name');
                     
-                    const roomType = roomTypeInput ? roomTypeInput.value : '';
-                    const boardBasis = boardBasisInput ? boardBasisInput.value : '';
-                    const sellingPrice = sellingPriceInput ? sellingPriceInput.value : '0.00';
+                    const roomType = roomTypeInput ? roomTypeInput.value : '[Room Type]';
+                    const boardBasis = boardBasisInput ? boardBasisInput.value : '[Board Basis]';
                     const upgradeDesc = upgradeDescInput ? upgradeDescInput.value : '';
+                    const upgradeAmount = upgradeAmountInput ? upgradeAmountInput.value : '0';
+                    const supplierHotelName = supplierHotelNameInput ? supplierHotelNameInput.value.trim() : '';
                     
-                    let cancelText = '';
-                    if (cancelPolicySelect) {
-                        const cancelPolicy = cancelPolicySelect.value;
-                        const cancelFee = cancelFeeInput ? cancelFeeInput.value : '0.00';
-                        const deadlineInput = item.querySelector('.cancellation-deadline');
-                        const deadlineVal = deadlineInput ? deadlineInput.value : '';
-
-                        if (cancelPolicy === 'refundable') {
-                            if (deadlineVal) {
-                                cancelText = 'Free cancellation until ' + formatDate(deadlineVal);
-                            } else {
-                                cancelText = 'Free cancellation until [cancellation_deadline]';
-                            }
-                        } else if (cancelPolicy === 'non-refundable') {
-                            cancelText = 'Non-refundable.';
-                        } else if (cancelPolicy === 'refundable-with-fee') {
-                            cancelText = 'Refundable with a fee of £' + (parseFloat(cancelFee || 0)).toFixed(2);
-                        }
+                    const cancelPolicy = cancelPolicySelect ? cancelPolicySelect.value : '';
+                    const cancelFee = cancelFeeInput ? cancelFeeInput.value || '0.00' : '0.00';
+                    const deadline = deadlineInput ? deadlineInput.value || '' : '';
+                    const cancelText = getCancellationText(cancelPolicy, cancelFee, deadline);
+                    
+                    const isUpgrade = upgradeCheckbox && upgradeCheckbox.checked;
+                    
+                    hotelOptionsCount++;
+                    
+                    let optionText = '';
+                    if (numIncludedHotels > 1 && supplierHotelName) {
+                        optionText += `${boldWrap(supplierHotelName.toUpperCase())}\n`;
                     }
                     
-                    if (roomType && boardBasis) {
-                        optionalExtras += `• UPGRADE: ${roomType} on ${boardBasis} - £${parseFloat(sellingPrice).toFixed(2)}${cancelText}`;
-                        if (upgradeDesc) {
-                            optionalExtras += ` - ${upgradeDesc}`;
-                        }
-                        optionalExtras += '\n';
+                    if (isUpgrade) {
+                        const upgradeText = upgradeDesc || `${roomType}, ${boardBasis}`;
+                        optionText += `Upgrade to ${boldWrap(upgradeText)} add ${boldWrap('£' + parseFloat(upgradeAmount).toFixed(0))} per family\n`;
+                    } else {
+                        optionText += `${boldWrap(roomType)} on ${boldWrap(boardBasis)} Basis\n`;
+                    }
+                    
+                    if (cancelText) {
+                        optionText += `${boldWrap(cancelText)}\n`;
+                    }
+                    
+                    if (hotelOptionsCount === 1) {
+                        hotelOptions += optionText;
+                    } else {
+                        hotelOptions += `\n${boldWrap('OPTION ' + hotelOptionsCount)}\n${optionText}`;
                     }
                 }
             });
             
-            // Get flight info
-            let flightInfo = '';
-            let flightCancellationText = '';
+            let flightOptions = '';
+            let flightOptionsCount = 0;
             const flightItems = document.querySelectorAll('#flight-comparison .supplier-comparison-item');
-            
-            let bestFlightFound = false;
             flightItems.forEach(item => {
-                const bestCheckbox = item.querySelector('input[type="checkbox"][id$="-best"]');
-                const upgradeCheckbox = item.querySelector('input[type="checkbox"][id$="-upgrade"]');
                 const includeInEmail = item.querySelector('input[type="checkbox"][id$="-include-email"]');
+                const upgradeCheckbox = item.querySelector('input[type="checkbox"][id$="-upgrade"]');
+                const includeReturnEl = item.querySelector('input[id$="-include-return"]');
+                const includeReturn = includeReturnEl ? includeReturnEl.checked : false;
                 
-                if (bestCheckbox && upgradeCheckbox && includeInEmail && bestCheckbox.checked && !upgradeCheckbox.checked && includeInEmail.checked) {
-                    bestFlightFound = true;
+                if (includeInEmail && includeInEmail.checked) {
                     const airlineInput = item.querySelector('.airline');
                     const depAirportInput = item.querySelector('.departure-airport');
                     const arrAirportInput = item.querySelector('.arrival-airport');
+                    const returnDepAirportInput = item.querySelector('.return-departure-airport');
+                    const returnArrAirportInput = item.querySelector('.return-arrival-airport');
+                    const outboundDepTimeInput = item.querySelector('.outbound-departure-time');
+                    const outboundArrTimeInput = item.querySelector('.outbound-arrival-time');
+                    const returnDepTimeInput = item.querySelector('.return-departure-time');
+                    const returnArrTimeInput = item.querySelector('.return-arrival-time');
+                    const upgradeDescInput = item.querySelector('.upgrade-desc');
+                    const upgradeAmountInput = item.querySelector('.upgrade-amount');
                     const baggageSelect = item.querySelector('.baggage-allowance');
-                    const depTimeInput = item.querySelector('.departure-time');
-                    const arrTimeInput = item.querySelector('.arrival-time');
-                    const cancelPolicySelect = item.querySelector('.cancellation-policy');
-                    const cancelFeeInput = item.querySelector('.cancellation-fee');
                     
                     const airline = airlineInput ? airlineInput.value || '[Airline]' : '[Airline]';
                     const depAirport = depAirportInput ? depAirportInput.value || '[DEP]' : '[DEP]';
                     const arrAirport = arrAirportInput ? arrAirportInput.value || '[ARR]' : '[ARR]';
-                    const baggage = baggageSelect ? baggageSelect.value || '20kg' : '20kg';
-                    const depTime = depTimeInput ? depTimeInput.value : '';
-                    const arrTime = arrTimeInput ? arrTimeInput.value : '';
-                    
-                    flightInfo = `${airline} - ${depAirport} to ${arrAirport}`;
-                    if (depTime && arrTime) {
-                        flightInfo += `\nDeparts: ${depTime} | Arrives: ${arrTime}`;
-                    }
-                    flightInfo += `\nBaggage allowance: ${baggage}`;
-                    
-                    // Get cancellation policy
-                    if (cancelPolicySelect) {
-                        const cancelPolicy = cancelPolicySelect.value;
-                        const cancelFee = cancelFeeInput ? (cancelFeeInput.value || '0.00') : '0.00';
-                        flightCancellationText = getCancellationText(cancelPolicy, cancelFee, cancellationDeadline);
-                    }
-                }
-            });
-            
-            // If no best flight marked, use first non-upgrade supplier's policy
-            if (!bestFlightFound && flightItems.length > 0) {
-                for (let i = 0; i < flightItems.length; i++) {
-                    const item = flightItems[i];
-                    const upgradeCheckbox = item.querySelector('input[type="checkbox"][id$="-upgrade"]');
-                    const includeInEmail = item.querySelector('input[type="checkbox"][id$="-include-email"]');
-                    
-                    if (!upgradeCheckbox.checked && includeInEmail.checked) {
-                        const airlineInput = item.querySelector('.airline');
-                        const depAirportInput = item.querySelector('.departure-airport');
-                        const arrAirportInput = item.querySelector('.arrival-airport');
-                        const baggageSelect = item.querySelector('.baggage-allowance');
-                        const depTimeInput = item.querySelector('.departure-time');
-                        const arrTimeInput = item.querySelector('.arrival-time');
-                        const cancelPolicySelect = item.querySelector('.cancellation-policy');
-                        const cancelFeeInput = item.querySelector('.cancellation-fee');
-                        
-                        const airline = airlineInput ? airlineInput.value || '[Airline]' : '[Airline]';
-                        const depAirport = depAirportInput ? depAirportInput.value || '[DEP]' : '[DEP]';
-                        const arrAirport = arrAirportInput ? arrAirportInput.value || '[ARR]' : '[ARR]';
-                        const baggage = baggageSelect ? baggageSelect.value || '20kg' : '20kg';
-                        const depTime = depTimeInput ? depTimeInput.value : '';
-                        const arrTime = arrTimeInput ? arrTimeInput.value : '';
-                        
-                        flightInfo = `${airline} - ${depAirport} to ${arrAirport}`;
-                        if (depTime && arrTime) {
-                            flightInfo += `\nDeparts: ${depTime} | Arrives: ${arrTime}`;
-                        }
-                        flightInfo += `\nBaggage allowance: ${baggage}`;
-                        
-                        // Get cancellation policy
-                        if (cancelPolicySelect) {
-                            const cancelPolicy = cancelPolicySelect.value;
-                            const cancelFee = cancelFeeInput ? (cancelFeeInput.value || '0.00') : '0.00';
-                            flightCancellationText = getCancellationText(cancelPolicy, cancelFee, cancellationDeadline);
-                        }
-                        break;
-                    }
-                }
-            }
-            
-            // Add flight upgrades to optional extras
-            flightItems.forEach(item => {
-                const upgradeCheckbox = item.querySelector('input[type="checkbox"][id$="-upgrade"]');
-                const includeInEmail = item.querySelector('input[type="checkbox"][id$="-include-email"]');
-                
-                if (upgradeCheckbox && upgradeCheckbox.checked && includeInEmail.checked) {
-                    const airlineInput = item.querySelector('.airline');
-                    const depAirportInput = item.querySelector('.departure-airport');
-                    const arrAirportInput = item.querySelector('.arrival-airport');
-                    const baggageSelect = item.querySelector('.baggage-allowance');
-                    const sellingPriceInput = item.querySelector('.selling-price');
-                    const upgradeDescInput = item.querySelector('.upgrade-desc');
-                    const cancelPolicySelect = item.querySelector('.cancellation-policy');
-                    const cancelFeeInput = item.querySelector('.cancellation-fee');
-                    
-                    const airline = airlineInput ? airlineInput.value : '';
-                    const depAirport = depAirportInput ? depAirportInput.value : '';
-                    const arrAirport = arrAirportInput ? arrAirportInput.value : '';
-                    const baggage = baggageSelect ? baggageSelect.value : '';
-                    const sellingPrice = sellingPriceInput ? sellingPriceInput.value : '0.00';
+                    const returnDepAirport = returnDepAirportInput ? returnDepAirportInput.value || '' : '';
+                    const returnArrAirport = returnArrAirportInput ? returnArrAirportInput.value || '' : '';
+                    const outboundDepTime = outboundDepTimeInput ? outboundDepTimeInput.value : '';
+                    const outboundArrTime = outboundArrTimeInput ? outboundArrTimeInput.value : '';
+                    const returnDepTime = returnDepTimeInput ? returnDepTimeInput.value : '';
+                    const returnArrTime = returnArrTimeInput ? returnArrTimeInput.value : '';
                     const upgradeDesc = upgradeDescInput ? upgradeDescInput.value : '';
+                    const upgradeAmount = upgradeAmountInput ? upgradeAmountInput.value : '0';
+                    const baggage = baggageSelect ? baggageSelect.value : '';
                     
-                    let cancelText = '';
-                    if (cancelPolicySelect) {
-                        const cancelPolicy = cancelPolicySelect.value;
-                        const cancelFee = cancelFeeInput ? cancelFeeInput.value : '0.00';
-                        const deadlineInput = item.querySelector('.cancellation-deadline');
-                        const deadlineVal = deadlineInput ? deadlineInput.value : '';
-
-                        if (cancelPolicy === 'refundable') {
-                            if (deadlineVal) {
-                                cancelText = 'Free cancellation until ' + formatDate(deadlineVal);
-                            } else {
-                                cancelText = 'Free cancellation until [cancellation_deadline]';
+                    const isUpgrade = upgradeCheckbox && upgradeCheckbox.checked;
+                    
+                    flightOptionsCount++;
+                    
+                    if (isUpgrade) {
+                        let upgradeRoute = `${depAirport} to ${arrAirport}`;
+                        if (includeReturn && returnDepAirport && returnArrAirport) {
+                            upgradeRoute += ` return ${returnDepAirport} to ${returnArrAirport}`;
+                        }
+                        const upgradeText = upgradeDesc || `${airline} ${upgradeRoute}${baggage ? ', ' + baggage : ''}`;
+                        if (flightOptionsCount > 1) {
+                            flightOptions += `\n${boldWrap('OPTION ' + flightOptionsCount)}\n`;
+                        }
+                        flightOptions += `Upgrade to ${boldWrap(upgradeText)} add ${boldWrap('£' + parseFloat(upgradeAmount).toFixed(0))}\n`;
+                    } else {
+                        if (flightOptionsCount > 1) {
+                            flightOptions += `\n${boldWrap('OPTION ' + flightOptionsCount)}\n`;
+                        }
+                        const flightType = includeReturn ? 'FLIGHTS' : 'ONE WAY FLIGHT';
+                        flightOptions += `${boldWrap(airline.toUpperCase() + ' ' + flightType)}\n`;
+                        flightOptions += `${boldWrap(departDate)} ${depAirport.toUpperCase()} - ${arrAirport.toUpperCase()}`;
+                        if (outboundDepTime) {
+                            flightOptions += ` DEP ${outboundDepTime.replace(':', '')}`;
+                        }
+                        if (outboundArrTime) {
+                            flightOptions += ` ARR ${outboundArrTime.replace(':', '')}`;
+                        }
+                        flightOptions += `\n`;
+                        if (includeReturn) {
+                            flightOptions += `${boldWrap(returnDate)} ${returnDepAirport.toUpperCase()} - ${returnArrAirport.toUpperCase()}`;
+                            if (returnDepTime) {
+                                flightOptions += ` DEP ${returnDepTime.replace(':', '')}`;
                             }
-                        } else if (cancelPolicy === 'non-refundable') {
-                            cancelText = 'Non-refundable.';
-                        } else if (cancelPolicy === 'refundable-with-fee') {
-                            cancelText = 'Refundable with a fee of £' + (parseFloat(cancelFee || 0)).toFixed(2);
+                            if (returnArrTime) {
+                                flightOptions += ` ARR ${returnArrTime.replace(':', '')}`;
+                            }
+                            flightOptions += `\n`;
                         }
-                    }
-                    
-                    if (airline && depAirport && arrAirport) {
-                        optionalExtras += `• UPGRADE: ${airline} Flight ${depAirport} to ${arrAirport}`;
-                        if (baggage) {
-                            optionalExtras += `, ${baggage} baggage`;
-                        }
-                        optionalExtras += ` - £${parseFloat(sellingPrice).toFixed(2)}${cancelText}`;
-                        if (upgradeDesc) {
-                            optionalExtras += ` - ${upgradeDesc}`;
-                        }
-                        optionalExtras += '\n';
                     }
                 }
             });
             
-            // Get totals
+            let optionalExtras = '';
+            
+            const hotelSellingRounded = document.getElementById('hotel-total-selling-rounded').textContent.replace('£', '');
+            const flightSellingRounded = document.getElementById('flight-total-selling-rounded').textContent.replace('£', '');
             const totalSellingRounded = document.getElementById('total-selling-rounded').textContent.replace('£', '');
             
-            let template = '';
+            let templateParts = [];
             
-            if (bookingType === 'hotel') {
-                template = `Hi ${customerName},
-
-We can offer for ${hotelAdults} Adult${hotelAdults > 1 ? 's' : ''}${hotelChildren > 0 ? ' & ' + hotelChildren + ' Child' + (hotelChildren > 1 ? 'ren' : '') : ''}${hotelChildAges ? ', ' + hotelChildAges : ''}
-
-${hotelName}
-${startDate} - ${endDate} - ${nights} Night${nights > 1 ? 's' : ''}
-${roomType} on ${boardBasis} Basis
-
-Total Cost £${totalSellingRounded} per booking
-
-${optionalExtras ? 'Optional Extras:\n' + optionalExtras + '\n' : ''}Deposit £${depositAmount}pp
-Balance due by ${balanceDueDate}
-
-${hotelCancellationText}
-
-Includes 5GB eSim Promo
-
-Prices are live and subject to change prior to confirmation.
-
-Kind regards
-${agentName}
-
-${agentName}
-${agentEmail}
-${agentPhone}
-Bradley Travelstore
-Your Quote Reference #[quote_reference]`;
-            } else {
-                // Package template
-                template = `Hi ${customerName},
-
-Here is your flight + hotel package quote:
-
-FLIGHTS
-${flightInfo}
-
-HOTEL
-${hotelName}
-${startDate} - ${endDate} - ${nights} Night${nights > 1 ? 's' : ''}
-${roomType} on ${boardBasis} Basis
-
-PACKAGE INCLUDES
-• Return flights for ${flightAdults} adult${flightAdults > 1 ? 's' : ''}${flightChildren > 0 ? ' & ' + flightChildren + ' child' + (flightChildren > 1 ? 'ren' : '') : ''}
-• ${nights} nights accommodation
-• ${boardBasis} meals
-• All taxes and charges
-
-TOTAL PACKAGE PRICE: £${totalSellingRounded}
-
-${optionalExtras ? 'OPTIONAL EXTRAS:\n' + optionalExtras + '\n' : ''}DEPOSIT: £${depositAmount} per person
-BALANCE DUE: ${balanceDueDate}
-
-CANCELLATION POLICY:
-${hotelCancellationText}
-${flightCancellationText}
-
-Includes 5GB eSim Promo
-
-Prices are live and subject to change prior to confirmation.
-
-Kind regards
-${agentName}
-
-${agentName}
-${agentEmail}
-${agentPhone}
-Bradley Travelstore
-Your Quote Reference #[quote_reference]`;
+            let websiteUrl = 'bradleytravelstore.com';
+            if (agentName !== 'custom') {
+                const details = agentDetails[agentName];
+                if (details && details.website) {
+                    websiteUrl = details.website;
+                }
             }
             
-            document.getElementById('email-template').value = template;
+            if (bookingType === 'hotel') {
+                let travelerText = `${boldWrap(hotelAdults + ' Adult' + (parseInt(hotelAdults) > 1 ? 's' : ''))}`;
+                if (parseInt(hotelChildren) > 0) {
+                    const agesList = hotelChildAges.join(', ');
+                    travelerText += ` & ${boldWrap(hotelChildren + ' Child' + (parseInt(hotelChildren) > 1 ? 'ren' : ''))}${agesList.length > 0 ? ', ' + agesList : ''}`;
+                }
+                
+                templateParts.push(`Hi ${boldWrap(customerName)},`);
+                templateParts.push('');
+                templateParts.push(`We can offer for ${travelerText}`);
+                templateParts.push('');
+                templateParts.push(`${boldWrap(headerHotelName.toUpperCase() + (destination ? ', ' + destination.toUpperCase() : ''))}`);
+                templateParts.push(`${boldWrap(startDate + '-' + endDate)} - ${boldWrap(nights + ' Night' + (parseInt(nights) > 1 ? 's' : ''))}`);
+                templateParts.push('');
+                templateParts.push(hotelOptions);
+                templateParts.push(`${boldWrap('Total Cost')} ${boldWrap('£' + parseFloat(hotelSellingRounded).toFixed(0))} per family`);
+                if (excludesNote) {
+                    templateParts.push(`${boldWrap('Excludes')} ${excludesNote}\n`);
+                }
+                templateParts.push(`${boldWrap('Deposit')} ${boldWrap('£' + depositAmount + 'pp')}`);
+                templateParts.push(`${boldWrap('Balance due by')} ${boldWrap(balanceDueDate)}`);
+                templateParts.push('');
+                templateParts.push(`${boldWrap('Includes 5GB eSim Promo')}`);
+                templateParts.push('');
+                templateParts.push('Prices are live and subject to change prior to confirmation.');
+                templateParts.push('');
+                templateParts.push(`Kind regards`);
+                templateParts.push(boldWrap(agentName));
+                templateParts.push('');
+                templateParts.push('Bradley Travelstore');
+                templateParts.push(`T: ${boldWrap(agentPhone)}`);
+                templateParts.push(`E: ${boldWrap(agentEmail)}`);
+                templateParts.push(`W: ${boldWrap(websiteUrl)}`);
+                templateParts.push('');
+                templateParts.push('We are fully ATOL bonded for your peace of mind.');
+                templateParts.push('');
+                templateParts.push(`Your Quote Reference #${boldWrap(quoteReference)}`);
+            } else if (bookingType === 'flight') {
+                let travelerText = `${boldWrap(flightAdults + ' Adult' + (parseInt(flightAdults) > 1 ? 's' : ''))}`;
+                if (parseInt(flightChildren) > 0) {
+                    const agesList = flightChildAges.join(', ');
+                    travelerText += ` & ${boldWrap(flightChildren + ' Child' + (parseInt(flightChildren) > 1 ? 'ren' : ''))}${agesList.length > 0 ? ', ' + agesList : ''}`;
+                }
+                
+                templateParts.push(`Hi ${boldWrap(customerName)},`);
+                templateParts.push('');
+                templateParts.push(`We can offer for ${travelerText}.`);
+                templateParts.push('');
+                templateParts.push(flightOptions);
+                templateParts.push(`${boldWrap('Total Cost')} ${boldWrap('£' + parseFloat(flightSellingRounded).toFixed(0))} per family`);
+                if (excludesNote) {
+                    templateParts.push(`${boldWrap('Excludes')} ${excludesNote}\n`);
+                }
+                templateParts.push(`${boldWrap('Deposit')} ${boldWrap('£' + depositAmount + 'pp')}`);
+                templateParts.push(`${boldWrap('Balance due by')} ${boldWrap(balanceDueDate)}`);
+                templateParts.push('');
+                templateParts.push(`${boldWrap('Our Flight Includes')}`);
+                templateParts.push('');
+                templateParts.push(`${boldWrap('Free 5GB eSim Promo included')}`);
+                templateParts.push(`${boldWrap('Flights and airport taxes')}`);
+                templateParts.push(`${boldWrap('2 x Small Hand Baggage allowance')}`);
+                templateParts.push(`${boldWrap('Fully ATOL bonded')}`);
+                templateParts.push('');
+                templateParts.push('Prices are live and subject to change prior to confirmation.');
+                templateParts.push('');
+                templateParts.push(`Kind regards`);
+                templateParts.push(boldWrap(agentName));
+                templateParts.push('');
+                templateParts.push('Bradley Travelstore');
+                templateParts.push(`T: ${boldWrap(agentPhone)}`);
+                templateParts.push(`E: ${boldWrap(agentEmail)}`);
+                templateParts.push(`W: ${boldWrap(websiteUrl)}`);
+                templateParts.push('');
+                templateParts.push('We are fully ATOL bonded for your peace of mind.');
+                templateParts.push('');
+                templateParts.push(`Your Quote Reference #${boldWrap(quoteReference)}`);
+            } else {
+                let travelerText = `${boldWrap(flightAdults + ' Adult' + (parseInt(flightAdults) > 1 ? 's' : ''))}`;
+                if (parseInt(flightChildren) > 0) {
+                    const agesList = flightChildAges.join(', ');
+                    travelerText += ` & ${boldWrap(flightChildren + ' Child' + (parseInt(flightChildren) > 1 ? 'ren' : ''))}${agesList.length > 0 ? ', ' + agesList : ''}`;
+                }
+                
+                templateParts.push(`Hi ${boldWrap(customerName)},`);
+                templateParts.push('');
+                templateParts.push(`We can offer for ${travelerText}.`);
+                templateParts.push('');
+                templateParts.push(flightOptions);
+                templateParts.push(`${boldWrap(headerHotelName.toUpperCase() + (destination ? ', ' + destination.toUpperCase() : ''))}`);
+                templateParts.push(`${boldWrap(startDate + '-' + endDate)} - ${boldWrap(nights + ' Night' + (parseInt(nights) > 1 ? 's' : ''))}`);
+                templateParts.push('');
+                templateParts.push(hotelOptions);
+                templateParts.push(`${boldWrap('Total Package Cost')} ${boldWrap('£' + parseFloat(totalSellingRounded).toFixed(0))}`);
+                if (excludesNote) {
+                    templateParts.push(`${boldWrap('Excludes')} ${excludesNote}\n`);
+                }
+                templateParts.push('');
+                templateParts.push(`${boldWrap('Deposit')} ${boldWrap('£' + depositAmount + 'pp')}`);
+                templateParts.push(`${boldWrap('Balance due by')} ${boldWrap(balanceDueDate)}`);
+                templateParts.push('');
+                templateParts.push(`${boldWrap('Our Package Includes')}`);
+                templateParts.push('');
+                templateParts.push(`${boldWrap('Free 5GB eSim Promo included')}`);
+                templateParts.push(`${boldWrap('Return flights and airport taxes')}`);
+                templateParts.push(`${boldWrap('2 x Small Hand Baggage allowance')}`);
+                templateParts.push(`${boldWrap(nights + ' Nights accommodation')}`);
+                templateParts.push(`${boldWrap('Fully ATOL bonded holiday')}`);
+                templateParts.push('');
+                templateParts.push('Prices are live and subject to change prior to confirmation.');
+                templateParts.push('');
+                templateParts.push(`Kind regards`);
+                templateParts.push(boldWrap(agentName));
+                templateParts.push('');
+                templateParts.push('Bradley Travelstore');
+                templateParts.push(`T: ${boldWrap(agentPhone)}`);
+                templateParts.push(`E: ${boldWrap(agentEmail)}`);
+                templateParts.push(`W: ${boldWrap(websiteUrl)}`);
+                templateParts.push('');
+                templateParts.push('We are fully ATOL bonded for your peace of mind.');
+                templateParts.push('');
+                templateParts.push(`Your Quote Reference #${boldWrap(quoteReference)}`);
+            }
+            
+            const template = templateParts.join('\n');
+            
+            const output = document.getElementById('email-template');
+            if (currentDeliveryOption === 'whatsapp') {
+                output.textContent = template;
+            } else {
+                const htmlTemplate = template.replace(/\n/g, '<br>').replace(/ /g, '&nbsp;');
+                output.innerHTML = htmlTemplate;
+            }
+            saveState();
         }
 
-        // Copy to clipboard
         function copyToClipboard() {
-            const emailText = document.getElementById('email-template');
-            emailText.select();
-            document.execCommand('copy');
-            alert('Email template copied to clipboard!');
+            const output = document.getElementById('email-template');
+            let textToCopy;
+            if (currentDeliveryOption === 'whatsapp') {
+                textToCopy = output.textContent;
+            } else {
+                textToCopy = output.innerHTML.replace(/<br>/g, '\n').replace(/&nbsp;/g, ' ');
+            }
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                alert('Email template copied to clipboard!');
+            }).catch(() => {
+                // Fallback for older browsers
+                const textArea = document.createElement('textarea');
+                textArea.value = textToCopy;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('Email template copied to clipboard!');
+            });
         }
 
-        // Send email
         function sendEmail() {
             if (!validateCustomerInfo()) {
                 alert('Please fill in Customer Name and Destination before sending email.');
@@ -3875,8 +3927,394 @@ Your Quote Reference #[quote_reference]`;
                 return;
             }
             
-            // In a real implementation, this would send the email via an API
             alert('Email sent successfully to the customer!');
+        }
+
+        // Local Storage Functions
+        function saveState() {
+            const state = {
+                customer: {
+                    name: document.getElementById('customer-name').value,
+                    destination: document.getElementById('destination').value,
+                    deposit: document.getElementById('deposit-amount').value
+                },
+                currency: {
+                    amount: document.getElementById('source-amount').value,
+                    currency: document.getElementById('source-currency').value,
+                    rate: document.getElementById('conversion-rate').value,
+                    result: convertedAmount
+                },
+                hotel: {
+                    name: document.getElementById('hotel-name').value,
+                    checkin: document.getElementById('hotel-checkin').value,
+                    nights: document.getElementById('hotel-nights').value,
+                    balanceDue: document.getElementById('balance-due-date').value,
+                    excludes: document.getElementById('excludes-note').value,
+                    adults: document.getElementById('hotel-adults-count').textContent,
+                    children: document.getElementById('hotel-children-count').textContent,
+                    infants: document.getElementById('hotel-infants-count').textContent,
+                    childAges: Array.from(document.querySelectorAll('#hotel-child-ages .child-age-input')).map(input => input.value)
+                },
+                flight: {
+                    dates: document.getElementById('flight-dates').value,
+                    adults: document.getElementById('flight-adults-count').textContent,
+                    children: document.getElementById('flight-children-count').textContent,
+                    infants: document.getElementById('flight-infants-count').textContent,
+                    childAges: Array.from(document.querySelectorAll('#flight-child-ages .child-age-input')).map(input => input.value)
+                },
+                commission: document.getElementById('commission-rate').value,
+                email: {
+                    bookingType: document.getElementById('booking-type').value,
+                    quoteRef: document.getElementById('quote-reference').value,
+                    agentName: document.getElementById('agent-name').value,
+                    agentEmail: document.getElementById('agent-email').value,
+                    agentPhone: document.getElementById('agent-phone').value,
+                    delivery: currentDeliveryOption
+                },
+                suppliers: {
+                    hotel: [],
+                    flight: []
+                }
+            };
+
+            // Save hotel suppliers
+            document.querySelectorAll('#hotel-comparison .supplier-comparison-item').forEach(item => {
+                const data = collectSupplierData(item, 'hotel');
+                state.suppliers.hotel.push(data);
+            });
+
+            // Save flight suppliers
+            document.querySelectorAll('#flight-comparison .supplier-comparison-item').forEach(item => {
+                const data = collectSupplierData(item, 'flight');
+                state.suppliers.flight.push(data);
+            });
+
+            localStorage.setItem('bradleyTravelState', JSON.stringify(state));
+        }
+
+        function collectSupplierData(item, type) {
+            const data = {
+                isSaved: item.classList.contains('saved'),
+                supplierName: item.querySelector('.supplier-name').value,
+                netPrice: item.querySelector('.net-price').value,
+                commissionRate: item.querySelector('.commission-rate').value,
+                sellingPrice: item.querySelector('.selling-price').value,
+                commissionAmount: item.querySelector('.commission-amount').value,
+                upgradeDesc: item.querySelector('.upgrade-desc').value,
+                upgradeAmount: item.querySelector('.upgrade-amount').value,
+                best: item.querySelector(`input[id="${item.id}-best"]`).checked,
+                upgrade: item.querySelector(`input[id="${item.id}-upgrade"]`).checked,
+                includeEmail: item.querySelector(`input[id="${item.id}-include-email"]`).checked,
+                cancellationPolicy: item.querySelector('.cancellation-policy').value,
+                cancellationFee: item.querySelector('.cancellation-fee').value,
+                cancellationDeadline: item.querySelector('.cancellation-deadline').value
+            };
+
+            if (type === 'hotel') {
+                data.supplierHotelName = item.querySelector('.supplier-hotel-name').value;
+                data.roomType = item.querySelector('.room-type').value;
+                data.boardBasis = item.querySelector('.board-basis').value;
+            } else {
+                data.airline = item.querySelector('.airline').value;
+                data.departureAirport = item.querySelector('.departure-airport').value;
+                data.arrivalAirport = item.querySelector('.arrival-airport').value;
+                data.returnDepartureAirport = item.querySelector('.return-departure-airport').value;
+                data.returnArrivalAirport = item.querySelector('.return-arrival-airport').value;
+                data.outboundDepartureTime = item.querySelector('.outbound-departure-time').value;
+                data.outboundArrivalTime = item.querySelector('.outbound-arrival-time').value;
+                data.returnDepartureTime = item.querySelector('.return-departure-time').value;
+                data.returnArrivalTime = item.querySelector('.return-arrival-time').value;
+                data.baggageAllowance = item.querySelector('.baggage-allowance').value;
+                data.includeReturn = item.querySelector(`input[id="${item.id}-include-return"]`).checked;
+            }
+
+            return data;
+        }
+
+        function loadState() {
+            const stateStr = localStorage.getItem('bradleyTravelState');
+            let state = null;
+            if (stateStr) {
+                try {
+                    state = JSON.parse(stateStr);
+                } catch (e) {
+                    console.error('Invalid saved state:', e);
+                }
+            }
+
+            // Populate static fields
+            if (state) {
+                document.getElementById('customer-name').value = state.customer.name || '';
+                document.getElementById('destination').value = state.customer.destination || '';
+                document.getElementById('deposit-amount').value = state.customer.deposit || '';
+
+                // Currency
+                if (state.currency) {
+                    document.getElementById('source-amount').value = state.currency.amount || '';
+                    document.getElementById('source-currency').value = state.currency.currency || 'EUR';
+                    document.getElementById('conversion-rate').value = state.currency.rate || '1.0';
+                    if (state.currency.result > 0) {
+                        convertedAmount = state.currency.result;
+                        const resultDiv = document.getElementById('converter-result');
+                        const raw = parseFloat(document.getElementById('source-amount').value) / parseFloat(document.getElementById('conversion-rate').value);
+                        resultDiv.innerHTML = `
+                            Converted Amount: £${state.currency.result.toFixed(2)}
+                            <div class="converter-raw-value">(raw: ${raw.toFixed(2)})</div>
+                        `;
+                        resultDiv.style.display = 'block';
+                    }
+                }
+
+                document.getElementById('hotel-name').value = state.hotel.name || '';
+                document.getElementById('hotel-nights').value = state.hotel.nights || '';
+                document.getElementById('balance-due-date').value = state.hotel.balanceDue || '';
+                document.getElementById('excludes-note').value = state.hotel.excludes || '';
+
+                // Set counters
+                document.getElementById('hotel-adults-count').textContent = state.hotel.adults || '2';
+                document.getElementById('hotel-children-count').textContent = state.hotel.children || '0';
+                document.getElementById('hotel-infants-count').textContent = state.hotel.infants || '0';
+
+                document.getElementById('flight-adults-count').textContent = state.flight.adults || '2';
+                document.getElementById('flight-children-count').textContent = state.flight.children || '0';
+                document.getElementById('flight-infants-count').textContent = state.flight.infants || '0';
+
+                // Update child ages
+                updateChildAges('hotel');
+                setTimeout(() => {
+                    const hotelInputs = document.querySelectorAll('#hotel-child-ages .child-age-input');
+                    (state.hotel.childAges || []).forEach((age, i) => {
+                        if (hotelInputs[i]) hotelInputs[i].value = age;
+                    });
+                }, 0);
+
+                updateChildAges('flight');
+                setTimeout(() => {
+                    const flightInputs = document.querySelectorAll('#flight-child-ages .child-age-input');
+                    (state.flight.childAges || []).forEach((age, i) => {
+                        if (flightInputs[i]) flightInputs[i].value = age;
+                    });
+                }, 0);
+
+                // Set dates
+                if (state.hotel.checkin) {
+                    const dates = state.hotel.checkin.split(' to ');
+                    if (dates.length === 2) {
+                        hotelCheckinFp.setDate([dates[0], dates[1]]);
+                    } else {
+                        hotelCheckinFp.setDate(dates[0]);
+                    }
+                }
+                if (state.hotel.balanceDue) {
+                    balanceDueFp.setDate(state.hotel.balanceDue);
+                }
+                if (state.flight.dates) {
+                    const dates = state.flight.dates.split(' to ');
+                    flightDatesFp.setDate(dates.length === 2 ? [dates[0], dates[1]] : dates[0]);
+                }
+
+                document.getElementById('commission-rate').value = state.commission || '11%';
+                updateCommission();
+
+                document.getElementById('booking-type').value = state.email.bookingType || 'hotel';
+                document.getElementById('quote-reference').value = state.email.quoteRef || '';
+                document.getElementById('agent-name').value = state.email.agentName || 'Adam';
+                document.getElementById('agent-email').value = state.email.agentEmail || '';
+                document.getElementById('agent-phone').value = state.email.agentPhone || '';
+                updateAgentSignature();
+
+                currentDeliveryOption = state.email.delivery || 'email';
+                document.querySelectorAll('.delivery-option').forEach(el => el.classList.remove('selected'));
+                const selectedEl = [...document.querySelectorAll('.delivery-option')].find(el => {
+                    const onclick = el.getAttribute('onclick');
+                    return onclick && onclick.includes(`'${currentDeliveryOption}'`);
+                });
+                if (selectedEl) selectedEl.classList.add('selected');
+            }
+
+            // Suppliers
+            const hotelComparison = document.getElementById('hotel-comparison');
+            const flightComparison = document.getElementById('flight-comparison');
+            savedHotelSuppliers = [];
+            savedFlightSuppliers = [];
+            hotelComparison.innerHTML = '';
+            flightComparison.innerHTML = '';
+
+            if (!state || !state.suppliers || state.suppliers.hotel.length === 0) {
+                addHotelSupplier();
+            } else {
+                state.suppliers.hotel.forEach(data => {
+                    addHotelSupplier();
+                    const newId = hotelComparison.lastElementChild.id;
+                    setHotelSupplierData(newId, data);
+                    updateSupplierPrice(newId);
+                    initCancellationPickers(document.getElementById(newId));
+                    if (data.isSaved) {
+                        document.getElementById(newId).classList.add('saved');
+                        generateHotelSummary(newId, data);
+                        savedHotelSuppliers.push({ id: newId, ...data });
+                    }
+                    toggleCancellationFee(newId);
+                    if (data.best) toggleBestPrice(newId);
+                    if (data.upgrade) toggleUpgrade(newId);
+                });
+            }
+
+            if (!state || !state.suppliers || state.suppliers.flight.length === 0) {
+                addFlightSupplier();
+            } else {
+                state.suppliers.flight.forEach(data => {
+                    addFlightSupplier();
+                    const newId = flightComparison.lastElementChild.id;
+                    setFlightSupplierData(newId, data);
+                    updateSupplierPrice(newId);
+                    initCancellationPickers(document.getElementById(newId));
+                    if (data.isSaved) {
+                        document.getElementById(newId).classList.add('saved');
+                        generateFlightSummary(newId, data);
+                        savedFlightSuppliers.push({ id: newId, ...data });
+                    }
+                    toggleCancellationFee(newId);
+                    if (data.best) toggleBestPrice(newId);
+                    if (data.upgrade) toggleUpgrade(newId);
+                    if (data.includeReturn) toggleReturnDetails(newId);
+                });
+            }
+
+            updateTotals();
+            updateEmailTemplate();
+        }
+
+        function setHotelSupplierData(id, data) {
+            const item = document.getElementById(id);
+            item.querySelector('.supplier-name').value = data.supplierName || '';
+            item.querySelector('.supplier-hotel-name').value = data.supplierHotelName || '';
+            item.querySelector('.cancellation-policy').value = data.cancellationPolicy || 'non-refundable';
+            item.querySelector('.cancellation-deadline').value = data.cancellationDeadline || '';
+            item.querySelector('.cancellation-fee').value = data.cancellationFee || '0.00';
+            item.querySelector('.room-type').value = data.roomType || '';
+            item.querySelector('.board-basis').value = data.boardBasis || 'Room Only';
+            item.querySelector('.net-price').value = data.netPrice || '0.00';
+            item.querySelector('.commission-rate').value = data.commissionRate || '';
+            item.querySelector('.upgrade-desc').value = data.upgradeDesc || '';
+            item.querySelector('.upgrade-amount').value = data.upgradeAmount || '0.00';
+            document.getElementById(`${id}-best`).checked = !!data.best;
+            document.getElementById(`${id}-upgrade`).checked = !!data.upgrade;
+            document.getElementById(`${id}-include-email`).checked = !!data.includeEmail;
+        }
+
+        function setFlightSupplierData(id, data) {
+            const item = document.getElementById(id);
+            item.querySelector('.supplier-name').value = data.supplierName || '';
+            item.querySelector('.cancellation-policy').value = data.cancellationPolicy || 'non-refundable';
+            item.querySelector('.cancellation-deadline').value = data.cancellationDeadline || '';
+            item.querySelector('.cancellation-fee').value = data.cancellationFee || '0.00';
+            item.querySelector('.airline').value = data.airline || '';
+            item.querySelector('.departure-airport').value = data.departureAirport || '';
+            item.querySelector('.arrival-airport').value = data.arrivalAirport || '';
+            item.querySelector('.return-departure-airport').value = data.returnDepartureAirport || '';
+            item.querySelector('.return-arrival-airport').value = data.returnArrivalAirport || '';
+            item.querySelector('.outbound-departure-time').value = data.outboundDepartureTime || '';
+            item.querySelector('.outbound-arrival-time').value = data.outboundArrivalTime || '';
+            item.querySelector('.return-departure-time').value = data.returnDepartureTime || '';
+            item.querySelector('.return-arrival-time').value = data.returnArrivalTime || '';
+            item.querySelector('.baggage-allowance').value = data.baggageAllowance || '20kg';
+            item.querySelector('.net-price').value = data.netPrice || '0.00';
+            item.querySelector('.commission-rate').value = data.commissionRate || '';
+            item.querySelector('.upgrade-desc').value = data.upgradeDesc || '';
+            item.querySelector('.upgrade-amount').value = data.upgradeAmount || '0.00';
+            document.getElementById(`${id}-best`).checked = !!data.best;
+            document.getElementById(`${id}-upgrade`).checked = !!data.upgrade;
+            document.getElementById(`${id}-include-email`).checked = !!data.includeEmail;
+            document.getElementById(`${id}-include-return`).checked = !!data.includeReturn;
+        }
+
+        function generateHotelSummary(id, data) {
+            const item = document.getElementById(id);
+            let summary = item.querySelector('.supplier-summary');
+            if (!summary) {
+                summary = document.createElement('div');
+                summary.className = 'supplier-summary';
+                item.querySelector('.supplier-comparison-header').after(summary);
+            }
+            const cancelText = getCancellationText(data.cancellationPolicy, data.cancellationFee, data.cancellationDeadline);
+            summary.innerHTML = `
+                <div class="supplier-summary-row">
+                    <span class="supplier-summary-label">Room:</span>
+                    <span class="supplier-summary-value">${data.roomType || 'N/A'}</span>
+                </div>
+                <div class="supplier-summary-row">
+                    <span class="supplier-summary-label">Board:</span>
+                    <span class="supplier-summary-value">${data.boardBasis || 'N/A'}</span>
+                </div>
+                <div class="supplier-summary-row">
+                    <span class="supplier-summary-label">Cancellation:</span>
+                    <span class="supplier-summary-value">${cancelText}</span>
+                </div>
+                <div class="supplier-summary-row">
+                    <span class="supplier-summary-label">Net Price:</span>
+                    <span class="supplier-summary-value">£${parseFloat(data.netPrice || 0).toFixed(2)}</span>
+                </div>
+                <div class="supplier-summary-row">
+                    <span class="supplier-summary-label">Selling Price:</span>
+                    <span class="supplier-summary-value">£${parseFloat(data.sellingPrice || 0).toFixed(2)}</span>
+                </div>
+            `;
+        }
+
+        function generateFlightSummary(id, data) {
+            const item = document.getElementById(id);
+            let summary = item.querySelector('.supplier-summary');
+            if (!summary) {
+                summary = document.createElement('div');
+                summary.className = 'supplier-summary';
+                item.querySelector('.supplier-comparison-header').after(summary);
+            }
+            const cancelText = getCancellationText(data.cancellationPolicy, data.cancellationFee, data.cancellationDeadline);
+            let summaryHTML = `
+                <div class="supplier-summary-row">
+                    <span class="supplier-summary-label">Airline:</span>
+                    <span class="supplier-summary-value">${data.airline || 'N/A'}</span>
+                </div>
+                <div class="supplier-summary-row">
+                    <span class="supplier-summary-label">Outbound:</span>
+                    <span class="supplier-summary-value">${data.departureAirport || 'N/A'} → ${data.arrivalAirport || 'N/A'}</span>
+                </div>
+            `;
+            if (data.includeReturn && data.returnDepartureAirport && data.returnArrivalAirport) {
+                summaryHTML += `
+                    <div class="supplier-summary-row">
+                        <span class="supplier-summary-label">Return:</span>
+                        <span class="supplier-summary-value">${data.returnDepartureAirport} → ${data.returnArrivalAirport}</span>
+                    </div>
+                `;
+            } else {
+                summaryHTML += `
+                    <div class="supplier-summary-row">
+                        <span class="supplier-summary-label">Route:</span>
+                        <span class="supplier-summary-value">One-way</span>
+                    </div>
+                `;
+            }
+            summaryHTML += `
+                <div class="supplier-summary-row">
+                    <span class="supplier-summary-label">Baggage:</span>
+                    <span class="supplier-summary-value">${data.baggageAllowance || 'N/A'}</span>
+                </div>
+                <div class="supplier-summary-row">
+                    <span class="supplier-summary-label">Cancellation:</span>
+                    <span class="supplier-summary-value">${cancelText}</span>
+                </div>
+                <div class="supplier-summary-row">
+                    <span class="supplier-summary-label">Net Price:</span>
+                    <span class="supplier-summary-value">£${parseFloat(data.netPrice || 0).toFixed(2)}</span>
+                </div>
+                <div class="supplier-summary-row">
+                    <span class="supplier-summary-label">Selling Price:</span>
+                    <span class="supplier-summary-value">£${parseFloat(data.sellingPrice || 0).toFixed(2)}</span>
+                </div>
+            `;
+            summary.innerHTML = summaryHTML;
         }
     </script>
 </body>
