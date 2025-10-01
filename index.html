@@ -822,47 +822,47 @@
     </section>
 
     <div class="container">
-        <section id="customer" class="card customer-info-section">
+        <section id="customer" class="card customer-info-section expanded">
             <div class="section-toggle" onclick="toggleSection('customer')">
                 <h2 class="section-title">Customer Information</h2>
                 <i class="fas fa-chevron-down"></i>
             </div>
             
-            <div class="section-content expanded">
+            <div class="section-content">
                 <div class="form-row">
                     <div class="form-group">
                         <label for="customer-name">Customer Name *</label>
-                        <input type="text" id="customer-name" class="form-control" placeholder="Customer name" onchange="validateCustomerInfo(); updateEmailTemplate();">
+                        <input type="text" id="customer-name" class="form-control" placeholder="Customer name" onchange="validateCustomerInfo(); updateEmailTemplate(); saveState();">
                     </div>
                     <div class="form-group">
                         <label for="destination">Destination *</label>
-                        <input type="text" id="destination" class="form-control" placeholder="Destination" onchange="validateCustomerInfo(); updateEmailTemplate();">
+                        <input type="text" id="destination" class="form-control" placeholder="Destination" onchange="validateCustomerInfo(); updateEmailTemplate(); saveState();">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="deposit-amount">Deposit (£ per person)</label>
-                        <input type="number" id="deposit-amount" class="deposit-input" placeholder="Enter deposit amount" step="0.01" onchange="updateEmailTemplate()">
+                        <input type="number" id="deposit-amount" class="deposit-input" placeholder="Enter deposit amount" step="0.01" onchange="updateEmailTemplate(); saveState();">
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="currency" class="card">
+        <section id="currency" class="card expanded">
             <div class="section-toggle" onclick="toggleSection('currency')">
                 <h2 class="section-title">Currency Converter</h2>
                 <i class="fas fa-chevron-down"></i>
             </div>
             
-            <div class="section-content expanded">
+            <div class="section-content">
                 <div class="form-row">
                     <div class="form-group">
                         <label for="source-amount">Amount to Convert</label>
-                        <input type="number" id="source-amount" class="form-control" placeholder="Enter amount" step="0.01" onchange="saveState()">
+                        <input type="number" id="source-amount" class="form-control" placeholder="Enter amount" step="0.01" onchange="saveState();">
                     </div>
                     <div class="form-group">
                         <label for="source-currency">From Currency</label>
-                        <select id="source-currency" class="form-control" onchange="saveState()">
+                        <select id="source-currency" class="form-control" onchange="saveState();">
                             <option value="EUR">EUR (€)</option>
                             <option value="USD">USD ($)</option>
                             <option value="CAD">CAD (C$)</option>
@@ -872,7 +872,7 @@
                     </div>
                     <div class="form-group">
                         <label for="conversion-rate">Conversion Rate (1 unit = X GBP)</label>
-                        <input type="number" id="conversion-rate" class="form-control" value="1.0" step="0.01" onchange="saveState()">
+                        <input type="number" id="conversion-rate" class="form-control" value="1.0" step="0.01" onchange="saveState();">
                     </div>
                 </div>
                 
@@ -889,17 +889,17 @@
             </div>
         </section>
 
-        <section id="hotel" class="card">
+        <section id="hotel" class="card expanded">
             <div class="section-toggle" onclick="toggleSection('hotel')">
                 <h2 class="section-title">Hotel Quote Details</h2>
                 <i class="fas fa-chevron-down"></i>
             </div>
             
-            <div class="section-content expanded">
+            <div class="section-content">
                 <div class="form-row">
                     <div class="form-group">
                         <label for="hotel-name">Hotel Name</label>
-                        <input type="text" id="hotel-name" class="form-control" placeholder="Hotel name" onchange="updateEmailTemplate()">
+                        <input type="text" id="hotel-name" class="form-control" placeholder="Hotel name" onchange="updateEmailTemplate(); saveState();">
                     </div>
                 </div>
                 
@@ -917,11 +917,11 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="balance-due-date">Balance Due Date</label>
-                        <input type="text" id="balance-due-date" class="form-control" placeholder="Select balance due date" onchange="updateEmailTemplate()">
+                        <input type="text" id="balance-due-date" class="form-control" placeholder="Select balance due date" onchange="updateEmailTemplate(); saveState();">
                     </div>
                     <div class="form-group">
                         <label for="excludes-note">Excludes Note (e.g., local taxes)</label>
-                        <input type="text" id="excludes-note" class="form-control" placeholder="e.g., Climate Resilience Tax EUR15 per room, per night, pay locally" onchange="updateEmailTemplate()">
+                        <input type="text" id="excludes-note" class="form-control" placeholder="e.g., Climate Resilience Tax EUR15 per room, per night, pay locally" onchange="updateEmailTemplate(); saveState();">
                     </div>
                 </div>
                 
@@ -982,13 +982,13 @@
             </div>
         </section>
 
-        <section id="flight" class="card">
+        <section id="flight" class="card expanded">
             <div class="section-toggle" onclick="toggleSection('flight')">
                 <h2 class="section-title">Flight Quote Details</h2>
                 <i class="fas fa-chevron-down"></i>
             </div>
             
-            <div class="section-content expanded">
+            <div class="section-content">
                 <div class="form-row">
                     <div class="form-group">
                         <label for="flight-dates">Departure & Return Dates</label>
@@ -1053,16 +1053,16 @@
             </div>
         </section>
 
-        <section id="totals" class="card">
+        <section id="totals" class="card expanded">
             <div class="section-toggle" onclick="toggleSection('totals')">
                 <h2 class="section-title">Totals</h2>
                 <i class="fas fa-chevron-down"></i>
             </div>
             
-            <div class="section-content expanded">
+            <div class="section-content">
                 <div class="form-group">
                     <label for="commission-rate">Commission Rate</label>
-                    <input type="text" id="commission-rate" class="form-control" placeholder="Enter commission (e.g., 0.89 or 11%)" value="11%" onchange="updateCommission()">
+                    <input type="text" id="commission-rate" class="form-control" placeholder="Enter commission (e.g., 0.89 or 11%)" value="11%" onchange="updateCommission(); saveState();">
                     <div class="commission-display">
                         <span id="commission-display-text">11% (multiplier 1.11)</span>
                     </div>
@@ -1088,17 +1088,17 @@
             </div>
         </section>
 
-        <section id="email" class="card">
+        <section id="email" class="card expanded">
             <div class="section-toggle" onclick="toggleSection('email')">
                 <h2 class="section-title">Email Generator</h2>
                 <i class="fas fa-chevron-down"></i>
             </div>
             
-            <div class="section-content expanded">
+            <div class="section-content">
                 <div class="booking-type-selector">
                     <div class="form-group">
                         <label for="booking-type">Booking Type</label>
-                        <select id="booking-type" class="form-control" onchange="updateEmailTemplate()">
+                        <select id="booking-type" class="form-control" onchange="updateEmailTemplate(); saveState();">
                             <option value="hotel">Hotel Only</option>
                             <option value="flight">Flight Only</option>
                             <option value="package">Package (Flight + Hotel)</option>
@@ -1124,14 +1124,14 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="quote-reference">Quote Reference #</label>
-                        <input type="text" id="quote-reference" class="form-control" placeholder="Enter quote reference number" onchange="updateEmailTemplate()">
+                        <input type="text" id="quote-reference" class="form-control" placeholder="Enter quote reference number" onchange="updateEmailTemplate(); saveState();">
                     </div>
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="agent-name">Agent Name</label>
-                        <select id="agent-name" class="form-control" onchange="updateAgentSignature()">
+                        <select id="agent-name" class="form-control" onchange="updateAgentSignature(); saveState();">
                             <option value="Adam">Adam</option>
                             <option value="Tara">Tara</option>
                             <option value="Monique">Monique</option>
@@ -1157,11 +1157,11 @@
                     </div>
                     <div class="form-group">
                         <label for="agent-email">Agent Email</label>
-                        <input type="email" id="agent-email" class="form-control" value="reservations@bradleytravelstore.com">
+                        <input type="email" id="agent-email" class="form-control" value="reservations@bradleytravelstore.com" onchange="saveState();">
                     </div>
                     <div class="form-group">
                         <label for="agent-phone">Agent Phone</label>
-                        <input type="text" id="agent-phone" class="form-control" value="020 3355 5060">
+                        <input type="text" id="agent-phone" class="form-control" value="020 3355 5060" onchange="saveState();">
                     </div>
                 </div>
                 
@@ -2576,6 +2576,7 @@
                     document.getElementById('hotel-nights').value = nights;
                     updateEmailTemplate();
                 }
+                saveState();
             }
         });
 
@@ -2583,6 +2584,7 @@
             dateFormat: "Y-m-d",
             onChange: function(selectedDates, dateStr, instance) {
                 updateEmailTemplate();
+                saveState();
             }
         });
 
@@ -2593,6 +2595,7 @@
                         dateFormat: "Y-m-d",
                         onChange: function(selectedDates, dateStr) {
                             updateEmailTemplate();
+                            saveState();
                         }
                     });
                 }
@@ -2604,6 +2607,7 @@
             dateFormat: "Y-m-d",
             onChange: function(selectedDates, dateStr, instance) {
                 updateEmailTemplate();
+                saveState();
             }
         });
 
@@ -2618,15 +2622,15 @@
 
         function toggleSection(sectionId) {
             const section = document.getElementById(sectionId);
-            const content = section.querySelector('.section-content');
             
-            if (content.classList.contains('expanded')) {
-                content.classList.remove('expanded');
-                content.classList.add('collapsed');
+            if (section.classList.contains('expanded')) {
+                section.classList.remove('expanded');
+                section.classList.add('collapsed');
             } else {
-                content.classList.remove('collapsed');
-                content.classList.add('expanded');
+                section.classList.remove('collapsed');
+                section.classList.add('expanded');
             }
+            saveState();
         }
 
         function changeCount(type, delta) {
@@ -2644,6 +2648,7 @@
             
             updateTotals();
             updateEmailTemplate();
+            saveState();
         }
 
         function updateChildAges(type) {
@@ -2662,10 +2667,12 @@
                 input.onchange = function() {
                     validateChildAges();
                     updateEmailTemplate();
+                    saveState();
                 };
                 container.appendChild(input);
             }
             updateEmailTemplate();
+            saveState();
         }
 
         function validateChildAges() {
@@ -2699,6 +2706,7 @@
             element.classList.add('selected');
             currentDeliveryOption = option;
             updateEmailTemplate();
+            saveState();
         }
 
         function updateAgentSignature() {
@@ -2712,6 +2720,7 @@
                 }
             }
             updateEmailTemplate();
+            saveState();
         }
 
         function updateCommission() {
@@ -2732,6 +2741,7 @@
                 
                 updateTotals();
                 updateEmailTemplate();
+                saveState();
             }
         }
 
@@ -2941,6 +2951,7 @@
             
             updateTotals();
             updateEmailTemplate();
+            saveState();
             alert(`${supplierName} saved successfully!`);
         }
 
@@ -2956,6 +2967,7 @@
             
             updateTotals();
             updateEmailTemplate();
+            saveState();
         }
 
         function addHotelSupplier() {
@@ -2968,7 +2980,7 @@
             supplierItem.innerHTML = `
                 <div class="supplier-comparison-header">
                     <div>
-                        <input type="text" class="form-control supplier-name" placeholder="Supplier Name" style="width: 200px; display: inline-block; margin-right: 10px;" onchange="updateEmailTemplate()">
+                        <input type="text" class="form-control supplier-name" placeholder="Supplier Name" style="width: 200px; display: inline-block; margin-right: 10px;" onchange="updateEmailTemplate(); saveState();">
                         <div class="checkbox-group" style="display: inline-block;">
                             <input type="checkbox" id="${id}-best" onchange="toggleBestPrice('${id}')">
                             <label for="${id}-best">Mark Best</label>
@@ -2978,7 +2990,7 @@
                             <label for="${id}-upgrade">Include as Upgrade</label>
                         </div>
                         <div class="checkbox-group include-in-email-group">
-                            <input type="checkbox" id="${id}-include-email" onchange="updateEmailTemplate()">
+                            <input type="checkbox" id="${id}-include-email" onchange="updateEmailTemplate(); saveState();">
                             <label for="${id}-include-email">Include in Email</label>
                         </div>
                     </div>
@@ -2989,13 +3001,13 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Hotel Name (leave blank to use global)</label>
-                        <input type="text" class="form-control supplier-hotel-name" placeholder="Use global hotel name" onchange="updateEmailTemplate()">
+                        <input type="text" class="form-control supplier-hotel-name" placeholder="Use global hotel name" onchange="updateEmailTemplate(); saveState();">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Cancellation Policy</label>
-                        <select class="form-control cancellation-policy" onchange="toggleCancellationFee('${id}'); updateEmailTemplate();">
+                        <select class="form-control cancellation-policy" onchange="toggleCancellationFee('${id}'); updateEmailTemplate(); saveState();">
                             <option value="non-refundable" selected>Non-Refundable</option>
                             <option value="refundable">Refundable</option>
                             <option value="refundable-with-fee">Refundable with Cancellation Fee</option>
@@ -3003,21 +3015,21 @@
                     </div>
                     <div class="form-group cancellation-deadline-group" style="display:none;">
                         <label>Free Cancellation Until</label>
-                        <input type="text" class="form-control cancellation-deadline" placeholder="Select cancellation deadline" onchange="updateEmailTemplate()">
+                        <input type="text" class="form-control cancellation-deadline" placeholder="Select cancellation deadline" onchange="updateEmailTemplate(); saveState();">
                     </div>
                     <div class="form-group cancellation-fee-group">
                         <label>Cancellation Fee (£)</label>
-                        <input type="number" class="form-control cancellation-fee" placeholder="0.00" step="0.01" onchange="updateEmailTemplate()">
+                        <input type="number" class="form-control cancellation-fee" placeholder="0.00" step="0.01" onchange="updateEmailTemplate(); saveState();">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Room Type</label>
-                        <input type="text" class="form-control room-type" placeholder="Room Type" onchange="updateEmailTemplate()">
+                        <input type="text" class="form-control room-type" placeholder="Room Type" onchange="updateEmailTemplate(); saveState();">
                     </div>
                     <div class="form-group">
                         <label>Board Basis</label>
-                        <select class="form-control board-basis" onchange="updateEmailTemplate()">
+                        <select class="form-control board-basis" onchange="updateEmailTemplate(); saveState();">
                             <option>Room Only</option>
                             <option>Bed & Breakfast</option>
                             <option>Half Board</option>
@@ -3029,11 +3041,11 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Net Price (£)</label>
-                        <input type="number" class="form-control net-price" placeholder="0.00" step="0.01" onchange="updateSupplierPrice('${id}')">
+                        <input type="number" class="form-control net-price" placeholder="0.00" step="0.01" onchange="updateSupplierPrice('${id}'); saveState();">
                     </div>
                     <div class="form-group">
                         <label>Commission Rate</label>
-                        <input type="text" class="form-control commission-rate" placeholder="Use global" value="" onchange="updateSupplierPrice('${id}')">
+                        <input type="text" class="form-control commission-rate" placeholder="Use global" value="" onchange="updateSupplierPrice('${id}'); saveState();">
                     </div>
                 </div>
                 <div class="form-row">
@@ -3049,11 +3061,11 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Upgrade Description</label>
-                        <input type="text" class="form-control upgrade-desc" placeholder="Upgrade description" onchange="updateEmailTemplate()">
+                        <input type="text" class="form-control upgrade-desc" placeholder="Upgrade description" onchange="updateEmailTemplate(); saveState();">
                     </div>
                     <div class="form-group">
                         <label>Upgrade Amount (£)</label>
-                        <input type="number" class="form-control upgrade-amount" placeholder="0.00" step="0.01" onchange="updateEmailTemplate()">
+                        <input type="number" class="form-control upgrade-amount" placeholder="0.00" step="0.01" onchange="updateEmailTemplate(); saveState();">
                     </div>
                 </div>
                 <div class="supplier-details">
@@ -3083,7 +3095,7 @@
             supplierItem.innerHTML = `
                 <div class="supplier-comparison-header">
                     <div>
-                        <input type="text" class="form-control supplier-name" placeholder="Supplier Name" style="width: 200px; display: inline-block; margin-right: 10px;" onchange="updateEmailTemplate()">
+                        <input type="text" class="form-control supplier-name" placeholder="Supplier Name" style="width: 200px; display: inline-block; margin-right: 10px;" onchange="updateEmailTemplate(); saveState();">
                         <div class="checkbox-group" style="display: inline-block;">
                             <input type="checkbox" id="${id}-best" onchange="toggleBestPrice('${id}')">
                             <label for="${id}-best">Mark Best</label>
@@ -3093,11 +3105,11 @@
                             <label for="${id}-upgrade">Include as Upgrade</label>
                         </div>
                         <div class="checkbox-group include-in-email-group">
-                            <input type="checkbox" id="${id}-include-email" checked onchange="updateEmailTemplate()">
+                            <input type="checkbox" id="${id}-include-email" checked onchange="updateEmailTemplate(); saveState();">
                             <label for="${id}-include-email">Include in Email</label>
                         </div>
                         <div class="checkbox-group include-in-email-group">
-                            <input type="checkbox" id="${id}-include-return" onchange="toggleReturnDetails('${id}'); updateEmailTemplate()">
+                            <input type="checkbox" id="${id}-include-return" onchange="toggleReturnDetails('${id}'); updateEmailTemplate(); saveState();">
                             <label for="${id}-include-return">Include Return</label>
                         </div>
                     </div>
@@ -3108,7 +3120,7 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Cancellation Policy</label>
-                        <select class="form-control cancellation-policy" onchange="toggleCancellationFee('${id}'); updateEmailTemplate();">
+                        <select class="form-control cancellation-policy" onchange="toggleCancellationFee('${id}'); updateEmailTemplate(); saveState();">
                             <option value="non-refundable" selected>Non-Refundable</option>
                             <option value="refundable">Refundable</option>
                             <option value="refundable-with-fee">Refundable with Cancellation Fee</option>
@@ -3116,53 +3128,53 @@
                     </div>
                     <div class="form-group cancellation-deadline-group" style="display:none;">
                         <label>Free Cancellation Until</label>
-                        <input type="text" class="form-control cancellation-deadline" placeholder="Select cancellation deadline" onchange="updateEmailTemplate()">
+                        <input type="text" class="form-control cancellation-deadline" placeholder="Select cancellation deadline" onchange="updateEmailTemplate(); saveState();">
                     </div>
                     <div class="form-group cancellation-fee-group">
                         <label>Cancellation Fee (£)</label>
-                        <input type="number" class="form-control cancellation-fee" placeholder="0.00" step="0.01" onchange="updateEmailTemplate()">
+                        <input type="number" class="form-control cancellation-fee" placeholder="0.00" step="0.01" onchange="updateEmailTemplate(); saveState();">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Airline</label>
-                        <input type="text" class="form-control airline" placeholder="Airline" onchange="updateEmailTemplate()">
+                        <input type="text" class="form-control airline" placeholder="Airline" onchange="updateEmailTemplate(); saveState();">
                     </div>
                     <div class="form-group">
                         <label>Outbound Departure Airport</label>
-                        <input type="text" class="form-control airport-input departure-airport" placeholder="Outbound Dep (IATA)" oninput="displayAirport(this)" onchange="updateEmailTemplate()">
+                        <input type="text" class="form-control airport-input departure-airport" placeholder="Outbound Dep (IATA)" oninput="displayAirport(this)" onchange="updateEmailTemplate(); saveState();">
                         <div class="airport-display"></div>
                     </div>
                     <div class="form-group">
                         <label>Outbound Arrival Airport</label>
-                        <input type="text" class="form-control airport-input arrival-airport" placeholder="Outbound Arr (IATA)" oninput="displayAirport(this)" onchange="updateEmailTemplate()">
+                        <input type="text" class="form-control airport-input arrival-airport" placeholder="Outbound Arr (IATA)" oninput="displayAirport(this)" onchange="updateEmailTemplate(); saveState();">
                         <div class="airport-display"></div>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Return Departure Airport</label>
-                        <input type="text" class="form-control airport-input return-departure-airport" placeholder="Return Dep (IATA)" oninput="displayAirport(this)" onchange="updateEmailTemplate()">
+                        <input type="text" class="form-control airport-input return-departure-airport" placeholder="Return Dep (IATA)" oninput="displayAirport(this)" onchange="updateEmailTemplate(); saveState();">
                         <div class="airport-display"></div>
                     </div>
                     <div class="form-group">
                         <label>Return Arrival Airport</label>
-                        <input type="text" class="form-control airport-input return-arrival-airport" placeholder="Return Arr (IATA)" oninput="displayAirport(this)" onchange="updateEmailTemplate()">
+                        <input type="text" class="form-control airport-input return-arrival-airport" placeholder="Return Arr (IATA)" oninput="displayAirport(this)" onchange="updateEmailTemplate(); saveState();">
                         <div class="airport-display"></div>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Outbound Departure Time</label>
-                        <input type="time" class="form-control outbound-departure-time" onchange="updateEmailTemplate()">
+                        <input type="time" class="form-control outbound-departure-time" onchange="updateEmailTemplate(); saveState();">
                     </div>
                     <div class="form-group">
                         <label>Outbound Arrival Time</label>
-                        <input type="time" class="form-control outbound-arrival-time" onchange="updateEmailTemplate()">
+                        <input type="time" class="form-control outbound-arrival-time" onchange="updateEmailTemplate(); saveState();">
                     </div>
                     <div class="form-group">
                         <label>Baggage Allowance</label>
-                        <select class="baggage-weight-select baggage-allowance" onchange="updateEmailTemplate()">
+                        <select class="baggage-weight-select baggage-allowance" onchange="updateEmailTemplate(); saveState();">
                             <option>10kg</option>
                             <option>15kg</option>
                             <option>20kg</option>
@@ -3180,22 +3192,22 @@
                     <div class="form-row">
                         <div class="form-group">
                             <label>Return Departure Time</label>
-                            <input type="time" class="form-control return-departure-time" onchange="updateEmailTemplate()">
+                            <input type="time" class="form-control return-departure-time" onchange="updateEmailTemplate(); saveState();">
                         </div>
                         <div class="form-group">
                             <label>Return Arrival Time</label>
-                            <input type="time" class="form-control return-arrival-time" onchange="updateEmailTemplate()">
+                            <input type="time" class="form-control return-arrival-time" onchange="updateEmailTemplate(); saveState();">
                         </div>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Net Price (£)</label>
-                        <input type="number" class="form-control net-price" placeholder="0.00" step="0.01" onchange="updateSupplierPrice('${id}')">
+                        <input type="number" class="form-control net-price" placeholder="0.00" step="0.01" onchange="updateSupplierPrice('${id}'); saveState();">
                     </div>
                     <div class="form-group">
                         <label>Commission Rate</label>
-                        <input type="text" class="form-control commission-rate" placeholder="Use global" value="" onchange="updateSupplierPrice('${id}')">
+                        <input type="text" class="form-control commission-rate" placeholder="Use global" value="" onchange="updateSupplierPrice('${id}'); saveState();">
                     </div>
                 </div>
                 <div class="form-row">
@@ -3211,11 +3223,11 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label>Upgrade Description</label>
-                        <input type="text" class="form-control upgrade-desc" placeholder="Upgrade description" onchange="updateEmailTemplate()">
+                        <input type="text" class="form-control upgrade-desc" placeholder="Upgrade description" onchange="updateEmailTemplate(); saveState();">
                     </div>
                     <div class="form-group">
                         <label>Upgrade Amount (£)</label>
-                        <input type="number" class="form-control upgrade-amount" placeholder="0.00" step="0.01" onchange="updateEmailTemplate()">
+                        <input type="number" class="form-control upgrade-amount" placeholder="0.00" step="0.01" onchange="updateEmailTemplate(); saveState();">
                     </div>
                 </div>
                 <div class="supplier-details">
@@ -3246,6 +3258,7 @@
             // Clear the input values
             section.querySelectorAll('input').forEach(input => input.value = '');
             updateEmailTemplate();
+            saveState();
         }
 
         function removeSupplier(id) {
@@ -3258,6 +3271,7 @@
                     element.remove();
                     updateTotals();
                     updateEmailTemplate();
+                    saveState();
                 }
             }
         }
@@ -3281,6 +3295,7 @@
                 if (deadlineGroup) deadlineGroup.style.display = 'none';
             }
             initCancellationPickers(item);
+            saveState();
         }
 
         function toggleBestPrice(id) {
@@ -3293,6 +3308,7 @@
                 item.classList.remove('best-price');
             }
             updateEmailTemplate();
+            saveState();
         }
 
         function toggleUpgrade(id) {
@@ -3307,6 +3323,7 @@
             
             updateTotals();
             updateEmailTemplate();
+            saveState();
         }
 
         function toggleReturnDetails(id) {
@@ -3324,6 +3341,7 @@
                 removeBtn.style.display = 'none';
             }
             updateEmailTemplate();
+            saveState();
         }
 
         function updateSupplierPrice(id) {
@@ -3357,6 +3375,7 @@
             
             updateTotals();
             updateEmailTemplate();
+            saveState();
         }
 
         function updateTotals() {
@@ -3458,6 +3477,7 @@
                 bestItem.classList.add('best-price');
                 
                 updateEmailTemplate();
+                saveState();
             } else {
                 alert('No eligible options found. Please add some supplier options first.');
             }
@@ -3971,11 +3991,19 @@
                     agentPhone: document.getElementById('agent-phone').value,
                     delivery: currentDeliveryOption
                 },
+                collapsed: {},
                 suppliers: {
                     hotel: [],
                     flight: []
                 }
             };
+
+            // Save collapsed states
+            const sections = ['customer', 'currency', 'hotel', 'flight', 'totals', 'email'];
+            sections.forEach(id => {
+                const sec = document.getElementById(id);
+                state.collapsed[id] = sec.classList.contains('collapsed');
+            });
 
             // Save hotel suppliers
             document.querySelectorAll('#hotel-comparison .supplier-comparison-item').forEach(item => {
@@ -4131,6 +4159,18 @@
                 });
                 if (selectedEl) selectedEl.classList.add('selected');
             }
+
+            // Restore collapsed states
+            const sections = ['customer', 'currency', 'hotel', 'flight', 'totals', 'email'];
+            sections.forEach(id => {
+                const sec = document.getElementById(id);
+                sec.classList.remove('collapsed', 'expanded');
+                if (state && state.collapsed && state.collapsed[id]) {
+                    sec.classList.add('collapsed');
+                } else {
+                    sec.classList.add('expanded');
+                }
+            });
 
             // Suppliers
             const hotelComparison = document.getElementById('hotel-comparison');
