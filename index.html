@@ -90,6 +90,24 @@
             background: rgba(255, 255, 255, 0.2);
         }
         
+        .reset-btn {
+            background: var(--danger);
+            color: white;
+            padding: 8px 15px;
+            border-radius: var(--border-radius);
+            text-decoration: none;
+            font-weight: 500;
+            transition: all 0.3s;
+            border: none;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+        
+        .reset-btn:hover {
+            background: #c82333;
+            transform: translateY(-2px);
+        }
+        
         .hero {
             background: url('https://images.unsplash.com/photo-1488646953014-85cb44e25828?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80') no-repeat center center/cover;
             color: white;
@@ -136,6 +154,8 @@
             transition: all 0.3s;
             border: none;
             cursor: pointer;
+            min-height: 44px; /* Touch-friendly */
+            font-size: 1rem;
         }
         
         .btn:hover {
@@ -258,6 +278,7 @@
             display: flex;
             gap: 10px;
             margin-top: 20px;
+            flex-wrap: wrap;
         }
         
         .btn-secondary {
@@ -295,6 +316,7 @@
             display: flex;
             gap: 15px;
             margin: 20px 0;
+            flex-wrap: wrap;
         }
         
         .delivery-option {
@@ -305,6 +327,7 @@
             border-radius: var(--border-radius);
             cursor: pointer;
             transition: all 0.3s;
+            min-width: 120px;
         }
         
         .delivery-option:hover {
@@ -385,6 +408,11 @@
             border: none;
             cursor: pointer;
             font-weight: bold;
+            transition: background 0.3s;
+        }
+        
+        .counter-btn:hover {
+            background: #2980b9;
         }
         
         .counter-value {
@@ -472,6 +500,11 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            transition: color 0.3s;
+        }
+        
+        .section-toggle:hover {
+            color: var(--secondary);
         }
         
         .section-toggle i {
@@ -589,6 +622,7 @@
         
         .supplier-comparison-item:hover {
             border-color: var(--secondary);
+            box-shadow: var(--box-shadow);
         }
         
         .supplier-comparison-item.selected {
@@ -620,7 +654,9 @@
         }
         
         .supplier-comparison-item.saved .form-row,
-        .supplier-comparison-item.saved .supplier-details {
+        .supplier-comparison-item.saved .supplier-details,
+        .supplier-comparison-item.saved .return-controls,
+        .supplier-comparison-item.saved .return-section {
             display: none;
         }
         
@@ -629,6 +665,8 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 10px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         
         .supplier-comparison-name {
@@ -649,6 +687,8 @@
             display: flex;
             justify-content: space-between;
             margin-top: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         
         .supplier-details {
@@ -726,11 +766,13 @@
             margin-top: 10px;
             display: flex;
             gap: 10px;
+            flex-wrap: wrap;
         }
         
         .btn-sm {
             padding: 8px 15px;
             font-size: 0.9rem;
+            min-height: 40px;
         }
         
         .include-in-email-group {
@@ -744,6 +786,27 @@
             border: 1px solid #ddd;
             border-radius: var(--border-radius);
             font-size: 1rem;
+        }
+        
+        .saved-emails-section {
+            margin-top: 20px;
+        }
+        
+        .saved-email-item {
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: var(--border-radius);
+            border-left: 4px solid var(--secondary);
+        }
+        
+        .saved-email-preview {
+            font-size: 0.9rem;
+            color: #666;
+            margin-bottom: 10px;
+            white-space: pre-wrap;
+            max-height: 100px;
+            overflow: hidden;
         }
         
         @media (max-width: 768px) {
@@ -790,6 +853,69 @@
             .supplier-edit-controls {
                 flex-direction: column;
             }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            nav ul {
+                flex-wrap: wrap;
+                justify-content: center;
+            }
+            
+            .btn, .counter-btn {
+                font-size: 1rem;
+                padding: 14px 20px;
+            }
+            
+            .logo-text {
+                font-size: 1.5rem;
+            }
+            
+            .counter-btn {
+                width: 40px;
+                height: 40px;
+            }
+            
+            .counter-value {
+                font-size: 1.5rem;
+            }
+            
+            .delivery-options {
+                flex-direction: column;
+            }
+            
+            .delivery-option {
+                min-width: auto;
+            }
+            
+            .supplier-comparison-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .checkbox-group {
+                margin-bottom: 10px;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 0 10px;
+            }
+            
+            .hero h1 {
+                font-size: 2rem;
+            }
+            
+            .hero p {
+                font-size: 1rem;
+            }
+            
+            .section-title {
+                font-size: 1.5rem;
+            }
         }
     </style>
 </head>
@@ -800,16 +926,19 @@
                 <div class="logo-icon"><i class="fas fa-globe-americas"></i></div>
                 <div class="logo-text">Bradley Travelstore</div>
             </div>
-            <nav>
-                <ul>
-                    <li><a href="#customer">Customer Info</a></li>
-                    <li><a href="#currency">Currency Converter</a></li>
-                    <li><a href="#hotel">Hotel Quote</a></li>
-                    <li><a href="#flight">Flight Quote</a></li>
-                    <li><a href="#totals">Totals</a></li>
-                    <li><a href="#email">Email Generator</a></li>
-                </ul>
-            </nav>
+            <div>
+                <nav>
+                    <ul>
+                        <li><a href="#customer">Customer Info</a></li>
+                        <li><a href="#currency">Currency Converter</a></li>
+                        <li><a href="#hotel">Hotel Quote</a></li>
+                        <li><a href="#flight">Flight Quote</a></li>
+                        <li><a href="#totals">Totals</a></li>
+                        <li><a href="#email">Email Generator</a></li>
+                    </ul>
+                </nav>
+                <button class="reset-btn" onclick="resetState()">Reset State</button>
+            </div>
         </div>
     </header>
 
@@ -863,20 +992,53 @@
                     <div class="form-group">
                         <label for="source-currency">From Currency</label>
                         <select id="source-currency" class="form-control" onchange="saveState();">
-                            <option value="EUR">EUR (€)</option>
-                            <option value="USD">USD ($)</option>
-                            <option value="CAD">CAD (C$)</option>
-                            <option value="AUD">AUD (A$)</option>
-                            <option value="JPY">JPY (¥)</option>
+                            <option value="EUR">EUR (€) - Eurozone</option>
+                            <option value="USD">USD ($) - United States</option>
+                            <option value="GBP">GBP (£) - United Kingdom</option>
+                            <option value="CAD">CAD (C$) - Canada</option>
+                            <option value="AUD">AUD (A$) - Australia</option>
+                            <option value="NZD">NZD (NZ$) - New Zealand</option>
+                            <option value="JPY">JPY (¥) - Japan</option>
+                            <option value="CNY">CNY (¥) - China</option>
+                            <option value="INR">INR (₹) - India</option>
+                            <option value="KRW">KRW (₩) - South Korea</option>
+                            <option value="THB">THB (฿) - Thailand</option>
+                            <option value="SGD">SGD ($) - Singapore</option>
+                            <option value="MYR">MYR (RM) - Malaysia</option>
+                            <option value="PHP">PHP (₱) - Philippines</option>
+                            <option value="IDR">IDR (Rp) - Indonesia</option>
+                            <option value="VND">VND (₫) - Vietnam</option>
+                            <option value="TRY">TRY (₺) - Turkey</option>
+                            <option value="ILS">ILS (₪) - Israel</option>
+                            <option value="ZAR">ZAR (R) - South Africa</option>
+                            <option value="AED">AED (د.إ) - United Arab Emirates</option>
+                            <option value="SAR">SAR (ر.س) - Saudi Arabia</option>
+                            <option value="EGP">EGP (£) - Egypt</option>
+                            <option value="MXN">MXN ($) - Mexico</option>
+                            <option value="BRL">BRL (R$) - Brazil</option>
+                            <option value="CHF">CHF (Fr.) - Switzerland</option>
+                            <option value="SEK">SEK (kr) - Sweden</option>
+                            <option value="NOK">NOK (kr) - Norway</option>
+                            <option value="DKK">DKK (kr) - Denmark</option>
+                            <option value="PLN">PLN (zł) - Poland</option>
+                            <option value="CZK">CZK (Kč) - Czech Republic</option>
+                            <option value="HUF">HUF (Ft) - Hungary</option>
+                            <option value="RON">RON (lei) - Romania</option>
                         </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="conversion-rate">Conversion Rate (1 unit = X GBP)</label>
-                        <input type="number" id="conversion-rate" class="form-control" value="1.0" step="0.01" onchange="saveState();">
                     </div>
                 </div>
                 
-                <button class="btn" onclick="convertCurrency()">Convert Currency</button>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="manual-rate">Manual Rate (1 GBP = ? From Currency)</label>
+                        <input type="number" id="manual-rate" class="form-control" placeholder="e.g. 1.14" step="0.0001" onchange="saveState();">
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button class="btn" onclick="convertCurrency()">Convert to GBP (Live Rate)</button>
+                    <button class="btn btn-secondary" onclick="convertManually()">Convert Manually</button>
+                </div>
                 
                 <div id="converter-result" class="converter-result">
                     Converted amount will appear here
@@ -1167,12 +1329,18 @@
                 
                 <div class="form-group">
                     <label for="email-template">Email Template</label>
-                    <div id="email-template" class="email-template">Email template will be generated here</div>
+                    <div id="email-template" class="email-template" contenteditable="false">Email template will be generated here</div>
                 </div>
                 
                 <div class="output-format-buttons">
                     <button class="btn btn-secondary" onclick="copyToClipboard()">Copy to Clipboard</button>
-                    <button class="btn btn-success" onclick="sendEmail()">Send Email</button>
+                    <button class="btn" id="edit-btn" onclick="handleEdit()">Edit</button>
+                    <button class="btn btn-success" onclick="saveEmail()">Save Email</button>
+                </div>
+
+                <div id="saved-emails" class="saved-emails-section card">
+                    <h3>Saved Emails</h3>
+                    <div id="saved-list"></div>
                 </div>
             </div>
         </section>
@@ -1201,7 +1369,7 @@
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2023 Bradley Travelstore. All rights reserved.</p>
+                <p>&copy; 2025 Bradley Travelstore. All rights reserved.</p>
             </div>
         </div>
     </footer>
@@ -1212,6 +1380,8 @@
         let convertedAmount = 0;
         let savedHotelSuppliers = [];
         let savedFlightSuppliers = [];
+        let isEditing = false;
+        let editingId = null;
         let AIRPORTS = {
                         'AAR': 'Aarhus, Denmark',
             'ABD': 'Abadan, Iran',
@@ -2618,6 +2788,8 @@
             updateAgentSignature();
             updateEmailTemplate();
             loadState();
+            displaySavedEmails();
+            validateChildAges(); // Added for initial validation
         });
 
         function toggleSection(sectionId) {
@@ -2705,7 +2877,9 @@
             });
             element.classList.add('selected');
             currentDeliveryOption = option;
-            updateEmailTemplate();
+            if (!isEditing) {
+                updateEmailTemplate();
+            }
             saveState();
         }
 
@@ -2797,9 +2971,80 @@
             } else if (cancelPolicy === 'refundable') {
                 return `Free cancellation until ${formatDate(cancellationDeadline)}`;
             } else if (cancelPolicy === 'refundable-with-fee') {
-                return `Refundable with a fee of £${parseFloat(cancelFee).toFixed(2)}`;
+                return `Refundable with a fee of £${(cancelFee || 0).toFixed(2)}`;
             }
             return "";
+        }
+
+        async function convertCurrency() {
+            const amount = parseFloat(document.getElementById('source-amount').value);
+            const sourceCurrency = document.getElementById('source-currency').value;
+            
+            if (isNaN(amount) || amount <= 0) {
+                alert('Please enter a valid amount.');
+                return;
+            }
+            
+            try {
+                const response = await fetch(`https://open.er-api.com/v6/latest/${sourceCurrency}`);
+                if (!response.ok) {
+                    throw new Error('API request failed');
+                }
+                const data = await response.json();
+                const rate = data.rates.GBP;
+                
+                if (!rate) {
+                    alert('Exchange rate not available for this currency.');
+                    return;
+                }
+                
+                const raw = amount * rate;
+                const roundedInt = Math.ceil(raw);
+                const result = roundedInt.toFixed(2);
+                
+                convertedAmount = parseFloat(result);
+                
+                const resultDiv = document.getElementById('converter-result');
+                resultDiv.innerHTML = `
+                    Converted Amount: £${result} (Live Rate: 1 ${sourceCurrency} = ${rate.toFixed(4)} GBP)<br>
+                    <div class="converter-raw-value">(raw: ${raw.toFixed(2)})</div>
+                `;
+                resultDiv.style.display = 'block';
+                saveState();
+            } catch (error) {
+                console.error('Conversion error:', error);
+                alert('Error fetching exchange rate. Please check your connection or try again.');
+            }
+        }
+
+        function convertManually() {
+            const amount = parseFloat(document.getElementById('source-amount').value);
+            const sourceCurrency = document.getElementById('source-currency').value;
+            const manualRate = parseFloat(document.getElementById('manual-rate').value);
+            
+            if (isNaN(amount) || amount <= 0) {
+                alert('Please enter a valid amount.');
+                return;
+            }
+            
+            if (isNaN(manualRate)) {
+                alert('Please enter a valid manual rate.');
+                return;
+            }
+            
+            const raw = amount / manualRate;
+            const roundedInt = Math.ceil(raw);
+            const result = roundedInt.toFixed(2);
+            
+            convertedAmount = parseFloat(result);
+            
+            const resultDiv = document.getElementById('converter-result');
+            resultDiv.innerHTML = `
+                Converted Amount: £${result} (Manual Rate: 1 GBP = ${manualRate.toFixed(4)} ${sourceCurrency})<br>
+                <div class="converter-raw-value">(raw: ${raw.toFixed(2)})</div>
+            `;
+            resultDiv.style.display = 'block';
+            saveState();
         }
 
         function saveSupplier(id, type) {
@@ -2808,18 +3053,18 @@
             item.classList.add('saved');
             
             const supplierName = item.querySelector('.supplier-name').value || 'Unnamed Supplier';
-            const netPrice = item.querySelector('.net-price').value || '0.00';
-            const sellingPrice = item.querySelector('.selling-price').value || '0.00';
+            const netPrice = parseFloat(item.querySelector('.net-price').value) || 0;
+            const sellingPrice = parseFloat(item.querySelector('.selling-price').value) || 0;
             const cancelPolicy = item.querySelector('.cancellation-policy').value;
-            const cancelFee = item.querySelector('.cancellation-fee').value || '0.00';
+            const cancelFee = parseFloat(item.querySelector('.cancellation-fee').value) || 0;
             
             let supplierData = {
                 id: id,
                 supplierName: supplierName,
-                netPrice: parseFloat(netPrice),
-                sellingPrice: parseFloat(sellingPrice),
+                netPrice: netPrice,
+                sellingPrice: sellingPrice,
                 cancelPolicy: cancelPolicy,
-                cancelFee: parseFloat(cancelFee)
+                cancelFee: cancelFee
             };
             
             if (type === 'hotel') {
@@ -2856,11 +3101,11 @@
                     </div>
                     <div class="supplier-summary-row">
                         <span class="supplier-summary-label">Net Price:</span>
-                        <span class="supplier-summary-value">£${parseFloat(netPrice).toFixed(2)}</span>
+                        <span class="supplier-summary-value">£${netPrice.toFixed(2)}</span>
                     </div>
                     <div class="supplier-summary-row">
                         <span class="supplier-summary-label">Selling Price:</span>
-                        <span class="supplier-summary-value">£${parseFloat(sellingPrice).toFixed(2)}</span>
+                        <span class="supplier-summary-value">£${sellingPrice.toFixed(2)}</span>
                     </div>
                 `;
             } else {
@@ -2931,11 +3176,11 @@
                     </div>
                     <div class="supplier-summary-row">
                         <span class="supplier-summary-label">Net Price:</span>
-                        <span class="supplier-summary-value">£${parseFloat(netPrice).toFixed(2)}</span>
+                        <span class="supplier-summary-value">£${netPrice.toFixed(2)}</span>
                     </div>
                     <div class="supplier-summary-row">
                         <span class="supplier-summary-label">Selling Price:</span>
-                        <span class="supplier-summary-value">£${parseFloat(sellingPrice).toFixed(2)}</span>
+                        <span class="supplier-summary-value">£${sellingPrice.toFixed(2)}</span>
                     </div>
                 `;
                 
@@ -3184,11 +3429,11 @@
                         </select>
                     </div>
                 </div>
-                <div style="margin: 10px 0;">
+                <div class="return-controls" style="margin: 10px 0;">
                     <button id="${id}-add-return-btn" class="btn btn-sm" onclick="document.getElementById('${id}-include-return').checked = true; toggleReturnDetails('${id}');">Add Return Details</button>
                     <button id="${id}-remove-return-btn" class="btn btn-sm btn-danger" style="display: none;" onclick="removeReturnDetails('${id}')">Remove Return Details</button>
                 </div>
-                <div id="${id}-return-section" style="display: none;">
+                <div id="${id}-return-section" class="return-section" style="display: none;">
                     <div class="form-row">
                         <div class="form-group">
                             <label>Return Departure Time</label>
@@ -3483,30 +3728,6 @@
             }
         }
 
-        function convertCurrency() {
-            const amount = parseFloat(document.getElementById('source-amount').value);
-            const rate = parseFloat(document.getElementById('conversion-rate').value);
-            
-            if (isNaN(amount) || isNaN(rate) || rate <= 0) {
-                alert('Please enter valid amount and conversion rate.');
-                return;
-            }
-            
-            const raw = amount / rate;
-            const roundedInt = Math.ceil(raw);
-            const result = roundedInt.toFixed(2);
-            
-            convertedAmount = parseFloat(result);
-            
-            const resultDiv = document.getElementById('converter-result');
-            resultDiv.innerHTML = `
-                Converted Amount: £${result}
-                <div class="converter-raw-value">(raw: ${raw.toFixed(2)})</div>
-            `;
-            resultDiv.style.display = 'block';
-            saveState();
-        }
-
         function addConvertedToHotel() {
             if (convertedAmount > 0) {
                 addHotelSupplier();
@@ -3576,6 +3797,7 @@
         }
 
         function updateEmailTemplate() {
+            if (isEditing) return;
             const bookingType = document.getElementById('booking-type').value;
             const customerName = document.getElementById('customer-name').value || '[Customer Name]';
             const destination = document.getElementById('destination').value || '[Destination]';
@@ -3648,11 +3870,11 @@
                     const roomType = roomTypeInput ? roomTypeInput.value : '[Room Type]';
                     const boardBasis = boardBasisInput ? boardBasisInput.value : '[Board Basis]';
                     const upgradeDesc = upgradeDescInput ? upgradeDescInput.value : '';
-                    const upgradeAmount = upgradeAmountInput ? upgradeAmountInput.value : '0';
+                    const upgradeAmount = parseFloat(upgradeAmountInput ? upgradeAmountInput.value : '0') || 0;
                     const supplierHotelName = supplierHotelNameInput ? supplierHotelNameInput.value.trim() : '';
                     
                     const cancelPolicy = cancelPolicySelect ? cancelPolicySelect.value : '';
-                    const cancelFee = cancelFeeInput ? cancelFeeInput.value || '0.00' : '0.00';
+                    const cancelFee = parseFloat(cancelFeeInput ? cancelFeeInput.value || '0.00' : '0.00') || 0;
                     const deadline = deadlineInput ? deadlineInput.value || '' : '';
                     const cancelText = getCancellationText(cancelPolicy, cancelFee, deadline);
                     
@@ -3667,7 +3889,7 @@
                     
                     if (isUpgrade) {
                         const upgradeText = upgradeDesc || `${roomType}, ${boardBasis}`;
-                        optionText += `Upgrade to ${boldWrap(upgradeText)} add ${boldWrap('£' + parseFloat(upgradeAmount).toFixed(0))} per family\n`;
+                        optionText += `Upgrade to ${boldWrap(upgradeText)} add ${boldWrap('£' + Math.round(upgradeAmount).toFixed(0))} per family\n`;
                     } else {
                         optionText += `${boldWrap(roomType)} on ${boldWrap(boardBasis)} Basis\n`;
                     }
@@ -3717,7 +3939,7 @@
                     const returnDepTime = returnDepTimeInput ? returnDepTimeInput.value : '';
                     const returnArrTime = returnArrTimeInput ? returnArrTimeInput.value : '';
                     const upgradeDesc = upgradeDescInput ? upgradeDescInput.value : '';
-                    const upgradeAmount = upgradeAmountInput ? upgradeAmountInput.value : '0';
+                    const upgradeAmount = parseFloat(upgradeAmountInput ? upgradeAmountInput.value : '0') || 0;
                     const baggage = baggageSelect ? baggageSelect.value : '';
                     
                     const isUpgrade = upgradeCheckbox && upgradeCheckbox.checked;
@@ -3733,7 +3955,7 @@
                         if (flightOptionsCount > 1) {
                             flightOptions += `\n${boldWrap('OPTION ' + flightOptionsCount)}\n`;
                         }
-                        flightOptions += `Upgrade to ${boldWrap(upgradeText)} add ${boldWrap('£' + parseFloat(upgradeAmount).toFixed(0))}\n`;
+                        flightOptions += `Upgrade to ${boldWrap(upgradeText)} add ${boldWrap('£' + Math.round(upgradeAmount).toFixed(0))}\n`;
                     } else {
                         if (flightOptionsCount > 1) {
                             flightOptions += `\n${boldWrap('OPTION ' + flightOptionsCount)}\n`;
@@ -3793,7 +4015,7 @@
                 templateParts.push(`${boldWrap(startDate + '-' + endDate)} - ${boldWrap(nights + ' Night' + (parseInt(nights) > 1 ? 's' : ''))}`);
                 templateParts.push('');
                 templateParts.push(hotelOptions);
-                templateParts.push(`${boldWrap('Total Cost')} ${boldWrap('£' + parseFloat(hotelSellingRounded).toFixed(0))} per family`);
+                templateParts.push(`${boldWrap('Total Cost')} ${boldWrap('£' + Math.round(parseFloat(hotelSellingRounded)).toFixed(0))} per family`);
                 if (excludesNote) {
                     templateParts.push(`${boldWrap('Excludes')} ${excludesNote}\n`);
                 }
@@ -3827,7 +4049,7 @@
                 templateParts.push(`We can offer for ${travelerText}.`);
                 templateParts.push('');
                 templateParts.push(flightOptions);
-                templateParts.push(`${boldWrap('Total Cost')} ${boldWrap('£' + parseFloat(flightSellingRounded).toFixed(0))} per family`);
+                templateParts.push(`${boldWrap('Total Cost')} ${boldWrap('£' + Math.round(parseFloat(flightSellingRounded)).toFixed(0))} per family`);
                 if (excludesNote) {
                     templateParts.push(`${boldWrap('Excludes')} ${excludesNote}\n`);
                 }
@@ -3870,7 +4092,7 @@
                 templateParts.push(`${boldWrap(startDate + '-' + endDate)} - ${boldWrap(nights + ' Night' + (parseInt(nights) > 1 ? 's' : ''))}`);
                 templateParts.push('');
                 templateParts.push(hotelOptions);
-                templateParts.push(`${boldWrap('Total Package Cost')} ${boldWrap('£' + parseFloat(totalSellingRounded).toFixed(0))}`);
+                templateParts.push(`${boldWrap('Total Package Cost')} ${boldWrap('£' + Math.round(parseFloat(totalSellingRounded)).toFixed(0))}`);
                 if (excludesNote) {
                     templateParts.push(`${boldWrap('Excludes')} ${excludesNote}\n`);
                 }
@@ -3907,7 +4129,7 @@
             if (currentDeliveryOption === 'whatsapp') {
                 output.textContent = template;
             } else {
-                const htmlTemplate = template.replace(/\n/g, '<br>').replace(/ /g, '&nbsp;');
+                const htmlTemplate = template.replace(/\n/g, '<br>').replace(/ {2}/g, '&nbsp; ');
                 output.innerHTML = htmlTemplate;
             }
             saveState();
@@ -3919,7 +4141,7 @@
             if (currentDeliveryOption === 'whatsapp') {
                 textToCopy = output.textContent;
             } else {
-                textToCopy = output.innerHTML.replace(/<br>/g, '\n').replace(/&nbsp;/g, ' ');
+                textToCopy = output.innerHTML.replace(/<br>/g, '\n').replace(/&nbsp; /g, '  ');
             }
             navigator.clipboard.writeText(textToCopy).then(() => {
                 alert('Email template copied to clipboard!');
@@ -3935,9 +4157,33 @@
             });
         }
 
-        function sendEmail() {
+        function handleEdit() {
+            const btn = document.getElementById('edit-btn');
+            const template = document.getElementById('email-template');
+            if (!isEditing) {
+                template.contentEditable = true;
+                template.focus();
+                isEditing = true;
+                btn.textContent = 'Finish Edit';
+                btn.classList.remove('btn');
+                btn.classList.add('btn-warning');
+            } else {
+                template.contentEditable = false;
+                isEditing = false;
+                btn.textContent = 'Edit';
+                btn.classList.remove('btn-warning');
+                btn.classList.add('btn');
+                if (editingId) {
+                    updateSavedEmail(editingId);
+                    editingId = null;
+                }
+                updateEmailTemplate();
+            }
+        }
+
+        function saveEmail() {
             if (!validateCustomerInfo()) {
-                alert('Please fill in Customer Name and Destination before sending email.');
+                alert('Please fill in Customer Name and Destination before saving email.');
                 document.getElementById('customer').scrollIntoView();
                 return;
             }
@@ -3946,8 +4192,137 @@
                 alert('Please provide valid ages for all children (0-17).');
                 return;
             }
-            
-            alert('Email sent successfully to the customer!');
+
+            const template = document.getElementById('email-template');
+            let plain;
+            if (currentDeliveryOption === 'whatsapp') {
+                plain = template.textContent;
+            } else {
+                plain = template.innerHTML.replace(/<br>/g, '\n').replace(/&nbsp; /g, '  ');
+            }
+
+            const saved = JSON.parse(localStorage.getItem('savedEmails') || '[]');
+            saved.push({
+                id: Date.now(),
+                timestamp: new Date().toISOString(),
+                content: plain,
+                delivery: currentDeliveryOption
+            });
+            localStorage.setItem('savedEmails', JSON.stringify(saved));
+            displaySavedEmails();
+            alert('Email saved successfully!');
+        }
+
+        function displaySavedEmails() {
+            const saved = JSON.parse(localStorage.getItem('savedEmails') || '[]');
+            const list = document.getElementById('saved-list');
+            list.innerHTML = '';
+            if (saved.length === 0) {
+                list.innerHTML = '<p>No saved emails yet.</p>';
+                return;
+            }
+            saved.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'saved-email-item';
+                const preview = item.content.substring(0, 200) + (item.content.length > 200 ? '...' : '');
+                div.innerHTML = `
+                    <div class="supplier-comparison-header">
+                        <span>${new Date(item.timestamp).toLocaleString()}</span>
+                        <div>
+                            <button class="btn btn-sm btn-secondary" onclick="copySaved(${item.id})">Copy</button>
+                            <button class="btn btn-sm" onclick="editSaved(${item.id})">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteSaved(${item.id})">Delete</button>
+                        </div>
+                    </div>
+                    <div class="saved-email-preview">${preview}</div>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function copySaved(id) {
+            const saved = JSON.parse(localStorage.getItem('savedEmails') || '[]');
+            const item = saved.find(s => s.id === id);
+            if (item) {
+                navigator.clipboard.writeText(item.content).then(() => {
+                    alert('Saved email copied to clipboard!');
+                }).catch(() => {
+                    const textArea = document.createElement('textarea');
+                    textArea.value = item.content;
+                    document.body.appendChild(textArea);
+                    textArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(textArea);
+                    alert('Saved email copied to clipboard!');
+                });
+            }
+        }
+
+        function editSaved(id) {
+            const saved = JSON.parse(localStorage.getItem('savedEmails') || '[]');
+            const item = saved.find(s => s.id === id);
+            if (item) {
+                editingId = id;
+                currentDeliveryOption = item.delivery;
+                const deliveryEls = document.querySelectorAll('.delivery-option');
+                const targetEl = Array.from(deliveryEls).find(el => {
+                    const match = el.getAttribute('onclick').match(/'([^']+)'/);
+                    return match && match[1] === item.delivery;
+                });
+                if (targetEl) {
+                    selectDeliveryOption(targetEl, item.delivery);
+                }
+                const template = document.getElementById('email-template');
+                const plain = item.content;
+                if (item.delivery === 'whatsapp') {
+                    template.textContent = plain;
+                } else {
+                    const html = plain.replace(/\n/g, '<br>');
+                    template.innerHTML = html;
+                }
+                template.contentEditable = true;
+                isEditing = true;
+                const btn = document.getElementById('edit-btn');
+                btn.textContent = 'Finish Edit';
+                btn.classList.remove('btn');
+                btn.classList.add('btn-warning');
+                template.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        function updateSavedEmail(id) {
+            const template = document.getElementById('email-template');
+            let plain;
+            if (currentDeliveryOption === 'whatsapp') {
+                plain = template.textContent;
+            } else {
+                plain = template.innerHTML.replace(/<br>/g, '\n').replace(/&nbsp; /g, '  ');
+            }
+            const saved = JSON.parse(localStorage.getItem('savedEmails') || '[]');
+            const index = saved.findIndex(s => s.id === id);
+            if (index !== -1) {
+                saved[index].content = plain;
+                saved[index].timestamp = new Date().toISOString();
+                localStorage.setItem('savedEmails', JSON.stringify(saved));
+                displaySavedEmails();
+                alert('Saved email updated!');
+            }
+        }
+
+        function deleteSaved(id) {
+            if (confirm('Are you sure you want to delete this saved email?')) {
+                let saved = JSON.parse(localStorage.getItem('savedEmails') || '[]');
+                saved = saved.filter(s => s.id !== id);
+                localStorage.setItem('savedEmails', JSON.stringify(saved));
+                displaySavedEmails();
+            }
+        }
+
+        function resetState() {
+            if (confirm('This will clear all data except saved emails and totals. Are you sure?')) {
+                localStorage.removeItem('bradleyTravelState');
+                location.reload();
+            }
         }
 
         // Local Storage Functions
@@ -3961,7 +4336,7 @@
                 currency: {
                     amount: document.getElementById('source-amount').value,
                     currency: document.getElementById('source-currency').value,
-                    rate: document.getElementById('conversion-rate').value,
+                    manualRate: document.getElementById('manual-rate').value,
                     result: convertedAmount
                 },
                 hotel: {
@@ -4024,17 +4399,17 @@
             const data = {
                 isSaved: item.classList.contains('saved'),
                 supplierName: item.querySelector('.supplier-name').value,
-                netPrice: item.querySelector('.net-price').value,
+                netPrice: parseFloat(item.querySelector('.net-price').value) || 0,
                 commissionRate: item.querySelector('.commission-rate').value,
-                sellingPrice: item.querySelector('.selling-price').value,
-                commissionAmount: item.querySelector('.commission-amount').value,
+                sellingPrice: parseFloat(item.querySelector('.selling-price').value) || 0,
+                commissionAmount: parseFloat(item.querySelector('.commission-amount').value) || 0,
                 upgradeDesc: item.querySelector('.upgrade-desc').value,
-                upgradeAmount: item.querySelector('.upgrade-amount').value,
+                upgradeAmount: parseFloat(item.querySelector('.upgrade-amount').value) || 0,
                 best: item.querySelector(`input[id="${item.id}-best"]`).checked,
                 upgrade: item.querySelector(`input[id="${item.id}-upgrade"]`).checked,
                 includeEmail: item.querySelector(`input[id="${item.id}-include-email"]`).checked,
                 cancellationPolicy: item.querySelector('.cancellation-policy').value,
-                cancellationFee: item.querySelector('.cancellation-fee').value,
+                cancellationFee: parseFloat(item.querySelector('.cancellation-fee').value) || 0,
                 cancellationDeadline: item.querySelector('.cancellation-deadline').value
             };
 
@@ -4080,14 +4455,13 @@
                 if (state.currency) {
                     document.getElementById('source-amount').value = state.currency.amount || '';
                     document.getElementById('source-currency').value = state.currency.currency || 'EUR';
-                    document.getElementById('conversion-rate').value = state.currency.rate || '1.0';
+                    document.getElementById('manual-rate').value = state.currency.manualRate || '';
                     if (state.currency.result > 0) {
                         convertedAmount = state.currency.result;
                         const resultDiv = document.getElementById('converter-result');
-                        const raw = parseFloat(document.getElementById('source-amount').value) / parseFloat(document.getElementById('conversion-rate').value);
                         resultDiv.innerHTML = `
                             Converted Amount: £${state.currency.result.toFixed(2)}
-                            <div class="converter-raw-value">(raw: ${raw.toFixed(2)})</div>
+                            <div class="converter-raw-value">(raw: N/A - loaded from state)</div>
                         `;
                         resultDiv.style.display = 'block';
                     }
@@ -4114,6 +4488,7 @@
                     (state.hotel.childAges || []).forEach((age, i) => {
                         if (hotelInputs[i]) hotelInputs[i].value = age;
                     });
+                    validateChildAges(); // Validate after setting
                 }, 0);
 
                 updateChildAges('flight');
@@ -4122,6 +4497,7 @@
                     (state.flight.childAges || []).forEach((age, i) => {
                         if (flightInputs[i]) flightInputs[i].value = age;
                     });
+                    validateChildAges(); // Validate after setting
                 }, 0);
 
                 // Set dates
@@ -4231,13 +4607,13 @@
             item.querySelector('.supplier-hotel-name').value = data.supplierHotelName || '';
             item.querySelector('.cancellation-policy').value = data.cancellationPolicy || 'non-refundable';
             item.querySelector('.cancellation-deadline').value = data.cancellationDeadline || '';
-            item.querySelector('.cancellation-fee').value = data.cancellationFee || '0.00';
+            item.querySelector('.cancellation-fee').value = (data.cancellationFee || 0).toFixed(2);
             item.querySelector('.room-type').value = data.roomType || '';
             item.querySelector('.board-basis').value = data.boardBasis || 'Room Only';
-            item.querySelector('.net-price').value = data.netPrice || '0.00';
+            item.querySelector('.net-price').value = (data.netPrice || 0).toFixed(2);
             item.querySelector('.commission-rate').value = data.commissionRate || '';
             item.querySelector('.upgrade-desc').value = data.upgradeDesc || '';
-            item.querySelector('.upgrade-amount').value = data.upgradeAmount || '0.00';
+            item.querySelector('.upgrade-amount').value = (data.upgradeAmount || 0).toFixed(2);
             document.getElementById(`${id}-best`).checked = !!data.best;
             document.getElementById(`${id}-upgrade`).checked = !!data.upgrade;
             document.getElementById(`${id}-include-email`).checked = !!data.includeEmail;
@@ -4248,7 +4624,7 @@
             item.querySelector('.supplier-name').value = data.supplierName || '';
             item.querySelector('.cancellation-policy').value = data.cancellationPolicy || 'non-refundable';
             item.querySelector('.cancellation-deadline').value = data.cancellationDeadline || '';
-            item.querySelector('.cancellation-fee').value = data.cancellationFee || '0.00';
+            item.querySelector('.cancellation-fee').value = (data.cancellationFee || 0).toFixed(2);
             item.querySelector('.airline').value = data.airline || '';
             item.querySelector('.departure-airport').value = data.departureAirport || '';
             item.querySelector('.arrival-airport').value = data.arrivalAirport || '';
@@ -4259,10 +4635,10 @@
             item.querySelector('.return-departure-time').value = data.returnDepartureTime || '';
             item.querySelector('.return-arrival-time').value = data.returnArrivalTime || '';
             item.querySelector('.baggage-allowance').value = data.baggageAllowance || '20kg';
-            item.querySelector('.net-price').value = data.netPrice || '0.00';
+            item.querySelector('.net-price').value = (data.netPrice || 0).toFixed(2);
             item.querySelector('.commission-rate').value = data.commissionRate || '';
             item.querySelector('.upgrade-desc').value = data.upgradeDesc || '';
-            item.querySelector('.upgrade-amount').value = data.upgradeAmount || '0.00';
+            item.querySelector('.upgrade-amount').value = (data.upgradeAmount || 0).toFixed(2);
             document.getElementById(`${id}-best`).checked = !!data.best;
             document.getElementById(`${id}-upgrade`).checked = !!data.upgrade;
             document.getElementById(`${id}-include-email`).checked = !!data.includeEmail;
@@ -4293,11 +4669,11 @@
                 </div>
                 <div class="supplier-summary-row">
                     <span class="supplier-summary-label">Net Price:</span>
-                    <span class="supplier-summary-value">£${parseFloat(data.netPrice || 0).toFixed(2)}</span>
+                    <span class="supplier-summary-value">£${(data.netPrice || 0).toFixed(2)}</span>
                 </div>
                 <div class="supplier-summary-row">
                     <span class="supplier-summary-label">Selling Price:</span>
-                    <span class="supplier-summary-value">£${parseFloat(data.sellingPrice || 0).toFixed(2)}</span>
+                    <span class="supplier-summary-value">£${(data.sellingPrice || 0).toFixed(2)}</span>
                 </div>
             `;
         }
@@ -4347,11 +4723,11 @@
                 </div>
                 <div class="supplier-summary-row">
                     <span class="supplier-summary-label">Net Price:</span>
-                    <span class="supplier-summary-value">£${parseFloat(data.netPrice || 0).toFixed(2)}</span>
+                    <span class="supplier-summary-value">£${(data.netPrice || 0).toFixed(2)}</span>
                 </div>
                 <div class="supplier-summary-row">
                     <span class="supplier-summary-label">Selling Price:</span>
-                    <span class="supplier-summary-value">£${parseFloat(data.sellingPrice || 0).toFixed(2)}</span>
+                    <span class="supplier-summary-value">£${(data.sellingPrice || 0).toFixed(2)}</span>
                 </div>
             `;
             summary.innerHTML = summaryHTML;
