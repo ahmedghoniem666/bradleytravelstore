@@ -21,6 +21,29 @@
             --hotel-color: #e3f2fd;
             --flight-color: #fff3e0;
             --supplier-color: #f5f5f5;
+            --bg: #f5f7fa;
+            --text: #333;
+            --card-bg: white;
+            --border: #ddd;
+        }
+        
+        body.dark {
+            --bg: #121212;
+            --text: #e0e0e0;
+            --card-bg: #1e1e1e;
+            --border: #444;
+            --primary: #4a90e2;
+            --secondary: #7b68ee;
+            --accent: #ffd700;
+            --light: #2a2a2a;
+            --dark: #f0f0f0;
+            --success: #4caf50;
+            --danger: #f44336;
+            --warning: #ff9800;
+            --hotel-color: #1a237e;
+            --flight-color: #ff6f00;
+            --supplier-color: #2a2a2a;
+            --box-shadow: 0 4px 12px rgba(0,0,0,0.3);
         }
         
         * {
@@ -31,8 +54,8 @@
         }
         
         body {
-            background-color: #f5f7fa;
-            color: #333;
+            background-color: var(--bg);
+            color: var(--text);
             line-height: 1.6;
         }
         
@@ -90,22 +113,56 @@
             background: rgba(255, 255, 255, 0.2);
         }
         
-        .reset-btn {
-            background: var(--danger);
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .section-like-btn {
+            background: transparent;
             color: white;
             padding: 8px 15px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
             border-radius: var(--border-radius);
             text-decoration: none;
             font-weight: 500;
             transition: all 0.3s;
-            border: none;
             cursor: pointer;
-            margin-left: 10px;
+            font-size: 1rem;
+        }
+        
+        .section-like-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+        
+        body.dark .section-like-btn:hover {
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .reset-btn {
+            background: var(--danger);
+        }
+        
+        #dark-toggle {
+            background: var(--warning);
         }
         
         .reset-btn:hover {
-            background: #c82333;
-            transform: translateY(-2px);
+            background: #c82333 !important;
+        }
+        
+        #dark-toggle:hover {
+            background: #e0a800 !important;
+        }
+        
+        body.dark .reset-btn:hover {
+            background: #d32f2f !important;
+        }
+        
+        body.dark #dark-toggle:hover {
+            background: #f57c00 !important;
         }
         
         .hero {
@@ -164,6 +221,10 @@
             box-shadow: 0 10px 20px rgba(0,0,0,0.2);
         }
         
+        body.dark .btn:hover {
+            box-shadow: 0 10px 20px rgba(255,255,255,0.2);
+        }
+        
         .section-title {
             text-align: center;
             margin-bottom: 40px;
@@ -182,11 +243,12 @@
         }
         
         .card {
-            background: white;
+            background: var(--card-bg);
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
             padding: 25px;
             margin-bottom: 30px;
+            border: 1px solid var(--border);
         }
         
         .hotel-card {
@@ -204,12 +266,17 @@
             padding: 15px;
             border-radius: var(--border-radius);
             margin-bottom: 15px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border);
         }
         
         .supplier-best-price {
             background-color: #d4edda !important;
             border: 2px solid #28a745;
+        }
+        
+        body.dark .supplier-best-price {
+            background-color: #1b5e20 !important;
+            border: 2px solid #4caf50;
         }
         
         .form-group {
@@ -225,9 +292,15 @@
         .form-control {
             width: 100%;
             padding: 12px 15px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border);
             border-radius: var(--border-radius);
             font-size: 1rem;
+            background: var(--card-bg);
+            color: var(--text);
+        }
+        
+        body.dark .form-control {
+            background: #2a2a2a;
         }
         
         .form-row {
@@ -253,7 +326,7 @@
         th, td {
             padding: 12px 15px;
             text-align: left;
-            border-bottom: 1px solid #ddd;
+            border-bottom: 1px solid var(--border);
         }
         
         th {
@@ -262,16 +335,28 @@
         }
         
         tr:nth-child(even) {
-            background-color: #f8f9fa;
+            background-color: var(--light);
+        }
+        
+        body.dark tr:nth-child(even) {
+            background-color: #2a2a2a;
         }
         
         tr:hover {
             background-color: #f1f3f5;
         }
         
+        body.dark tr:hover {
+            background-color: #333;
+        }
+        
         .best-price {
             background-color: #d4edda !important;
             font-weight: bold;
+        }
+        
+        body.dark .best-price {
+            background-color: #1b5e20 !important;
         }
         
         .action-buttons {
@@ -300,16 +385,25 @@
             margin-bottom: 20px;
         }
         
+        body.dark .conversion-box {
+            background: #0d47a1;
+        }
+        
         .email-template {
-            background: #f8f9fa;
+            background: var(--light);
             border-left: 4px solid var(--primary);
             padding: 20px;
             margin: 20px 0;
             white-space: pre-line;
             line-height: 1.8;
             min-height: 300px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border);
             border-radius: var(--border-radius);
+            color: var(--text);
+        }
+        
+        body.dark .email-template {
+            background: #2a2a2a;
         }
         
         .delivery-options {
@@ -323,11 +417,13 @@
             flex: 1;
             text-align: center;
             padding: 15px;
-            border: 2px solid #ddd;
+            border: 2px solid var(--border);
             border-radius: var(--border-radius);
             cursor: pointer;
             transition: all 0.3s;
             min-width: 120px;
+            background: var(--card-bg);
+            color: var(--text);
         }
         
         .delivery-option:hover {
@@ -337,6 +433,10 @@
         .delivery-option.selected {
             border-color: var(--secondary);
             background: #e8f4fc;
+        }
+        
+        body.dark .delivery-option.selected {
+            background: #1a237e;
         }
         
         .delivery-option i {
@@ -383,8 +483,12 @@
             flex: 1;
             text-align: center;
             padding: 15px;
-            background: #f8f9fa;
+            background: var(--light);
             border-radius: var(--border-radius);
+        }
+        
+        body.dark .people-type {
+            background: #2a2a2a;
         }
         
         .people-type h3 {
@@ -415,6 +519,10 @@
             background: #2980b9;
         }
         
+        body.dark .counter-btn:hover {
+            background: #5c6bc0;
+        }
+        
         .counter-value {
             font-size: 1.2rem;
             font-weight: bold;
@@ -431,6 +539,10 @@
             margin-top: 15px;
             font-weight: bold;
             display: none;
+        }
+        
+        body.dark .converter-result {
+            background: #4caf50;
         }
         
         .child-ages-container {
@@ -495,6 +607,10 @@
             font-weight: bold;
         }
         
+        body.dark .grand-total {
+            background: #4a90e2;
+        }
+        
         .section-toggle {
             cursor: pointer;
             display: flex;
@@ -538,6 +654,10 @@
             color: #666;
         }
         
+        body.dark .age-label {
+            color: #999;
+        }
+        
         .booking-type-selector {
             margin-bottom: 20px;
         }
@@ -553,6 +673,10 @@
             padding: 20px;
             border-radius: var(--border-radius);
             margin-bottom: 20px;
+        }
+        
+        body.dark .totals-panel {
+            background: #0d47a1;
         }
         
         .totals-row {
@@ -577,12 +701,17 @@
             margin-top: 5px;
         }
         
+        body.dark .airport-display {
+            color: #999;
+        }
+        
         .customer-info-section {
-            background: white;
+            background: var(--card-bg);
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
             padding: 25px;
             margin-bottom: 30px;
+            border: 1px solid var(--border);
         }
         
         .comparison-container {
@@ -593,10 +722,11 @@
         
         .comparison-section {
             flex: 1;
-            background: white;
+            background: var(--card-bg);
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
             padding: 20px;
+            border: 1px solid var(--border);
         }
         
         .comparison-section h3 {
@@ -613,11 +743,13 @@
         
         .supplier-comparison-item {
             padding: 15px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border);
             border-radius: var(--border-radius);
             cursor: pointer;
             transition: all 0.3s;
             position: relative;
+            background: var(--card-bg);
+            color: var(--text);
         }
         
         .supplier-comparison-item:hover {
@@ -630,14 +762,27 @@
             background: #e8f4fc;
         }
         
+        body.dark .supplier-comparison-item.selected {
+            background: #1a237e;
+        }
+        
         .supplier-comparison-item.best-price {
             background-color: #d4edda;
             border-color: #28a745;
         }
         
+        body.dark .supplier-comparison-item.best-price {
+            background-color: #1b5e20;
+            border-color: #4caf50;
+        }
+        
         .supplier-comparison-item.saved {
             border: 2px solid var(--success);
             background-color: #f8fff9;
+        }
+        
+        body.dark .supplier-comparison-item.saved {
+            background-color: #2e7d32;
         }
         
         .supplier-comparison-item.saved::before {
@@ -683,6 +828,10 @@
             color: #666;
         }
         
+        body.dark .supplier-comparison-details {
+            color: #999;
+        }
+        
         .comparison-controls {
             display: flex;
             justify-content: space-between;
@@ -694,8 +843,12 @@
         .supplier-details {
             margin-top: 20px;
             padding: 15px;
-            background: #f8f9fa;
+            background: var(--light);
             border-radius: var(--border-radius);
+        }
+        
+        body.dark .supplier-details {
+            background: #2a2a2a;
         }
         
         .supplier-details h4 {
@@ -706,9 +859,11 @@
         .baggage-weight-select {
             width: 100%;
             padding: 12px 15px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border);
             border-radius: var(--border-radius);
             font-size: 1rem;
+            background: var(--card-bg);
+            color: var(--text);
         }
         
         .upgrade-badge {
@@ -727,19 +882,31 @@
             margin-top: 5px;
         }
         
+        body.dark .commission-interpretation {
+            color: #999;
+        }
+        
         .converter-raw-value {
             font-size: 0.8rem;
             color: #666;
             margin-top: 5px;
         }
         
+        body.dark .converter-raw-value {
+            color: #999;
+        }
+        
         .supplier-summary {
             display: none;
-            background: #f8f9fa;
+            background: var(--light);
             padding: 10px;
             border-radius: 4px;
             margin-top: 10px;
             font-size: 0.95rem;
+        }
+        
+        body.dark .supplier-summary {
+            background: #2a2a2a;
         }
         
         .supplier-comparison-item.saved .supplier-summary {
@@ -755,6 +922,10 @@
         .supplier-summary-label {
             font-weight: 600;
             color: #666;
+        }
+        
+        body.dark .supplier-summary-label {
+            color: #999;
         }
         
         .supplier-summary-value {
@@ -783,9 +954,11 @@
         .deposit-input {
             width: 100%;
             padding: 12px 15px;
-            border: 1px solid #ddd;
+            border: 1px solid var(--border);
             border-radius: var(--border-radius);
             font-size: 1rem;
+            background: var(--card-bg);
+            color: var(--text);
         }
         
         .saved-emails-section {
@@ -795,9 +968,13 @@
         .saved-email-item {
             margin-bottom: 15px;
             padding: 10px;
-            background: #f8f9fa;
+            background: var(--light);
             border-radius: var(--border-radius);
             border-left: 4px solid var(--secondary);
+        }
+        
+        body.dark .saved-email-item {
+            background: #2a2a2a;
         }
         
         .saved-email-preview {
@@ -807,6 +984,10 @@
             white-space: pre-wrap;
             max-height: 100px;
             overflow: hidden;
+        }
+        
+        body.dark .saved-email-preview {
+            color: #999;
         }
         
         @media (max-width: 768px) {
@@ -926,7 +1107,7 @@
                 <div class="logo-icon"><i class="fas fa-globe-americas"></i></div>
                 <div class="logo-text">Bradley Travelstore</div>
             </div>
-            <div>
+            <div class="header-controls">
                 <nav>
                     <ul>
                         <li><a href="#customer">Customer Info</a></li>
@@ -937,7 +1118,8 @@
                         <li><a href="#email">Email Generator</a></li>
                     </ul>
                 </nav>
-                <button class="reset-btn" onclick="resetState()">Reset State</button>
+                <button id="dark-toggle" class="section-like-btn" onclick="toggleDarkMode()">Toggle Dark Mode</button>
+                <button class="section-like-btn reset-btn" onclick="resetState()">Reset State</button>
             </div>
         </div>
     </header>
@@ -1009,11 +1191,15 @@
                             <option value="IDR">IDR (Rp) - Indonesia</option>
                             <option value="VND">VND (₫) - Vietnam</option>
                             <option value="TRY">TRY (₺) - Turkey</option>
-                            <option value="ILS">ILS (₪) - Israel</option>
                             <option value="ZAR">ZAR (R) - South Africa</option>
                             <option value="AED">AED (د.إ) - United Arab Emirates</option>
                             <option value="SAR">SAR (ر.س) - Saudi Arabia</option>
                             <option value="EGP">EGP (£) - Egypt</option>
+                            <option value="BHD">BHD (BD) - Bahrain</option>
+                            <option value="JOD">JOD (JD) - Jordan</option>
+                            <option value="KWD">KWD (KD) - Kuwait</option>
+                            <option value="OMR">OMR (OMR) - Oman</option>
+                            <option value="QAR">QAR (QR) - Qatar</option>
                             <option value="MXN">MXN ($) - Mexico</option>
                             <option value="BRL">BRL (R$) - Brazil</option>
                             <option value="CHF">CHF (Fr.) - Switzerland</option>
@@ -1042,11 +1228,6 @@
                 
                 <div id="converter-result" class="converter-result">
                     Converted amount will appear here
-                </div>
-                
-                <div class="action-buttons">
-                    <button class="btn btn-secondary" onclick="addConvertedToHotel()">Add to Hotel Comparison</button>
-                    <button class="btn btn-secondary" onclick="addConvertedToFlight()">Add to Flight Comparison</button>
                 </div>
             </div>
         </section>
@@ -2790,7 +2971,21 @@
             loadState();
             displaySavedEmails();
             validateChildAges(); // Added for initial validation
+            // Load dark mode preference
+            const isDark = localStorage.getItem('darkMode') === 'true';
+            if (isDark) {
+                document.body.classList.add('dark');
+                document.getElementById('dark-toggle').textContent = 'Toggle Light Mode';
+            }
         });
+
+        function toggleDarkMode() {
+            document.body.classList.toggle('dark');
+            const isDark = document.body.classList.contains('dark');
+            localStorage.setItem('darkMode', isDark);
+            const btn = document.getElementById('dark-toggle');
+            btn.textContent = isDark ? 'Toggle Light Mode' : 'Toggle Dark Mode';
+        }
 
         function toggleSection(sectionId) {
             const section = document.getElementById(sectionId);
@@ -3728,32 +3923,6 @@
             }
         }
 
-        function addConvertedToHotel() {
-            if (convertedAmount > 0) {
-                addHotelSupplier();
-                const items = document.querySelectorAll('#hotel-comparison .supplier-comparison-item');
-                const lastItem = items[items.length - 1];
-                const netPriceInput = lastItem.querySelector('.net-price');
-                netPriceInput.value = convertedAmount.toFixed(2);
-                updateSupplierPrice(lastItem.id);
-            } else {
-                alert('Please convert a currency amount first.');
-            }
-        }
-
-        function addConvertedToFlight() {
-            if (convertedAmount > 0) {
-                addFlightSupplier();
-                const items = document.querySelectorAll('#flight-comparison .supplier-comparison-item');
-                const lastItem = items[items.length - 1];
-                const netPriceInput = lastItem.querySelector('.net-price');
-                netPriceInput.value = convertedAmount.toFixed(2);
-                updateSupplierPrice(lastItem.id);
-            } else {
-                alert('Please convert a currency amount first.');
-            }
-        }
-
         function displayAirport(input) {
             const displayDiv = input.nextElementSibling;
             const code = input.value.toUpperCase().trim();
@@ -4567,6 +4736,9 @@
                     initCancellationPickers(document.getElementById(newId));
                     if (data.isSaved) {
                         document.getElementById(newId).classList.add('saved');
+                        // Hide saved fields
+                        const savedItem = document.getElementById(newId);
+                        savedItem.querySelectorAll('.form-row, .supplier-details, .return-controls, .return-section').forEach(el => el.style.display = 'none');
                         generateHotelSummary(newId, data);
                         savedHotelSuppliers.push({ id: newId, ...data });
                     }
@@ -4587,6 +4759,9 @@
                     initCancellationPickers(document.getElementById(newId));
                     if (data.isSaved) {
                         document.getElementById(newId).classList.add('saved');
+                        // Hide saved fields
+                        const savedItem = document.getElementById(newId);
+                        savedItem.querySelectorAll('.form-row, .supplier-details, .return-controls, .return-section').forEach(el => el.style.display = 'none');
                         generateFlightSummary(newId, data);
                         savedFlightSuppliers.push({ id: newId, ...data });
                     }
