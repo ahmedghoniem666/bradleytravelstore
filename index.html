@@ -756,8 +756,8 @@
         }
         
         .supplier-comparison-item.best-price {
-            background-color: #ecfdf5;
-            border-color: var(--success);
+            background-color: #ecfdf5 !important;
+            border: 2px solid var(--success) !important;
         }
         
         .supplier-comparison-item.saved {
@@ -783,6 +783,21 @@
         .supplier-comparison-item.saved .return-controls,
         .supplier-comparison-item.saved .return-section {
             display: none;
+        }
+        
+        .supplier-comparison-item.include-email {
+            background-color: #f0f9ff !important;
+            border-left: 4px solid var(--secondary) !important;
+        }
+        
+        .supplier-comparison-item.upgrade-item {
+            background-color: var(--flight-color) !important;
+            border-left: 5px solid var(--accent) !important;
+        }
+        
+        .supplier-comparison-item.has-return {
+            background-color: #f0fdf4 !important;
+            border-left: 4px solid var(--success) !important;
         }
         
         .supplier-comparison-header {
@@ -3404,7 +3419,7 @@
                             <label for="${id}-upgrade">Upgrade</label>
                         </div>
                         <div class="checkbox-group include-in-email-group">
-                            <input type="checkbox" id="${id}-include-email" onchange="updateEmailTemplate(); saveState();">
+                            <input type="checkbox" id="${id}-include-email" onchange="toggleIncludeEmail('${id}')">
                             <label for="${id}-include-email">Include in Email</label>
                         </div>
                     </div>
@@ -3523,11 +3538,11 @@
                             <label for="${id}-upgrade">Upgrade</label>
                         </div>
                         <div class="checkbox-group include-in-email-group">
-                            <input type="checkbox" id="${id}-include-email" onchange="updateEmailTemplate(); saveState();">
+                            <input type="checkbox" id="${id}-include-email" onchange="toggleIncludeEmail('${id}')">
                             <label for="${id}-include-email">Include in Email</label>
                         </div>
                         <div class="checkbox-group include-in-email-group">
-                            <input type="checkbox" id="${id}-include-return" onchange="toggleReturnDetails('${id}'); updateEmailTemplate(); saveState();">
+                            <input type="checkbox" id="${id}-include-return" onchange="toggleReturnDetails('${id}')">
                             <label for="${id}-include-return">Return</label>
                         </div>
                     </div>
@@ -3735,14 +3750,31 @@
         function toggleUpgrade(id) {
             const checkbox = document.getElementById(`${id}-upgrade`);
             const badge = document.querySelector(`#${id} .upgrade-badge`);
+            const item = document.getElementById(id);
             
             if (checkbox.checked) {
                 badge.style.display = 'inline-block';
+                item.classList.add('upgrade-item');
             } else {
                 badge.style.display = 'none';
+                item.classList.remove('upgrade-item');
             }
             
             updateTotals();
+            updateEmailTemplate();
+            saveState();
+        }
+
+        function toggleIncludeEmail(id) {
+            const checkbox = document.getElementById(`${id}-include-email`);
+            const item = document.getElementById(id);
+            
+            if (checkbox.checked) {
+                item.classList.add('include-email');
+            } else {
+                item.classList.remove('include-email');
+            }
+            
             updateEmailTemplate();
             saveState();
         }
@@ -3752,14 +3784,18 @@
             const section = document.getElementById(id + '-return-section');
             const addBtn = document.getElementById(id + '-add-return-btn');
             const removeBtn = document.getElementById(id + '-remove-return-btn');
+            const item = document.getElementById(id);
+            
             if (checkbox.checked) {
                 section.style.display = 'block';
                 addBtn.style.display = 'none';
                 removeBtn.style.display = 'inline-block';
+                item.classList.add('has-return');
             } else {
                 section.style.display = 'none';
                 addBtn.style.display = 'inline-block';
                 removeBtn.style.display = 'none';
+                item.classList.remove('has-return');
             }
             updateEmailTemplate();
             saveState();
@@ -4711,6 +4747,9 @@
                     setHotelSupplierData(newId, data);
                     updateSupplierPrice(newId);
                     initCancellationPickers(document.getElementById(newId));
+                    toggleIncludeEmail(newId);
+                    toggleBestPrice(newId);
+                    toggleUpgrade(newId);
                     if (data.isSaved) {
                         document.getElementById(newId).classList.add('saved');
                         const savedItem = document.getElementById(newId);
@@ -4719,8 +4758,6 @@
                         savedHotelSuppliers.push({ id: newId, ...data });
                     }
                     toggleCancellationFee(newId);
-                    if (data.best) toggleBestPrice(newId);
-                    if (data.upgrade) toggleUpgrade(newId);
                 });
             }
 
@@ -4733,6 +4770,10 @@
                     setFlightSupplierData(newId, data);
                     updateSupplierPrice(newId);
                     initCancellationPickers(document.getElementById(newId));
+                    toggleIncludeEmail(newId);
+                    toggleBestPrice(newId);
+                    toggleUpgrade(newId);
+                    toggleReturnDetails(newId);
                     if (data.isSaved) {
                         document.getElementById(newId).classList.add('saved');
                         const savedItem = document.getElementById(newId);
@@ -4741,9 +4782,6 @@
                         savedFlightSuppliers.push({ id: newId, ...data });
                     }
                     toggleCancellationFee(newId);
-                    if (data.best) toggleBestPrice(newId);
-                    if (data.upgrade) toggleUpgrade(newId);
-                    if (data.includeReturn) toggleReturnDetails(newId);
                 });
             }
 
