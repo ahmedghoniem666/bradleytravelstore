@@ -6,52 +6,60 @@
     <title>Bradley Travelstore - Compare & Save on Hotels and Flights</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --primary: #1a4b8c;
-            --secondary: #3498db;
-            --accent: #f39c12;
-            --light: #f8f9fa;
-            --dark: #343a40;
-            --success: #28a745;
-            --danger: #dc3545;
-            --warning: #ffc107;
-            --border-radius: 8px;
-            --box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            --hotel-color: #e3f2fd;
-            --flight-color: #fff3e0;
-            --supplier-color: #f5f5f5;
-            --bg: #f5f7fa;
-            --text: #333;
-            --card-bg: white;
-            --border: #ddd;
+            --primary: #0f172a; /* Deep slate for luxury */
+            --secondary: #1e40af; /* Rich blue */
+            --accent: #f59e0b; /* Warm gold accent */
+            --light: #f8fafc;
+            --dark: #0f172a;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --border-radius: 12px; /* Softer corners */
+            --box-shadow: 0 10px 25px rgba(0,0,0,0.08); /* Softer shadow */
+            --box-shadow-hover: 0 20px 40px rgba(0,0,0,0.12);
+            --hotel-color: #eff6ff; /* Light blue for hotel */
+            --flight-color: #fef3c7; /* Soft gold for flight */
+            --supplier-color: #f1f5f9;
+            --bg: #ffffff; /* Clean white bg */
+            --text: #334155;
+            --card-bg: #ffffff;
+            --border: #e2e8f0;
+            --gradient-primary: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            --gradient-accent: linear-gradient(135deg, var(--accent) 0%, #d97706 100%);
         }
         
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: 'Inter', sans-serif;
         }
         
         body {
             background-color: var(--bg);
             color: var(--text);
-            line-height: 1.6;
+            line-height: 1.7;
+            overflow-x: hidden;
         }
         
         .container {
             width: 100%;
-            max-width: 1200px;
+            max-width: 1280px;
             margin: 0 auto;
-            padding: 0 15px;
+            padding: 0 20px;
         }
         
         header {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            background: var(--gradient-primary);
             color: white;
-            padding: 20px 0;
+            padding: 1rem 0;
             box-shadow: var(--box-shadow);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
         
         .header-content {
@@ -63,76 +71,87 @@
         .logo {
             display: flex;
             align-items: center;
-            gap: 15px;
+            gap: 12px;
         }
         
         .logo-icon {
-            font-size: 2.5rem;
+            font-size: 2rem;
+            color: var(--accent);
         }
         
         .logo-text {
-            font-size: 1.8rem;
-            font-weight: bold;
+            font-size: 1.75rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
         }
         
         nav ul {
             display: flex;
             list-style: none;
-            gap: 20px;
+            gap: 24px;
         }
         
         nav a {
             color: white;
             text-decoration: none;
             font-weight: 500;
-            padding: 5px 10px;
+            padding: 8px 16px;
             border-radius: var(--border-radius);
-            transition: background 0.3s;
+            transition: all 0.3s ease;
+            opacity: 0.9;
         }
         
         nav a:hover {
-            background: rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            opacity: 1;
+            transform: translateY(-1px);
         }
         
         .header-controls {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
         
         .section-like-btn {
             background: transparent;
             color: white;
-            padding: 8px 15px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 10px 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
             border-radius: var(--border-radius);
             text-decoration: none;
             font-weight: 500;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
             cursor: pointer;
-            font-size: 1rem;
+            font-size: 0.95rem;
         }
         
         .section-like-btn:hover {
-            background: rgba(255, 255, 255, 0.2);
-            border-color: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(255, 255, 255, 0.4);
+            transform: translateY(-1px);
         }
         
         .reset-btn {
             background: var(--danger);
+            border-color: var(--danger);
         }
         
         .reset-btn:hover {
-            background: #c82333 !important;
+            background: #dc2626;
+            border-color: #dc2626;
         }
         
         .hero {
             background: url('https://images.unsplash.com/photo-1488646953014-85cb44e25828?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80') no-repeat center center/cover;
             color: white;
-            padding: 80px 0;
+            padding: 120px 0;
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 60px;
             position: relative;
+            min-height: 500px;
+            display: flex;
+            align-items: center;
         }
         
         .hero::after {
@@ -142,60 +161,67 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.4);
         }
         
         .hero-content {
             position: relative;
             z-index: 1;
+            max-width: 800px;
+            margin: 0 auto;
         }
         
         .hero h1 {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
+            font-size: 3.5rem;
+            font-weight: 700;
+            margin-bottom: 24px;
+            letter-spacing: -0.02em;
         }
         
         .hero p {
-            font-size: 1.2rem;
+            font-size: 1.25rem;
             max-width: 700px;
-            margin: 0 auto 30px;
+            margin: 0 auto 40px;
+            opacity: 0.95;
         }
         
         .btn {
             display: inline-block;
-            background: var(--accent);
+            background: var(--gradient-accent);
             color: white;
-            padding: 12px 25px;
+            padding: 16px 32px;
             border-radius: 50px;
             text-decoration: none;
             font-weight: 600;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
             border: none;
             cursor: pointer;
-            min-height: 44px; /* Touch-friendly */
+            min-height: 48px;
             font-size: 1rem;
+            box-shadow: 0 4px 14px rgba(245, 158, 11, 0.4);
         }
         
         .btn:hover {
-            background: #e67e22;
-            transform: translateY(-3px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(245, 158, 11, 0.5);
         }
         
         .section-title {
             text-align: center;
-            margin-bottom: 40px;
+            margin-bottom: 48px;
             color: var(--primary);
             position: relative;
+            font-size: 2rem;
+            font-weight: 600;
         }
         
         .section-title::after {
             content: '';
             display: block;
-            width: 80px;
+            width: 60px;
             height: 4px;
-            background: var(--accent);
-            margin: 15px auto;
+            background: var(--gradient-accent);
+            margin: 16px auto;
             border-radius: 2px;
         }
         
@@ -203,58 +229,72 @@
             background: var(--card-bg);
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
-            padding: 25px;
-            margin-bottom: 30px;
+            padding: 32px;
+            margin-bottom: 40px;
             border: 1px solid var(--border);
+            transition: all 0.3s ease;
+        }
+        
+        .card:hover {
+            box-shadow: var(--box-shadow-hover);
         }
         
         .hotel-card {
             background-color: var(--hotel-color);
-            border-left: 4px solid var(--primary);
+            border-left: 5px solid var(--secondary);
         }
         
         .flight-card {
             background-color: var(--flight-color);
-            border-left: 4px solid var(--accent);
+            border-left: 5px solid var(--accent);
         }
         
         .supplier-section {
             background-color: var(--supplier-color);
-            padding: 15px;
+            padding: 20px;
             border-radius: var(--border-radius);
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             border: 1px solid var(--border);
         }
         
         .supplier-best-price {
-            background-color: #d4edda !important;
-            border: 2px solid #28a745;
+            background-color: #ecfdf5 !important;
+            border: 2px solid var(--success);
         }
         
         .form-group {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
         
         .form-group label {
             display: block;
             margin-bottom: 8px;
             font-weight: 500;
+            color: var(--primary);
+            font-size: 0.95rem;
         }
         
         .form-control {
             width: 100%;
-            padding: 12px 15px;
+            padding: 14px 16px;
             border: 1px solid var(--border);
             border-radius: var(--border-radius);
             font-size: 1rem;
             background: var(--card-bg);
             color: var(--text);
+            transition: all 0.3s ease;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(30, 64, 175, 0.1);
         }
         
         .form-row {
             display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
+            gap: 24px;
+            margin-bottom: 24px;
         }
         
         .cancellation-fee-group {
@@ -268,11 +308,14 @@
         table {
             width: 100%;
             border-collapse: collapse;
-            margin: 20px 0;
+            margin: 24px 0;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: var(--box-shadow);
         }
         
         th, td {
-            padding: 12px 15px;
+            padding: 16px;
             text-align: left;
             border-bottom: 1px solid var(--border);
         }
@@ -280,6 +323,7 @@
         th {
             background-color: var(--primary);
             color: white;
+            font-weight: 600;
         }
         
         tr:nth-child(even) {
@@ -287,98 +331,118 @@
         }
         
         tr:hover {
-            background-color: #f1f3f5;
+            background-color: #f1f5f9;
         }
         
         .best-price {
-            background-color: #d4edda !important;
+            background-color: #ecfdf5 !important;
             font-weight: bold;
         }
         
         .action-buttons {
             display: flex;
-            gap: 10px;
-            margin-top: 20px;
+            gap: 12px;
+            margin-top: 24px;
             flex-wrap: wrap;
         }
         
         .btn-secondary {
-            background: var(--secondary);
+            background: var(--gradient-primary);
+            box-shadow: 0 4px 14px rgba(15, 23, 42, 0.4);
+        }
+        
+        .btn-secondary:hover {
+            box-shadow: 0 8px 25px rgba(15, 23, 42, 0.5);
         }
         
         .btn-danger {
             background: var(--danger);
+            box-shadow: 0 4px 14px rgba(239, 68, 68, 0.4);
+        }
+        
+        .btn-danger:hover {
+            box-shadow: 0 8px 25px rgba(239, 68, 68, 0.5);
         }
         
         .btn-success {
             background: var(--success);
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+        }
+        
+        .btn-success:hover {
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
         }
         
         .conversion-box {
-            background: #e8f4fc;
-            padding: 20px;
+            background: #eff6ff;
+            padding: 24px;
             border-radius: var(--border-radius);
-            margin-bottom: 20px;
+            margin-bottom: 24px;
+            border-left: 4px solid var(--secondary);
         }
         
         .email-template {
             background: var(--light);
-            border-left: 4px solid var(--primary);
-            padding: 20px;
-            margin: 20px 0;
+            border-left: 4px solid var(--secondary);
+            padding: 24px;
+            margin: 24px 0;
             white-space: pre-line;
             line-height: 1.8;
             min-height: 300px;
             border: 1px solid var(--border);
             border-radius: var(--border-radius);
             color: var(--text);
+            font-family: inherit;
         }
         
         .delivery-options {
             display: flex;
-            gap: 15px;
-            margin: 20px 0;
+            gap: 16px;
+            margin: 24px 0;
             flex-wrap: wrap;
         }
         
         .delivery-option {
             flex: 1;
             text-align: center;
-            padding: 15px;
+            padding: 20px;
             border: 2px solid var(--border);
             border-radius: var(--border-radius);
             cursor: pointer;
-            transition: all 0.3s;
-            min-width: 120px;
+            transition: all 0.3s ease;
+            min-width: 140px;
             background: var(--card-bg);
             color: var(--text);
         }
         
         .delivery-option:hover {
             border-color: var(--secondary);
+            transform: translateY(-2px);
         }
         
         .delivery-option.selected {
             border-color: var(--secondary);
-            background: #e8f4fc;
+            background: #eff6ff;
+            box-shadow: var(--box-shadow);
         }
         
         .delivery-option i {
-            font-size: 2rem;
-            margin-bottom: 10px;
+            font-size: 2.5rem;
+            margin-bottom: 12px;
             color: var(--secondary);
         }
         
         footer {
             background: var(--dark);
             color: white;
-            padding: 40px 0;
-            margin-top: 60px;
+            padding: 60px 0 30px;
+            margin-top: 80px;
         }
         
         .footer-content {
             display: flex;
             justify-content: space-between;
+            gap: 40px;
         }
         
         .footer-section {
@@ -388,135 +452,157 @@
         .footer-section h3 {
             margin-bottom: 20px;
             color: var(--accent);
+            font-weight: 600;
         }
         
         .footer-bottom {
             text-align: center;
-            padding-top: 20px;
-            margin-top: 20px;
+            padding-top: 30px;
+            margin-top: 30px;
             border-top: 1px solid rgba(255,255,255,0.1);
+            opacity: 0.8;
         }
         
         .people-selector {
             display: flex;
-            gap: 15px;
-            margin-bottom: 20px;
+            gap: 20px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
         }
         
         .people-type {
             flex: 1;
             text-align: center;
-            padding: 15px;
+            padding: 20px;
             background: var(--light);
             border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
         }
         
         .people-type h3 {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             color: var(--primary);
+            font-size: 1.1rem;
+            font-weight: 600;
         }
         
         .counter {
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
         }
         
         .counter-btn {
-            width: 30px;
-            height: 30px;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
             background: var(--secondary);
             color: white;
             border: none;
             cursor: pointer;
             font-weight: bold;
-            transition: background 0.3s;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
         }
         
         .counter-btn:hover {
-            background: #2980b9;
+            background: #1d4ed8;
+            transform: scale(1.05);
         }
         
         .counter-value {
-            font-size: 1.2rem;
-            font-weight: bold;
-            min-width: 30px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            min-width: 40px;
             text-align: center;
+            color: var(--primary);
         }
         
         .converter-result {
             background: var(--success);
             color: white;
-            padding: 15px;
+            padding: 20px;
             border-radius: var(--border-radius);
             text-align: center;
-            margin-top: 15px;
-            font-weight: bold;
+            margin-top: 20px;
+            font-weight: 600;
             display: none;
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
         }
         
         .child-ages-container {
             display: flex;
             flex-wrap: wrap;
-            gap: 10px;
-            margin-top: 10px;
+            gap: 12px;
+            margin-top: 12px;
             justify-content: center;
         }
         
         .child-age-input {
-            width: 80px;
-            padding: 10px;
+            width: 90px;
+            padding: 12px;
             font-size: 1rem;
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius);
         }
         
         .upgrade-option {
             display: flex;
-            gap: 10px;
-            margin-bottom: 10px;
+            gap: 12px;
+            margin-bottom: 12px;
             align-items: center;
+            flex-wrap: wrap;
         }
         
         .upgrade-option input {
             flex: 1;
+            min-width: 200px;
         }
         
         .checkbox-group {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 8px;
+            margin-bottom: 16px;
+            font-size: 0.95rem;
         }
         
         .commission-display {
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-top: 5px;
+            gap: 12px;
+            margin-top: 8px;
+            padding: 12px;
+            background: var(--light);
+            border-radius: var(--border-radius);
         }
         
         .commission-percentage {
-            font-weight: bold;
-            color: var(--primary);
+            font-weight: 700;
+            color: var(--secondary);
         }
         
         .hotel-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
         }
         
         .grand-total {
-            background: var(--primary);
+            background: var(--gradient-primary);
             color: white;
-            padding: 15px;
+            padding: 20px;
             border-radius: var(--border-radius);
             text-align: center;
-            margin-top: 20px;
-            font-size: 1.2rem;
-            font-weight: bold;
+            margin-top: 24px;
+            font-size: 1.25rem;
+            font-weight: 700;
         }
         
         .section-toggle {
@@ -524,7 +610,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            transition: color 0.3s;
+            transition: color 0.3s ease;
+            padding: 12px 0;
         }
         
         .section-toggle:hover {
@@ -532,12 +619,13 @@
         }
         
         .section-toggle i {
-            transition: transform 0.3s;
+            transition: transform 0.3s ease;
+            font-size: 1.2rem;
         }
         
         .section-content {
             overflow: hidden;
-            transition: max-height 0.3s ease-out;
+            transition: max-height 0.4s ease-out;
         }
         
         .collapsed .section-content {
@@ -545,7 +633,7 @@
         }
         
         .expanded .section-content {
-            max-height: 5000px;
+            max-height: 6000px;
         }
         
         .collapsed .section-toggle i {
@@ -557,63 +645,70 @@
         }
         
         .age-label {
-            font-size: 0.8rem;
-            margin-top: 5px;
-            color: #666;
+            font-size: 0.85rem;
+            margin-top: 8px;
+            color: #64748b;
+            text-align: center;
         }
         
         .booking-type-selector {
-            margin-bottom: 20px;
+            margin-bottom: 24px;
         }
         
         .output-format-buttons {
             display: flex;
-            gap: 10px;
-            margin-top: 20px;
+            gap: 12px;
+            margin-top: 24px;
+            flex-wrap: wrap;
         }
         
         .totals-panel {
-            background: #e8f4fc;
-            padding: 20px;
+            background: #eff6ff;
+            padding: 24px;
             border-radius: var(--border-radius);
-            margin-bottom: 20px;
+            margin-bottom: 24px;
+            border-left: 4px solid var(--secondary);
         }
         
         .totals-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             font-size: 1.1rem;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--border);
         }
         
         .totals-label {
-            font-weight: bold;
+            font-weight: 600;
+            color: var(--primary);
         }
         
         .totals-value {
-            font-weight: bold;
-            color: var(--primary);
+            font-weight: 700;
+            color: var(--secondary);
         }
         
         .airport-display {
             font-size: 0.9rem;
-            color: #666;
-            margin-top: 5px;
+            color: #64748b;
+            margin-top: 6px;
+            font-style: italic;
         }
         
         .customer-info-section {
             background: var(--card-bg);
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
-            padding: 25px;
-            margin-bottom: 30px;
+            padding: 32px;
+            margin-bottom: 40px;
             border: 1px solid var(--border);
         }
         
         .comparison-container {
             display: flex;
-            gap: 20px;
-            margin-bottom: 30px;
+            gap: 24px;
+            margin-bottom: 40px;
         }
         
         .comparison-section {
@@ -621,28 +716,29 @@
             background: var(--card-bg);
             border-radius: var(--border-radius);
             box-shadow: var(--box-shadow);
-            padding: 20px;
+            padding: 24px;
             border: 1px solid var(--border);
         }
         
         .comparison-section h3 {
-            margin-bottom: 15px;
+            margin-bottom: 20px;
             color: var(--primary);
             text-align: center;
+            font-weight: 600;
         }
         
         .supplier-comparison {
             display: flex;
             flex-direction: column;
-            gap: 15px;
+            gap: 20px;
         }
         
         .supplier-comparison-item {
-            padding: 15px;
+            padding: 24px;
             border: 1px solid var(--border);
             border-radius: var(--border-radius);
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
             position: relative;
             background: var(--card-bg);
             color: var(--text);
@@ -650,35 +746,36 @@
         
         .supplier-comparison-item:hover {
             border-color: var(--secondary);
-            box-shadow: var(--box-shadow);
+            box-shadow: var(--box-shadow-hover);
+            transform: translateY(-2px);
         }
         
         .supplier-comparison-item.selected {
             border-color: var(--secondary);
-            background: #e8f4fc;
+            background: #eff6ff;
         }
         
         .supplier-comparison-item.best-price {
-            background-color: #d4edda;
-            border-color: #28a745;
+            background-color: #ecfdf5;
+            border-color: var(--success);
         }
         
         .supplier-comparison-item.saved {
             border: 2px solid var(--success);
-            background-color: #f8fff9;
+            background-color: #f0fdf4;
         }
         
         .supplier-comparison-item.saved::before {
             content: '✓ SAVED';
             position: absolute;
-            top: 5px;
-            right: 10px;
+            top: 12px;
+            right: 16px;
             background: var(--success);
             color: white;
-            padding: 2px 8px;
-            border-radius: 10px;
-            font-size: 0.7rem;
-            font-weight: bold;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 700;
         }
         
         .supplier-comparison-item.saved .form-row,
@@ -692,84 +789,97 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 16px;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 12px;
         }
         
         .supplier-comparison-name {
-            font-weight: bold;
+            font-weight: 700;
+            font-size: 1.1rem;
         }
         
         .supplier-comparison-price {
-            font-weight: bold;
-            color: var(--primary);
+            font-weight: 700;
+            color: var(--secondary);
+            font-size: 1.2rem;
         }
         
         .supplier-comparison-details {
             font-size: 0.9rem;
-            color: #666;
+            color: #64748b;
         }
         
         .comparison-controls {
             display: flex;
             justify-content: space-between;
-            margin-top: 15px;
+            margin-top: 20px;
             flex-wrap: wrap;
-            gap: 10px;
+            gap: 12px;
         }
         
         .supplier-details {
-            margin-top: 20px;
-            padding: 15px;
+            margin-top: 24px;
+            padding: 20px;
             background: var(--light);
             border-radius: var(--border-radius);
+            border-left: 4px solid var(--secondary);
         }
         
         .supplier-details h4 {
-            margin-bottom: 10px;
+            margin-bottom: 12px;
             color: var(--primary);
+            font-weight: 600;
         }
         
         .baggage-weight-select {
             width: 100%;
-            padding: 12px 15px;
+            padding: 14px 16px;
             border: 1px solid var(--border);
             border-radius: var(--border-radius);
             font-size: 1rem;
             background: var(--card-bg);
             color: var(--text);
+            transition: all 0.3s ease;
+        }
+        
+        .baggage-weight-select:focus {
+            outline: none;
+            border-color: var(--secondary);
         }
         
         .upgrade-badge {
             background-color: var(--accent);
             color: white;
-            padding: 3px 8px;
-            border-radius: 4px;
+            padding: 4px 12px;
+            border-radius: 20px;
             font-size: 0.8rem;
-            font-weight: bold;
-            margin-left: 10px;
+            font-weight: 700;
+            margin-left: 12px;
         }
         
         .commission-interpretation {
             font-size: 0.9rem;
-            color: #666;
-            margin-top: 5px;
+            color: #64748b;
+            margin-top: 8px;
+            font-style: italic;
         }
         
         .converter-raw-value {
-            font-size: 0.8rem;
-            color: #666;
-            margin-top: 5px;
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-top: 8px;
+            font-style: italic;
         }
         
         .supplier-summary {
             display: none;
             background: var(--light);
-            padding: 10px;
-            border-radius: 4px;
-            margin-top: 10px;
+            padding: 16px;
+            border-radius: var(--border-radius);
+            margin-top: 16px;
             font-size: 0.95rem;
+            border-left: 3px solid var(--success);
         }
         
         .supplier-comparison-item.saved .supplier-summary {
@@ -779,40 +889,41 @@
         .supplier-summary-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
+            padding: 4px 0;
         }
         
         .supplier-summary-label {
             font-weight: 600;
-            color: #666;
+            color: #475569;
         }
         
         .supplier-summary-value {
-            color: var(--primary);
-            font-weight: bold;
+            color: var(--secondary);
+            font-weight: 600;
         }
         
         .supplier-edit-controls {
-            margin-top: 10px;
+            margin-top: 16px;
             display: flex;
-            gap: 10px;
+            gap: 12px;
             flex-wrap: wrap;
         }
         
         .btn-sm {
-            padding: 8px 15px;
+            padding: 10px 20px;
             font-size: 0.9rem;
-            min-height: 40px;
+            min-height: 44px;
         }
         
         .include-in-email-group {
             display: inline-block;
-            margin-left: 15px;
+            margin-left: 16px;
         }
         
         .deposit-input {
             width: 100%;
-            padding: 12px 15px;
+            padding: 14px 16px;
             border: 1px solid var(--border);
             border-radius: var(--border-radius);
             font-size: 1rem;
@@ -821,24 +932,26 @@
         }
         
         .saved-emails-section {
-            margin-top: 20px;
+            margin-top: 24px;
         }
         
         .saved-email-item {
-            margin-bottom: 15px;
-            padding: 10px;
+            margin-bottom: 20px;
+            padding: 20px;
             background: var(--light);
             border-radius: var(--border-radius);
             border-left: 4px solid var(--secondary);
+            box-shadow: var(--box-shadow);
         }
         
         .saved-email-preview {
-            font-size: 0.9rem;
-            color: #666;
-            margin-bottom: 10px;
+            font-size: 0.95rem;
+            color: #64748b;
+            margin-bottom: 12px;
             white-space: pre-wrap;
-            max-height: 100px;
+            max-height: 120px;
             overflow: hidden;
+            line-height: 1.6;
         }
         
         @media (max-width: 768px) {
@@ -849,11 +962,13 @@
             
             .footer-content {
                 flex-direction: column;
-                gap: 30px;
+                gap: 40px;
             }
             
             nav ul {
-                gap: 10px;
+                gap: 12px;
+                flex-wrap: wrap;
+                justify-content: center;
             }
             
             .people-selector {
@@ -866,7 +981,7 @@
             
             .hotel-header {
                 flex-direction: column;
-                gap: 15px;
+                gap: 16px;
                 align-items: flex-start;
             }
             
@@ -888,7 +1003,7 @@
             
             .header-content {
                 flex-direction: column;
-                gap: 15px;
+                gap: 16px;
             }
             
             nav ul {
@@ -898,7 +1013,7 @@
             
             .btn, .counter-btn {
                 font-size: 1rem;
-                padding: 14px 20px;
+                padding: 16px 24px;
             }
             
             .logo-text {
@@ -906,12 +1021,12 @@
             }
             
             .counter-btn {
-                width: 40px;
-                height: 40px;
+                width: 48px;
+                height: 48px;
             }
             
             .counter-value {
-                font-size: 1.5rem;
+                font-size: 1.75rem;
             }
             
             .delivery-options {
@@ -928,13 +1043,30 @@
             }
             
             .checkbox-group {
-                margin-bottom: 10px;
+                margin-bottom: 12px;
+            }
+            
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            
+            .hero p {
+                font-size: 1.1rem;
+            }
+            
+            .section-title {
+                font-size: 1.75rem;
             }
         }
         
         @media (max-width: 480px) {
             .container {
-                padding: 0 10px;
+                padding: 0 12px;
+            }
+            
+            .hero {
+                padding: 80px 0;
+                min-height: 400px;
             }
             
             .hero h1 {
@@ -945,8 +1077,8 @@
                 font-size: 1rem;
             }
             
-            .section-title {
-                font-size: 1.5rem;
+            .card {
+                padding: 24px;
             }
         }
     </style>
@@ -955,55 +1087,55 @@
     <header>
         <div class="container header-content">
             <div class="logo">
-                <div class="logo-icon"><i class="fas fa-globe-americas"></i></div>
+                <div class="logo-icon"><i class="fas fa-plane-departure"></i></div>
                 <div class="logo-text">Bradley Travelstore</div>
             </div>
             <div class="header-controls">
                 <nav>
                     <ul>
                         <li><a href="#customer">Customer Info</a></li>
-                        <li><a href="#currency">Currency Converter</a></li>
-                        <li><a href="#hotel">Hotel Quote</a></li>
-                        <li><a href="#flight">Flight Quote</a></li>
+                        <li><a href="#currency">Currency</a></li>
+                        <li><a href="#hotel">Hotel</a></li>
+                        <li><a href="#flight">Flight</a></li>
                         <li><a href="#totals">Totals</a></li>
-                        <li><a href="#email">Email Generator</a></li>
+                        <li><a href="#email">Email</a></li>
                     </ul>
                 </nav>
-                <button class="section-like-btn reset-btn" onclick="resetState()">Reset State</button>
+                <button class="section-like-btn reset-btn" onclick="resetState()">Reset</button>
             </div>
         </div>
     </header>
 
     <section class="hero">
         <div class="container hero-content">
-            <h1>Compare Travel Prices & Save</h1>
-            <p>Find the best deals on hotels, flights, and packages across multiple websites. We add our commission and provide you with the best overall price.</p>
-            <a href="#customer" class="btn">Get Started</a>
+            <h1>Discover Unmatched Travel Deals</h1>
+            <p>Elevate your journey with curated hotel and flight options. Seamlessly compare, customize, and secure the perfect itinerary with expert precision.</p>
+            <a href="#customer" class="btn">Begin Your Journey</a>
         </div>
     </section>
 
     <div class="container">
         <section id="customer" class="card customer-info-section expanded">
             <div class="section-toggle" onclick="toggleSection('customer')">
-                <h2 class="section-title">Customer Information</h2>
+                <h2 class="section-title">Client Details</h2>
                 <i class="fas fa-chevron-down"></i>
             </div>
             
             <div class="section-content">
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="customer-name">Customer Name *</label>
-                        <input type="text" id="customer-name" class="form-control" placeholder="Customer name" onchange="validateCustomerInfo(); updateEmailTemplate(); saveState();">
+                        <label for="customer-name">Client Name *</label>
+                        <input type="text" id="customer-name" class="form-control" placeholder="Enter client name" onchange="validateCustomerInfo(); updateEmailTemplate(); saveState();">
                     </div>
                     <div class="form-group">
                         <label for="destination">Destination *</label>
-                        <input type="text" id="destination" class="form-control" placeholder="Destination" onchange="validateCustomerInfo(); updateEmailTemplate(); saveState();">
+                        <input type="text" id="destination" class="form-control" placeholder="Enter destination" onchange="validateCustomerInfo(); updateEmailTemplate(); saveState();">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="deposit-amount">Deposit (£ per person)</label>
-                        <input type="number" id="deposit-amount" class="deposit-input" placeholder="Enter deposit amount" step="0.01" onchange="updateEmailTemplate(); saveState();">
+                        <input type="number" id="deposit-amount" class="deposit-input" placeholder="Enter deposit" step="0.01" onchange="updateEmailTemplate(); saveState();">
                     </div>
                 </div>
             </div>
@@ -1011,18 +1143,18 @@
 
         <section id="currency" class="card expanded">
             <div class="section-toggle" onclick="toggleSection('currency')">
-                <h2 class="section-title">Currency Converter</h2>
+                <h2 class="section-title">Currency Conversion</h2>
                 <i class="fas fa-chevron-down"></i>
             </div>
             
             <div class="section-content">
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="source-amount">Amount to Convert</label>
+                        <label for="source-amount">Amount</label>
                         <input type="number" id="source-amount" class="form-control" placeholder="Enter amount" step="0.01" onchange="saveState();">
                     </div>
                     <div class="form-group">
-                        <label for="source-currency">From Currency</label>
+                        <label for="source-currency">From</label>
                         <select id="source-currency" class="form-control" onchange="saveState();">
                             <option value="EUR">EUR (€) - Eurozone</option>
                             <option value="USD">USD ($) - United States</option>
@@ -1072,19 +1204,19 @@
                 </div>
                 
                 <div class="action-buttons">
-                    <button class="btn" onclick="convertCurrency()">Convert to GBP (Live Rate)</button>
-                    <button class="btn btn-secondary" onclick="convertManually()">Convert Manually</button>
+                    <button class="btn" onclick="convertCurrency()">Convert Live</button>
+                    <button class="btn btn-secondary" onclick="convertManually()">Manual Convert</button>
                 </div>
                 
                 <div id="converter-result" class="converter-result">
-                    Converted amount will appear here
+                    Results appear here
                 </div>
             </div>
         </section>
 
         <section id="hotel" class="card expanded">
             <div class="section-toggle" onclick="toggleSection('hotel')">
-                <h2 class="section-title">Hotel Quote Details</h2>
+                <h2 class="section-title">Hotel Quote</h2>
                 <i class="fas fa-chevron-down"></i>
             </div>
             
@@ -1092,13 +1224,13 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="hotel-name">Hotel Name</label>
-                        <input type="text" id="hotel-name" class="form-control" placeholder="Hotel name" onchange="updateEmailTemplate(); saveState();">
+                        <input type="text" id="hotel-name" class="form-control" placeholder="Enter hotel name" onchange="updateEmailTemplate(); saveState();">
                     </div>
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="hotel-checkin">Check-in & Check-out Dates</label>
+                        <label for="hotel-checkin">Check-in & Check-out</label>
                         <input type="text" id="hotel-checkin" class="form-control" placeholder="Select dates">
                     </div>
                     <div class="form-group">
@@ -1109,12 +1241,12 @@
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="balance-due-date">Balance Due Date</label>
-                        <input type="text" id="balance-due-date" class="form-control" placeholder="Select balance due date" onchange="updateEmailTemplate(); saveState();">
+                        <label for="balance-due-date">Balance Due</label>
+                        <input type="text" id="balance-due-date" class="form-control" placeholder="Select date" onchange="updateEmailTemplate(); saveState();">
                     </div>
                     <div class="form-group">
-                        <label for="excludes-note">Excludes Note (e.g., local taxes)</label>
-                        <input type="text" id="excludes-note" class="form-control" placeholder="e.g., Climate Resilience Tax EUR15 per room, per night, pay locally" onchange="updateEmailTemplate(); saveState();">
+                        <label for="excludes-note">Excludes (e.g., taxes)</label>
+                        <input type="text" id="excludes-note" class="form-control" placeholder="e.g., Local tax €15/room/night" onchange="updateEmailTemplate(); saveState();">
                     </div>
                 </div>
                 
@@ -1142,33 +1274,33 @@
                             <span id="hotel-infants-count" class="counter-value">0</span>
                             <button class="counter-btn" onclick="changeCount('hotel-infants', 1)">+</button>
                         </div>
-                        <div class="age-label">Under 2 years old</div>
+                        <div class="age-label">Under 2 years</div>
                     </div>
                 </div>
                 
                 <div id="hotel-child-ages" class="child-ages-container">
                 </div>
                 
-                <h3>Hotel Options</h3>
+                <h3>Options</h3>
                 <div id="hotel-comparison" class="supplier-comparison">
                 </div>
                 <div class="comparison-controls" id="hotel-controls">
-                    <button class="btn" onclick="addHotelSupplier()"><i class="fas fa-plus"></i> Add Hotel Option</button>
-                    <button class="btn btn-secondary" onclick="highlightBestHotelPrice()"><i class="fas fa-star"></i> Highlight Best Price</button>
+                    <button class="btn" onclick="addHotelSupplier()"><i class="fas fa-plus"></i> Add Option</button>
+                    <button class="btn btn-secondary" onclick="highlightBestHotelPrice()"><i class="fas fa-star"></i> Best Price</button>
                 </div>
                 
                 <div class="section-totals">
-                    <h3>Hotel Totals (Saved Options Only)</h3>
+                    <h3>Totals (Saved Only)</h3>
                     <div class="totals-row">
-                        <span class="totals-label">Total Net (Hotel):</span>
+                        <span class="totals-label">Net Total:</span>
                         <span id="hotel-total-net" class="totals-value">£0.00</span>
                     </div>
                     <div class="totals-row">
-                        <span class="totals-label">Total Selling - Exact (Hotel):</span>
+                        <span class="totals-label">Selling (Exact):</span>
                         <span id="hotel-total-selling-exact" class="totals-value">£0.00</span>
                     </div>
                     <div class="totals-row">
-                        <span class="totals-label">Total Selling - Rounded (Hotel):</span>
+                        <span class="totals-label">Selling (Rounded):</span>
                         <span id="hotel-total-selling-rounded" class="totals-value">£0.00</span>
                     </div>
                 </div>
@@ -1177,14 +1309,14 @@
 
         <section id="flight" class="card expanded">
             <div class="section-toggle" onclick="toggleSection('flight')">
-                <h2 class="section-title">Flight Quote Details</h2>
+                <h2 class="section-title">Flight Quote</h2>
                 <i class="fas fa-chevron-down"></i>
             </div>
             
             <div class="section-content">
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="flight-dates">Departure & Return Dates</label>
+                        <label for="flight-dates">Departure & Return</label>
                         <input type="text" id="flight-dates" class="form-control" placeholder="Select dates">
                     </div>
                 </div>
@@ -1213,33 +1345,33 @@
                             <span id="flight-infants-count" class="counter-value">0</span>
                             <button class="counter-btn" onclick="changeCount('flight-infants', 1)">+</button>
                         </div>
-                        <div class="age-label">Under 2 years old</div>
+                        <div class="age-label">Under 2 years</div>
                     </div>
                 </div>
                 
                 <div id="flight-child-ages" class="child-ages-container">
                 </div>
                 
-                <h3>Flight Options</h3>
+                <h3>Options</h3>
                 <div id="flight-comparison" class="supplier-comparison">
                 </div>
                 <div class="comparison-controls" id="flight-controls">
-                    <button class="btn" onclick="addFlightSupplier()"><i class="fas fa-plus"></i> Add Flight Option</button>
-                    <button class="btn btn-secondary" onclick="highlightBestFlightPrice()"><i class="fas fa-star"></i> Highlight Best Price</button>
+                    <button class="btn" onclick="addFlightSupplier()"><i class="fas fa-plus"></i> Add Option</button>
+                    <button class="btn btn-secondary" onclick="highlightBestFlightPrice()"><i class="fas fa-star"></i> Best Price</button>
                 </div>
                 
                 <div class="section-totals">
-                    <h3>Flight Totals (Saved Options Only)</h3>
+                    <h3>Totals (Saved Only)</h3>
                     <div class="totals-row">
-                        <span class="totals-label">Total Net (Flight):</span>
+                        <span class="totals-label">Net Total:</span>
                         <span id="flight-total-net" class="totals-value">£0.00</span>
                     </div>
                     <div class="totals-row">
-                        <span class="totals-label">Total Selling - Exact (Flight):</span>
+                        <span class="totals-label">Selling (Exact):</span>
                         <span id="flight-total-selling-exact" class="totals-value">£0.00</span>
                     </div>
                     <div class="totals-row">
-                        <span class="totals-label">Total Selling - Rounded (Flight):</span>
+                        <span class="totals-label">Selling (Rounded):</span>
                         <span id="flight-total-selling-rounded" class="totals-value">£0.00</span>
                     </div>
                 </div>
@@ -1255,12 +1387,12 @@
             <div class="section-content">
                 <div class="form-group">
                     <label for="commission-rate">Commission Rate</label>
-                    <input type="text" id="commission-rate" class="form-control" placeholder="Enter commission (e.g., 0.89 or 11%)" value="11%" onchange="updateCommission(); saveState();">
+                    <input type="text" id="commission-rate" class="form-control" placeholder="e.g., 11%" value="11%" onchange="updateCommission(); saveState();">
                     <div class="commission-display">
                         <span id="commission-display-text">11% (multiplier 1.11)</span>
                     </div>
                     <div id="commission-interpretation" class="commission-interpretation">
-                        Interpreted rate: 11% (0.11)
+                        Interpreted: 11% (0.11)
                     </div>
                 </div>
                 
@@ -1270,11 +1402,11 @@
                         <span id="total-net" class="totals-value">£0.00</span>
                     </div>
                     <div class="totals-row">
-                        <span class="totals-label">Total Selling (exact):</span>
+                        <span class="totals-label">Selling (Exact):</span>
                         <span id="total-selling-exact" class="totals-value">£0.00</span>
                     </div>
                     <div class="totals-row">
-                        <span class="totals-label">Total Selling (rounded):</span>
+                        <span class="totals-label">Selling (Rounded):</span>
                         <span id="total-selling-rounded" class="totals-value">£0.00</span>
                     </div>
                 </div>
@@ -1283,18 +1415,18 @@
 
         <section id="email" class="card expanded">
             <div class="section-toggle" onclick="toggleSection('email')">
-                <h2 class="section-title">Email Generator</h2>
+                <h2 class="section-title">Quote Generator</h2>
                 <i class="fas fa-chevron-down"></i>
             </div>
             
             <div class="section-content">
                 <div class="booking-type-selector">
                     <div class="form-group">
-                        <label for="booking-type">Booking Type</label>
+                        <label for="booking-type">Type</label>
                         <select id="booking-type" class="form-control" onchange="updateEmailTemplate(); saveState();">
                             <option value="hotel">Hotel Only</option>
                             <option value="flight">Flight Only</option>
-                            <option value="package">Package (Flight + Hotel)</option>
+                            <option value="package">Package</option>
                         </select>
                     </div>
                 </div>
@@ -1316,14 +1448,14 @@
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="quote-reference">Quote Reference #</label>
-                        <input type="text" id="quote-reference" class="form-control" placeholder="Enter quote reference number" onchange="updateEmailTemplate(); saveState();">
+                        <label for="quote-reference">Reference #</label>
+                        <input type="text" id="quote-reference" class="form-control" placeholder="Enter reference" onchange="updateEmailTemplate(); saveState();">
                     </div>
                 </div>
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="agent-name">Agent Name</label>
+                        <label for="agent-name">Agent</label>
                         <select id="agent-name" class="form-control" onchange="updateAgentSignature(); saveState();">
                             <option value="Adam">Adam</option>
                             <option value="Tara">Tara</option>
@@ -1345,32 +1477,32 @@
                             <option value="Joseph">Joseph</option>
                             <option value="Tracey">Tracey</option>
                             <option value="Trudy">Trudy</option>
-                            <option value="custom">Custom Signature</option>
+                            <option value="custom">Custom</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="agent-email">Agent Email</label>
+                        <label for="agent-email">Email</label>
                         <input type="email" id="agent-email" class="form-control" value="reservations@bradleytravelstore.com" onchange="saveState();">
                     </div>
                     <div class="form-group">
-                        <label for="agent-phone">Agent Phone</label>
+                        <label for="agent-phone">Phone</label>
                         <input type="text" id="agent-phone" class="form-control" value="020 3355 5060" onchange="saveState();">
                     </div>
                 </div>
                 
                 <div class="form-group">
-                    <label for="email-template">Email Template</label>
-                    <div id="email-template" class="email-template" contenteditable="false">Email template will be generated here</div>
+                    <label for="email-template">Template</label>
+                    <div id="email-template" class="email-template" contenteditable="false">Template generates here</div>
                 </div>
                 
                 <div class="output-format-buttons">
-                    <button class="btn btn-secondary" onclick="copyToClipboard()">Copy to Clipboard</button>
+                    <button class="btn btn-secondary" onclick="copyToClipboard()">Copy</button>
                     <button class="btn" id="edit-btn" onclick="handleEdit()">Edit</button>
-                    <button class="btn btn-success" onclick="saveEmail()">Save Email</button>
+                    <button class="btn btn-success" onclick="saveEmail()">Save</button>
                 </div>
 
                 <div id="saved-emails" class="saved-emails-section card">
-                    <h3>Saved Emails</h3>
+                    <h3>Saved Quotes</h3>
                     <div id="saved-list"></div>
                 </div>
             </div>
@@ -1382,20 +1514,20 @@
             <div class="footer-content">
                 <div class="footer-section">
                     <h3>Bradley Travelstore</h3>
-                    <p>Compare prices across multiple travel websites and find the best deals for your clients.</p>
+                    <p>Expertly crafted travel experiences. Compare, customize, and conquer your next adventure.</p>
                 </div>
                 <div class="footer-section">
-                    <h3>Contact Us</h3>
+                    <h3>Contact</h3>
                     <p>Email: info@bradleytravelstore.com</p>
                     <p>Phone: 0203 633 0210</p>
                 </div>
                 <div class="footer-section">
-                    <h3>Quick Links</h3>
-                    <ul>
-                        <li><a href="#customer">Customer Info</a></li>
-                        <li><a href="#hotel">Hotel Quote</a></li>
-                        <li><a href="#flight">Flight Quote</a></li>
-                        <li><a href="#email">Email Generator</a></li>
+                    <h3>Links</h3>
+                    <ul style="list-style: none; padding: 0;">
+                        <li><a href="#customer" style="color: white; text-decoration: none; opacity: 0.8;">Client Info</a></li>
+                        <li><a href="#hotel" style="color: white; text-decoration: none; opacity: 0.8;">Hotel</a></li>
+                        <li><a href="#flight" style="color: white; text-decoration: none; opacity: 0.8;">Flight</a></li>
+                        <li><a href="#email" style="color: white; text-decoration: none; opacity: 0.8;">Generator</a></li>
                     </ul>
                 </div>
             </div>
@@ -1414,7 +1546,7 @@
         let isEditing = false;
         let editingId = null;
         let AIRPORTS = {
-                        'AAR': 'Aarhus, Denmark',
+            'AAR': 'Aarhus, Denmark',
             'ABD': 'Abadan, Iran',
             'AEH': 'Abeche, Chad',
             'ABZ': 'Aberdeen, United Kingdom',
@@ -2820,7 +2952,7 @@
             updateEmailTemplate();
             loadState();
             displaySavedEmails();
-            validateChildAges(); // Added for initial validation
+            validateChildAges();
         });
 
         function toggleSection(sectionId) {
@@ -2885,7 +3017,7 @@
             childInputs.forEach(input => {
                 const age = parseInt(input.value);
                 if (isNaN(age) || age < 0 || age > 17) {
-                    input.style.borderColor = 'red';
+                    input.style.borderColor = 'var(--danger)';
                     allValid = false;
                 } else {
                     input.style.borderColor = '';
@@ -2963,12 +3095,12 @@
             }
             
             if (isNaN(value)) {
-                alert('Invalid commission rate. Please enter a valid number or percentage.');
+                alert('Invalid commission. Enter number or %.');
                 return null;
             }
             
             if (inputNormalizationMap.hasOwnProperty(s)) {
-                console.log(`Commission input "${s}" was remapped to ${inputNormalizationMap[s]}`);
+                console.log(`Normalized "${s}" to ${inputNormalizationMap[s]}`);
                 return inputNormalizationMap[s];
             }
             
@@ -2977,7 +3109,7 @@
             } else if (value >= 0 && value <= 1) {
                 return value;
             } else {
-                alert('Commission must be between 0% and 100%.');
+                alert('Commission 0-100%.');
                 return null;
             }
         }
@@ -3000,9 +3132,9 @@
             if (cancelPolicy === 'non-refundable') {
                 return "Non-refundable";
             } else if (cancelPolicy === 'refundable') {
-                return `Free cancellation until ${formatDate(cancellationDeadline)}`;
+                return `Free until ${formatDate(cancellationDeadline)}`;
             } else if (cancelPolicy === 'refundable-with-fee') {
-                return `Refundable with a fee of £${(cancelFee || 0).toFixed(2)}`;
+                return `Refundable, fee £${(cancelFee || 0).toFixed(2)}`;
             }
             return "";
         }
@@ -3012,20 +3144,18 @@
             const sourceCurrency = document.getElementById('source-currency').value;
             
             if (isNaN(amount) || amount <= 0) {
-                alert('Please enter a valid amount.');
+                alert('Enter valid amount.');
                 return;
             }
             
             try {
                 const response = await fetch(`https://open.er-api.com/v6/latest/${sourceCurrency}`);
-                if (!response.ok) {
-                    throw new Error('API request failed');
-                }
+                if (!response.ok) throw new Error('API failed');
                 const data = await response.json();
                 const rate = data.rates.GBP;
                 
                 if (!rate) {
-                    alert('Exchange rate not available for this currency.');
+                    alert('Rate unavailable.');
                     return;
                 }
                 
@@ -3037,14 +3167,14 @@
                 
                 const resultDiv = document.getElementById('converter-result');
                 resultDiv.innerHTML = `
-                    Converted Amount: £${result} (Live Rate: 1 ${sourceCurrency} = ${rate.toFixed(4)} GBP)<br>
+                    £${result} (Rate: 1 ${sourceCurrency} = ${rate.toFixed(4)} GBP)<br>
                     <div class="converter-raw-value">(raw: ${raw.toFixed(2)})</div>
                 `;
                 resultDiv.style.display = 'block';
                 saveState();
             } catch (error) {
-                console.error('Conversion error:', error);
-                alert('Error fetching exchange rate. Please check your connection or try again.');
+                console.error('Error:', error);
+                alert('Conversion failed. Check connection.');
             }
         }
 
@@ -3054,12 +3184,12 @@
             const manualRate = parseFloat(document.getElementById('manual-rate').value);
             
             if (isNaN(amount) || amount <= 0) {
-                alert('Please enter a valid amount.');
+                alert('Enter valid amount.');
                 return;
             }
             
             if (isNaN(manualRate)) {
-                alert('Please enter a valid manual rate.');
+                alert('Enter valid rate.');
                 return;
             }
             
@@ -3071,7 +3201,7 @@
             
             const resultDiv = document.getElementById('converter-result');
             resultDiv.innerHTML = `
-                Converted Amount: £${result} (Manual Rate: 1 GBP = ${manualRate.toFixed(4)} ${sourceCurrency})<br>
+                £${result} (Manual: 1 GBP = ${manualRate.toFixed(4)} ${sourceCurrency})<br>
                 <div class="converter-raw-value">(raw: ${raw.toFixed(2)})</div>
             `;
             resultDiv.style.display = 'block';
@@ -3083,7 +3213,7 @@
             
             item.classList.add('saved');
             
-            const supplierName = item.querySelector('.supplier-name').value || 'Unnamed Supplier';
+            const supplierName = item.querySelector('.supplier-name').value || 'Unnamed';
             const netPrice = parseFloat(item.querySelector('.net-price').value) || 0;
             const sellingPrice = parseFloat(item.querySelector('.selling-price').value) || 0;
             const cancelPolicy = item.querySelector('.cancellation-policy').value;
@@ -3137,11 +3267,11 @@
                         <span class="supplier-summary-value">${cancelPolicyText}</span>
                     </div>
                     <div class="supplier-summary-row">
-                        <span class="supplier-summary-label">Net Price:</span>
+                        <span class="supplier-summary-label">Net:</span>
                         <span class="supplier-summary-value">£${netPrice.toFixed(2)}</span>
                     </div>
                     <div class="supplier-summary-row">
-                        <span class="supplier-summary-label">Selling Price:</span>
+                        <span class="supplier-summary-label">Selling:</span>
                         <span class="supplier-summary-value">£${sellingPrice.toFixed(2)}</span>
                     </div>
                 `;
@@ -3214,11 +3344,11 @@
                         <span class="supplier-summary-value">${cancelPolicyText}</span>
                     </div>
                     <div class="supplier-summary-row">
-                        <span class="supplier-summary-label">Net Price:</span>
+                        <span class="supplier-summary-label">Net:</span>
                         <span class="supplier-summary-value">£${netPrice.toFixed(2)}</span>
                     </div>
                     <div class="supplier-summary-row">
-                        <span class="supplier-summary-label">Selling Price:</span>
+                        <span class="supplier-summary-label">Selling:</span>
                         <span class="supplier-summary-value">£${sellingPrice.toFixed(2)}</span>
                     </div>
                 `;
@@ -3236,7 +3366,7 @@
             updateTotals();
             updateEmailTemplate();
             saveState();
-            alert(`${supplierName} saved successfully!`);
+            alert(`${supplierName} saved!`);
         }
 
         function editSupplier(id, type) {
@@ -3267,11 +3397,11 @@
                         <input type="text" class="form-control supplier-name" placeholder="Supplier Name" style="width: 200px; display: inline-block; margin-right: 10px;" onchange="updateEmailTemplate(); saveState();">
                         <div class="checkbox-group" style="display: inline-block;">
                             <input type="checkbox" id="${id}-best" onchange="toggleBestPrice('${id}')">
-                            <label for="${id}-best">Mark Best</label>
+                            <label for="${id}-best">Best</label>
                         </div>
                         <div class="checkbox-group" style="display: inline-block;">
                             <input type="checkbox" id="${id}-upgrade" onchange="toggleUpgrade('${id}')">
-                            <label for="${id}-upgrade">Include as Upgrade</label>
+                            <label for="${id}-upgrade">Upgrade</label>
                         </div>
                         <div class="checkbox-group include-in-email-group">
                             <input type="checkbox" id="${id}-include-email" onchange="updateEmailTemplate(); saveState();">
@@ -3284,8 +3414,8 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Hotel Name (leave blank to use global)</label>
-                        <input type="text" class="form-control supplier-hotel-name" placeholder="Use global hotel name" onchange="updateEmailTemplate(); saveState();">
+                        <label>Hotel Name (or use global)</label>
+                        <input type="text" class="form-control supplier-hotel-name" placeholder="Use global" onchange="updateEmailTemplate(); saveState();">
                     </div>
                 </div>
                 <div class="form-row">
@@ -3294,29 +3424,29 @@
                         <select class="form-control cancellation-policy" onchange="toggleCancellationFee('${id}'); updateEmailTemplate(); saveState();">
                             <option value="non-refundable" selected>Non-Refundable</option>
                             <option value="refundable">Refundable</option>
-                            <option value="refundable-with-fee">Refundable with Cancellation Fee</option>
+                            <option value="refundable-with-fee">With Fee</option>
                         </select>
                     </div>
                     <div class="form-group cancellation-deadline-group" style="display:none;">
-                        <label>Free Cancellation Until</label>
-                        <input type="text" class="form-control cancellation-deadline" placeholder="Select cancellation deadline" onchange="updateEmailTemplate(); saveState();">
+                        <label>Free Until</label>
+                        <input type="text" class="form-control cancellation-deadline" placeholder="Select date" onchange="updateEmailTemplate(); saveState();">
                     </div>
                     <div class="form-group cancellation-fee-group">
-                        <label>Cancellation Fee (£)</label>
+                        <label>Fee (£)</label>
                         <input type="number" class="form-control cancellation-fee" placeholder="0.00" step="0.01" onchange="updateEmailTemplate(); saveState();">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Room Type</label>
-                        <input type="text" class="form-control room-type" placeholder="Room Type" onchange="updateEmailTemplate(); saveState();">
+                        <input type="text" class="form-control room-type" placeholder="e.g., Deluxe" onchange="updateEmailTemplate(); saveState();">
                     </div>
                     <div class="form-group">
                         <label>Rooms</label>
                         <input type="number" class="form-control rooms" min="1" value="1" onchange="updateEmailTemplate(); saveState();">
                     </div>
                     <div class="form-group">
-                        <label>Board Basis</label>
+                        <label>Board</label>
                         <select class="form-control board-basis" onchange="updateEmailTemplate(); saveState();">
                             <option>Room Only</option>
                             <option>Bed & Breakfast</option>
@@ -3328,36 +3458,36 @@
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Net Price (£)</label>
+                        <label>Net (£)</label>
                         <input type="number" class="form-control net-price" placeholder="0.00" step="0.01" onchange="updateSupplierPrice('${id}'); saveState();">
                     </div>
                     <div class="form-group">
-                        <label>Commission Rate</label>
-                        <input type="text" class="form-control commission-rate" placeholder="Use global" value="" onchange="updateSupplierPrice('${id}'); saveState();">
+                        <label>Commission</label>
+                        <input type="text" class="form-control commission-rate" placeholder="Global" value="" onchange="updateSupplierPrice('${id}'); saveState();">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Selling Price (£)</label>
+                        <label>Selling (£)</label>
                         <input type="text" class="form-control selling-price" placeholder="0.00" readonly>
                     </div>
                     <div class="form-group">
-                        <label>Commission Amount (£)</label>
+                        <label>Commission (£)</label>
                         <input type="text" class="form-control commission-amount" placeholder="0.00" readonly>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Upgrade Description</label>
-                        <input type="text" class="form-control upgrade-desc" placeholder="Upgrade description" onchange="updateEmailTemplate(); saveState();">
+                        <label>Upgrade Desc</label>
+                        <input type="text" class="form-control upgrade-desc" placeholder="Description" onchange="updateEmailTemplate(); saveState();">
                     </div>
                     <div class="form-group">
-                        <label>Upgrade Amount (£)</label>
+                        <label>Upgrade (£)</label>
                         <input type="number" class="form-control upgrade-amount" placeholder="0.00" step="0.01" onchange="updateEmailTemplate(); saveState();">
                     </div>
                 </div>
                 <div class="supplier-details">
-                    <h4>Calculation</h4>
+                    <h4>Calc</h4>
                     <div class="commission-calculation"></div>
                 </div>
                 <div class="supplier-edit-controls">
@@ -3386,19 +3516,19 @@
                         <input type="text" class="form-control supplier-name" placeholder="Supplier Name" style="width: 200px; display: inline-block; margin-right: 10px;" onchange="updateEmailTemplate(); saveState();">
                         <div class="checkbox-group" style="display: inline-block;">
                             <input type="checkbox" id="${id}-best" onchange="toggleBestPrice('${id}')">
-                            <label for="${id}-best">Mark Best</label>
+                            <label for="${id}-best">Best</label>
                         </div>
                         <div class="checkbox-group" style="display: inline-block;">
                             <input type="checkbox" id="${id}-upgrade" onchange="toggleUpgrade('${id}')">
-                            <label for="${id}-upgrade">Include as Upgrade</label>
+                            <label for="${id}-upgrade">Upgrade</label>
                         </div>
                         <div class="checkbox-group include-in-email-group">
-                            <input type="checkbox" id="${id}-include-email" checked onchange="updateEmailTemplate(); saveState();">
+                            <input type="checkbox" id="${id}-include-email" onchange="updateEmailTemplate(); saveState();">
                             <label for="${id}-include-email">Include in Email</label>
                         </div>
                         <div class="checkbox-group include-in-email-group">
                             <input type="checkbox" id="${id}-include-return" onchange="toggleReturnDetails('${id}'); updateEmailTemplate(); saveState();">
-                            <label for="${id}-include-return">Include Return</label>
+                            <label for="${id}-include-return">Return</label>
                         </div>
                     </div>
                     <div>
@@ -3411,45 +3541,45 @@
                         <select class="form-control cancellation-policy" onchange="toggleCancellationFee('${id}'); updateEmailTemplate(); saveState();">
                             <option value="non-refundable" selected>Non-Refundable</option>
                             <option value="refundable">Refundable</option>
-                            <option value="refundable-with-fee">Refundable with Cancellation Fee</option>
+                            <option value="refundable-with-fee">With Fee</option>
                         </select>
                     </div>
                     <div class="form-group cancellation-deadline-group" style="display:none;">
-                        <label>Free Cancellation Until</label>
-                        <input type="text" class="form-control cancellation-deadline" placeholder="Select cancellation deadline" onchange="updateEmailTemplate(); saveState();">
+                        <label>Free Until</label>
+                        <input type="text" class="form-control cancellation-deadline" placeholder="Select date" onchange="updateEmailTemplate(); saveState();">
                     </div>
                     <div class="form-group cancellation-fee-group">
-                        <label>Cancellation Fee (£)</label>
+                        <label>Fee (£)</label>
                         <input type="number" class="form-control cancellation-fee" placeholder="0.00" step="0.01" onchange="updateEmailTemplate(); saveState();">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Airline</label>
-                        <input type="text" class="form-control airline" placeholder="Airline" onchange="updateEmailTemplate(); saveState();">
+                        <input type="text" class="form-control airline" placeholder="e.g., BA" onchange="updateEmailTemplate(); saveState();">
                     </div>
                     <div class="form-group">
-                        <label>Outbound Departure Airport</label>
-                        <input type="text" class="form-control airport-input departure-airport" placeholder="Outbound Dep (IATA)" oninput="displayAirport(this)" onchange="updateEmailTemplate(); saveState();">
+                        <label>Outbound Dep</label>
+                        <input type="text" class="form-control airport-input departure-airport" placeholder="IATA" oninput="displayAirport(this)" onchange="updateEmailTemplate(); saveState();">
                         <div class="airport-display"></div>
                     </div>
                     <div class="form-group">
-                        <label>Outbound Arrival Airport</label>
-                        <input type="text" class="form-control airport-input arrival-airport" placeholder="Outbound Arr (IATA)" oninput="displayAirport(this)" onchange="updateEmailTemplate(); saveState();">
+                        <label>Outbound Arr</label>
+                        <input type="text" class="form-control airport-input arrival-airport" placeholder="IATA" oninput="displayAirport(this)" onchange="updateEmailTemplate(); saveState();">
                         <div class="airport-display"></div>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Outbound Departure Time</label>
+                        <label>Dep Time</label>
                         <input type="time" class="form-control outbound-departure-time" onchange="updateEmailTemplate(); saveState();">
                     </div>
                     <div class="form-group">
-                        <label>Outbound Arrival Time</label>
+                        <label>Arr Time</label>
                         <input type="time" class="form-control outbound-arrival-time" onchange="updateEmailTemplate(); saveState();">
                     </div>
                     <div class="form-group">
-                        <label>Baggage Allowance</label>
+                        <label>Baggage</label>
                         <select class="baggage-weight-select baggage-allowance" onchange="updateEmailTemplate(); saveState();">
                             <option>10kg</option>
                             <option>15kg</option>
@@ -3460,70 +3590,70 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Number of Baggage</label>
+                        <label>Baggage #</label>
                         <input type="number" class="form-control baggage-number" min="0" value="1" onchange="updateEmailTemplate(); saveState();">
                     </div>
                 </div>
                 <div class="return-controls" style="margin: 10px 0;">
-                    <button id="${id}-add-return-btn" class="btn btn-sm" onclick="document.getElementById('${id}-include-return').checked = true; toggleReturnDetails('${id}');">Add Return Details</button>
-                    <button id="${id}-remove-return-btn" class="btn btn-sm btn-danger" style="display: none;" onclick="removeReturnDetails('${id}')">Remove Return Details</button>
+                    <button id="${id}-add-return-btn" class="btn btn-sm" onclick="document.getElementById('${id}-include-return').checked = true; toggleReturnDetails('${id}');">Add Return</button>
+                    <button id="${id}-remove-return-btn" class="btn btn-sm btn-danger" style="display: none;" onclick="removeReturnDetails('${id}')">Remove Return</button>
                 </div>
                 <div id="${id}-return-section" class="return-section" style="display: none;">
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Return Departure Airport</label>
-                            <input type="text" class="form-control airport-input return-departure-airport" placeholder="Return Dep (IATA)" oninput="displayAirport(this)" onchange="updateEmailTemplate(); saveState();">
+                            <label>Return Dep</label>
+                            <input type="text" class="form-control airport-input return-departure-airport" placeholder="IATA" oninput="displayAirport(this)" onchange="updateEmailTemplate(); saveState();">
                             <div class="airport-display"></div>
                         </div>
                         <div class="form-group">
-                            <label>Return Arrival Airport</label>
-                            <input type="text" class="form-control airport-input return-arrival-airport" placeholder="Return Arr (IATA)" oninput="displayAirport(this)" onchange="updateEmailTemplate(); saveState();">
+                            <label>Return Arr</label>
+                            <input type="text" class="form-control airport-input return-arrival-airport" placeholder="IATA" oninput="displayAirport(this)" onchange="updateEmailTemplate(); saveState();">
                             <div class="airport-display"></div>
                         </div>
                     </div>
                     <div class="form-row">
                         <div class="form-group">
-                            <label>Return Departure Time</label>
+                            <label>Return Dep Time</label>
                             <input type="time" class="form-control return-departure-time" onchange="updateEmailTemplate(); saveState();">
                         </div>
                         <div class="form-group">
-                            <label>Return Arrival Time</label>
+                            <label>Return Arr Time</label>
                             <input type="time" class="form-control return-arrival-time" onchange="updateEmailTemplate(); saveState();">
                         </div>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Net Price (£)</label>
+                        <label>Net (£)</label>
                         <input type="number" class="form-control net-price" placeholder="0.00" step="0.01" onchange="updateSupplierPrice('${id}'); saveState();">
                     </div>
                     <div class="form-group">
-                        <label>Commission Rate</label>
-                        <input type="text" class="form-control commission-rate" placeholder="Use global" value="" onchange="updateSupplierPrice('${id}'); saveState();">
+                        <label>Commission</label>
+                        <input type="text" class="form-control commission-rate" placeholder="Global" value="" onchange="updateSupplierPrice('${id}'); saveState();">
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Selling Price (£)</label>
+                        <label>Selling (£)</label>
                         <input type="text" class="form-control selling-price" placeholder="0.00" readonly>
                     </div>
                     <div class="form-group">
-                        <label>Commission Amount (£)</label>
+                        <label>Commission (£)</label>
                         <input type="text" class="form-control commission-amount" placeholder="0.00" readonly>
                     </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Upgrade Description</label>
-                        <input type="text" class="form-control upgrade-desc" placeholder="Upgrade description" onchange="updateEmailTemplate(); saveState();">
+                        <label>Upgrade Desc</label>
+                        <input type="text" class="form-control upgrade-desc" placeholder="Description" onchange="updateEmailTemplate(); saveState();">
                     </div>
                     <div class="form-group">
-                        <label>Upgrade Amount (£)</label>
+                        <label>Upgrade (£)</label>
                         <input type="number" class="form-control upgrade-amount" placeholder="0.00" step="0.01" onchange="updateEmailTemplate(); saveState();">
                     </div>
                 </div>
                 <div class="supplier-details">
-                    <h4>Calculation</h4>
+                    <h4>Calc</h4>
                     <div class="commission-calculation"></div>
                 </div>
                 <div class="supplier-edit-controls">
@@ -3547,14 +3677,13 @@
             section.style.display = 'none';
             addBtn.style.display = 'inline-block';
             removeBtn.style.display = 'none';
-            // Clear the input values
             section.querySelectorAll('input').forEach(input => input.value = '');
             updateEmailTemplate();
             saveState();
         }
 
         function removeSupplier(id) {
-            if (confirm('Are you sure you want to remove this supplier option?')) {
+            if (confirm('Remove this option?')) {
                 const element = document.getElementById(id);
                 if (element) {
                     savedHotelSuppliers = savedHotelSuppliers.filter(s => s.id !== id);
@@ -3663,7 +3792,7 @@
             sellingPriceInput.value = sellingPrice.toFixed(2);
             commissionAmountInput.value = commissionAmount.toFixed(2);
             
-            calculationDiv.textContent = `${netPrice.toFixed(2)} × ${commissionRate.toFixed(3)} = ${commissionAmount.toFixed(2)} → Selling Price £${sellingPrice.toFixed(2)}`;
+            calculationDiv.textContent = `${netPrice.toFixed(2)} × ${commissionRate.toFixed(3)} = ${commissionAmount.toFixed(2)} → £${sellingPrice.toFixed(2)}`;
             
             updateTotals();
             updateEmailTemplate();
@@ -3771,7 +3900,7 @@
                 updateEmailTemplate();
                 saveState();
             } else {
-                alert('No eligible options found. Please add some supplier options first.');
+                alert('Add options first.');
             }
         }
 
@@ -3820,14 +3949,14 @@
         function updateEmailTemplate() {
             if (isEditing) return;
             const bookingType = document.getElementById('booking-type').value;
-            const customerName = document.getElementById('customer-name').value || '[Customer Name]';
+            const customerName = document.getElementById('customer-name').value || '[Name]';
             const destination = document.getElementById('destination').value || '[Destination]';
-            const hotelName = document.getElementById('hotel-name').value || '[Hotel Name]';
+            const hotelName = document.getElementById('hotel-name').value || '[Hotel]';
             const agentName = document.getElementById('agent-name').value;
             const agentEmail = document.getElementById('agent-email').value;
             const agentPhone = document.getElementById('agent-phone').value;
             const excludesNote = document.getElementById('excludes-note').value;
-            const quoteReference = document.getElementById('quote-reference').value || '[quote_reference]';
+            const quoteReference = document.getElementById('quote-reference').value || '[ref]';
             
             const depositAmount = document.getElementById('deposit-amount').value || '[deposit]';
             
@@ -3849,7 +3978,7 @@
             const flightChildAges = getChildAgesList('flight');
             
             const balanceDueInput = document.getElementById('balance-due-date').value;
-            const balanceDueDate = balanceDueInput ? formatDate(balanceDueInput) : '[balance_due_date]';
+            const balanceDueDate = balanceDueInput ? formatDate(balanceDueInput) : '[due]';
             
             const flightDatesInput = document.getElementById('flight-dates').value;
             let departDate = '', returnDate = '';
@@ -3859,7 +3988,6 @@
                 returnDate = dates[1] ? formatDate(dates[1]) : '';
             }
             
-            // Hotel header logic
             const hotelItems = document.querySelectorAll('#hotel-comparison .supplier-comparison-item');
             const includedHotelItems = Array.from(hotelItems).filter(item => item.querySelector('input[id$="-include-email"]').checked);
             const numIncludedHotels = includedHotelItems.length;
@@ -3889,9 +4017,9 @@
                     const upgradeAmountInput = item.querySelector('.upgrade-amount');
                     const supplierHotelNameInput = item.querySelector('.supplier-hotel-name');
                     
-                    const roomType = roomTypeInput ? roomTypeInput.value : '[Room Type]';
+                    const roomType = roomTypeInput ? roomTypeInput.value : '[Room]';
                     const rooms = parseInt(roomsInput ? roomsInput.value : '1') || 1;
-                    const boardBasis = boardBasisInput ? boardBasisInput.value : '[Board Basis]';
+                    const boardBasis = boardBasisInput ? boardBasisInput.value : '[Board]';
                     const upgradeDesc = upgradeDescInput ? upgradeDescInput.value : '';
                     const upgradeAmount = parseFloat(upgradeAmountInput ? upgradeAmountInput.value : '0') || 0;
                     const supplierHotelName = supplierHotelNameInput ? supplierHotelNameInput.value.trim() : '';
@@ -4037,24 +4165,24 @@
                 
                 templateParts.push(`Hi ${boldWrap(customerName)},`);
                 templateParts.push('');
-                templateParts.push(`We can offer for ${travelerText}`);
+                templateParts.push(`For ${travelerText}`);
                 templateParts.push('');
                 templateParts.push(`${boldWrap(headerHotelName.toUpperCase() + (destination ? ', ' + destination.toUpperCase() : ''))}`);
                 templateParts.push(`${boldWrap(startDate + '-' + endDate)} - ${boldWrap(nights + ' Night' + (parseInt(nights) > 1 ? 's' : ''))}`);
                 templateParts.push('');
                 templateParts.push(hotelOptions);
-                templateParts.push(`${boldWrap('Total Cost')} ${boldWrap('£' + Math.round(parseFloat(hotelSellingRounded)).toFixed(0))} per family`);
+                templateParts.push(`${boldWrap('Total')} ${boldWrap('£' + Math.round(parseFloat(hotelSellingRounded)).toFixed(0))} per family`);
                 if (excludesNote) {
                     templateParts.push(`${boldWrap('Excludes')} ${excludesNote}\n`);
                 }
                 templateParts.push(`${boldWrap('Deposit')} ${boldWrap('£' + depositAmount + 'pp')}`);
-                templateParts.push(`${boldWrap('Balance due by')} ${boldWrap(balanceDueDate)}`);
+                templateParts.push(`${boldWrap('Balance by')} ${boldWrap(balanceDueDate)}`);
                 templateParts.push('');
-                templateParts.push(`${boldWrap('Includes 5GB eSim Promo')}`);
+                templateParts.push(`${boldWrap('Includes 5GB eSim')}`);
                 templateParts.push('');
-                templateParts.push('Prices are live and subject to change prior to confirmation.');
+                templateParts.push('Prices live, subject to change.');
                 templateParts.push('');
-                templateParts.push(`Kind regards`);
+                templateParts.push(`Regards`);
                 templateParts.push(boldWrap(agentName));
                 templateParts.push('');
                 templateParts.push('Bradley Travelstore');
@@ -4062,9 +4190,9 @@
                 templateParts.push(`E: ${boldWrap(agentEmail)}`);
                 templateParts.push(`W: ${boldWrap(websiteUrl)}`);
                 templateParts.push('');
-                templateParts.push('We are fully ATOL bonded for your peace of mind.');
+                templateParts.push('Fully ATOL bonded.');
                 templateParts.push('');
-                templateParts.push(`Your Quote Reference #${boldWrap(quoteReference)}`);
+                templateParts.push(`Ref #${boldWrap(quoteReference)}`);
             } else if (bookingType === 'flight') {
                 let travelerText = `${boldWrap(flightAdults + ' Adult' + (parseInt(flightAdults) > 1 ? 's' : ''))}`;
                 if (parseInt(flightChildren) > 0) {
@@ -4074,26 +4202,26 @@
                 
                 templateParts.push(`Hi ${boldWrap(customerName)},`);
                 templateParts.push('');
-                templateParts.push(`We can offer for ${travelerText}.`);
+                templateParts.push(`For ${travelerText}.`);
                 templateParts.push('');
                 templateParts.push(flightOptions);
-                templateParts.push(`${boldWrap('Total Cost')} ${boldWrap('£' + Math.round(parseFloat(flightSellingRounded)).toFixed(0))} per family`);
+                templateParts.push(`${boldWrap('Total')} ${boldWrap('£' + Math.round(parseFloat(flightSellingRounded)).toFixed(0))} per family`);
                 if (excludesNote) {
                     templateParts.push(`${boldWrap('Excludes')} ${excludesNote}\n`);
                 }
                 templateParts.push(`${boldWrap('Deposit')} ${boldWrap('£' + depositAmount + 'pp')}`);
-                templateParts.push(`${boldWrap('Balance due by')} ${boldWrap(balanceDueDate)}`);
+                templateParts.push(`${boldWrap('Balance by')} ${boldWrap(balanceDueDate)}`);
                 templateParts.push('');
-                templateParts.push(`${boldWrap('Our Flight Includes')}`);
+                templateParts.push(`${boldWrap('Includes')}`);
                 templateParts.push('');
-                templateParts.push(`${boldWrap('Free 5GB eSim Promo included')}`);
-                templateParts.push(`${boldWrap('Flights and airport taxes')}`);
-                templateParts.push(`${boldWrap('2 x Small Hand Baggage allowance')}`);
-                templateParts.push(`${boldWrap('Fully ATOL bonded')}`);
+                templateParts.push(`${boldWrap('5GB eSim Promo')}`);
+                templateParts.push(`${boldWrap('Flights & taxes')}`);
+                templateParts.push(`${boldWrap('Hand baggage')}`);
+                templateParts.push(`${boldWrap('ATOL bonded')}`);
                 templateParts.push('');
-                templateParts.push('Prices are live and subject to change prior to confirmation.');
+                templateParts.push('Prices live, subject to change.');
                 templateParts.push('');
-                templateParts.push(`Kind regards`);
+                templateParts.push(`Regards`);
                 templateParts.push(boldWrap(agentName));
                 templateParts.push('');
                 templateParts.push('Bradley Travelstore');
@@ -4101,9 +4229,9 @@
                 templateParts.push(`E: ${boldWrap(agentEmail)}`);
                 templateParts.push(`W: ${boldWrap(websiteUrl)}`);
                 templateParts.push('');
-                templateParts.push('We are fully ATOL bonded for your peace of mind.');
+                templateParts.push('Fully ATOL bonded.');
                 templateParts.push('');
-                templateParts.push(`Your Quote Reference #${boldWrap(quoteReference)}`);
+                templateParts.push(`Ref #${boldWrap(quoteReference)}`);
             } else {
                 let travelerText = `${boldWrap(flightAdults + ' Adult' + (parseInt(flightAdults) > 1 ? 's' : ''))}`;
                 if (parseInt(flightChildren) > 0) {
@@ -4113,32 +4241,32 @@
                 
                 templateParts.push(`Hi ${boldWrap(customerName)},`);
                 templateParts.push('');
-                templateParts.push(`We can offer for ${travelerText}.`);
+                templateParts.push(`For ${travelerText}.`);
                 templateParts.push('');
                 templateParts.push(flightOptions);
                 templateParts.push(`${boldWrap(headerHotelName.toUpperCase() + (destination ? ', ' + destination.toUpperCase() : ''))}`);
                 templateParts.push(`${boldWrap(startDate + '-' + endDate)} - ${boldWrap(nights + ' Night' + (parseInt(nights) > 1 ? 's' : ''))}`);
                 templateParts.push('');
                 templateParts.push(hotelOptions);
-                templateParts.push(`${boldWrap('Total Package Cost')} ${boldWrap('£' + Math.round(parseFloat(totalSellingRounded)).toFixed(0))}`);
+                templateParts.push(`${boldWrap('Package Total')} ${boldWrap('£' + Math.round(parseFloat(totalSellingRounded)).toFixed(0))}`);
                 if (excludesNote) {
                     templateParts.push(`${boldWrap('Excludes')} ${excludesNote}\n`);
                 }
                 templateParts.push('');
                 templateParts.push(`${boldWrap('Deposit')} ${boldWrap('£' + depositAmount + 'pp')}`);
-                templateParts.push(`${boldWrap('Balance due by')} ${boldWrap(balanceDueDate)}`);
+                templateParts.push(`${boldWrap('Balance by')} ${boldWrap(balanceDueDate)}`);
                 templateParts.push('');
-                templateParts.push(`${boldWrap('Our Package Includes')}`);
+                templateParts.push(`${boldWrap('Includes')}`);
                 templateParts.push('');
-                templateParts.push(`${boldWrap('Free 5GB eSim Promo included')}`);
-                templateParts.push(`${boldWrap('Return flights and airport taxes')}`);
-                templateParts.push(`${boldWrap('2 x Small Hand Baggage allowance')}`);
-                templateParts.push(`${boldWrap(nights + ' Nights accommodation')}`);
-                templateParts.push(`${boldWrap('Fully ATOL bonded holiday')}`);
+                templateParts.push(`${boldWrap('5GB eSim Promo')}`);
+                templateParts.push(`${boldWrap('Return flights & taxes')}`);
+                templateParts.push(`${boldWrap('Hand baggage')}`);
+                templateParts.push(`${boldWrap(nights + ' Nights')}`);
+                templateParts.push(`${boldWrap('ATOL bonded')}`);
                 templateParts.push('');
-                templateParts.push('Prices are live and subject to change prior to confirmation.');
+                templateParts.push('Prices live, subject to change.');
                 templateParts.push('');
-                templateParts.push(`Kind regards`);
+                templateParts.push(`Regards`);
                 templateParts.push(boldWrap(agentName));
                 templateParts.push('');
                 templateParts.push('Bradley Travelstore');
@@ -4146,9 +4274,9 @@
                 templateParts.push(`E: ${boldWrap(agentEmail)}`);
                 templateParts.push(`W: ${boldWrap(websiteUrl)}`);
                 templateParts.push('');
-                templateParts.push('We are fully ATOL bonded for your peace of mind.');
+                templateParts.push('Fully ATOL bonded.');
                 templateParts.push('');
-                templateParts.push(`Your Quote Reference #${boldWrap(quoteReference)}`);
+                templateParts.push(`Ref #${boldWrap(quoteReference)}`);
             }
             
             const template = templateParts.join('\n');
@@ -4172,16 +4300,15 @@
                 textToCopy = output.innerHTML.replace(/<br>/g, '\n').replace(/&nbsp; /g, '  ');
             }
             navigator.clipboard.writeText(textToCopy).then(() => {
-                alert('Email template copied to clipboard!');
+                alert('Copied!');
             }).catch(() => {
-                // Fallback for older browsers
                 const textArea = document.createElement('textarea');
                 textArea.value = textToCopy;
                 document.body.appendChild(textArea);
                 textArea.select();
                 document.execCommand('copy');
                 document.body.removeChild(textArea);
-                alert('Email template copied to clipboard!');
+                alert('Copied!');
             });
         }
 
@@ -4192,7 +4319,7 @@
                 template.contentEditable = true;
                 template.focus();
                 isEditing = true;
-                btn.textContent = 'Finish Edit';
+                btn.textContent = 'Finish';
                 btn.classList.remove('btn');
                 btn.classList.add('btn-warning');
             } else {
@@ -4211,13 +4338,13 @@
 
         function saveEmail() {
             if (!validateCustomerInfo()) {
-                alert('Please fill in Customer Name and Destination before saving email.');
+                alert('Fill Client Name & Destination.');
                 document.getElementById('customer').scrollIntoView();
                 return;
             }
             
             if (!validateChildAges()) {
-                alert('Please provide valid ages for all children (0-17).');
+                alert('Valid child ages (0-17).');
                 return;
             }
 
@@ -4238,7 +4365,7 @@
             });
             localStorage.setItem('savedEmails', JSON.stringify(saved));
             displaySavedEmails();
-            alert('Email saved successfully!');
+            alert('Saved!');
         }
 
         function displaySavedEmails() {
@@ -4246,7 +4373,7 @@
             const list = document.getElementById('saved-list');
             list.innerHTML = '';
             if (saved.length === 0) {
-                list.innerHTML = '<p>No saved emails yet.</p>';
+                list.innerHTML = '<p>No saved quotes.</p>';
                 return;
             }
             saved.forEach(item => {
@@ -4273,7 +4400,7 @@
             const item = saved.find(s => s.id === id);
             if (item) {
                 navigator.clipboard.writeText(item.content).then(() => {
-                    alert('Saved email copied to clipboard!');
+                    alert('Copied!');
                 }).catch(() => {
                     const textArea = document.createElement('textarea');
                     textArea.value = item.content;
@@ -4281,7 +4408,7 @@
                     textArea.select();
                     document.execCommand('copy');
                     document.body.removeChild(textArea);
-                    alert('Saved email copied to clipboard!');
+                    alert('Copied!');
                 });
             }
         }
@@ -4311,7 +4438,7 @@
                 template.contentEditable = true;
                 isEditing = true;
                 const btn = document.getElementById('edit-btn');
-                btn.textContent = 'Finish Edit';
+                btn.textContent = 'Finish';
                 btn.classList.remove('btn');
                 btn.classList.add('btn-warning');
                 template.scrollIntoView({ behavior: 'smooth' });
@@ -4333,12 +4460,12 @@
                 saved[index].timestamp = new Date().toISOString();
                 localStorage.setItem('savedEmails', JSON.stringify(saved));
                 displaySavedEmails();
-                alert('Saved email updated!');
+                alert('Updated!');
             }
         }
 
         function deleteSaved(id) {
-            if (confirm('Are you sure you want to delete this saved email?')) {
+            if (confirm('Delete?')) {
                 let saved = JSON.parse(localStorage.getItem('savedEmails') || '[]');
                 saved = saved.filter(s => s.id !== id);
                 localStorage.setItem('savedEmails', JSON.stringify(saved));
@@ -4347,13 +4474,12 @@
         }
 
         function resetState() {
-            if (confirm('This will clear all data except saved emails and totals. Are you sure?')) {
+            if (confirm('Clear all except saved?')) {
                 localStorage.removeItem('bradleyTravelState');
                 location.reload();
             }
         }
 
-        // Local Storage Functions
         function saveState() {
             const state = {
                 customer: {
@@ -4401,20 +4527,17 @@
                 }
             };
 
-            // Save collapsed states
             const sections = ['customer', 'currency', 'hotel', 'flight', 'totals', 'email'];
             sections.forEach(id => {
                 const sec = document.getElementById(id);
                 state.collapsed[id] = sec.classList.contains('collapsed');
             });
 
-            // Save hotel suppliers
             document.querySelectorAll('#hotel-comparison .supplier-comparison-item').forEach(item => {
                 const data = collectSupplierData(item, 'hotel');
                 state.suppliers.hotel.push(data);
             });
 
-            // Save flight suppliers
             document.querySelectorAll('#flight-comparison .supplier-comparison-item').forEach(item => {
                 const data = collectSupplierData(item, 'flight');
                 state.suppliers.flight.push(data);
@@ -4471,17 +4594,15 @@
                 try {
                     state = JSON.parse(stateStr);
                 } catch (e) {
-                    console.error('Invalid saved state:', e);
+                    console.error('Invalid state:', e);
                 }
             }
 
-            // Populate static fields
             if (state) {
                 document.getElementById('customer-name').value = state.customer.name || '';
                 document.getElementById('destination').value = state.customer.destination || '';
                 document.getElementById('deposit-amount').value = state.customer.deposit || '';
 
-                // Currency
                 if (state.currency) {
                     document.getElementById('source-amount').value = state.currency.amount || '';
                     document.getElementById('source-currency').value = state.currency.currency || 'EUR';
@@ -4490,8 +4611,8 @@
                         convertedAmount = state.currency.result;
                         const resultDiv = document.getElementById('converter-result');
                         resultDiv.innerHTML = `
-                            Converted Amount: £${state.currency.result.toFixed(2)}
-                            <div class="converter-raw-value">(raw: N/A - loaded from state)</div>
+                            Converted: £${state.currency.result.toFixed(2)}
+                            <div class="converter-raw-value">(loaded)</div>
                         `;
                         resultDiv.style.display = 'block';
                     }
@@ -4502,7 +4623,6 @@
                 document.getElementById('balance-due-date').value = state.hotel.balanceDue || '';
                 document.getElementById('excludes-note').value = state.hotel.excludes || '';
 
-                // Set counters
                 document.getElementById('hotel-adults-count').textContent = state.hotel.adults || '2';
                 document.getElementById('hotel-children-count').textContent = state.hotel.children || '0';
                 document.getElementById('hotel-infants-count').textContent = state.hotel.infants || '0';
@@ -4511,14 +4631,13 @@
                 document.getElementById('flight-children-count').textContent = state.flight.children || '0';
                 document.getElementById('flight-infants-count').textContent = state.flight.infants || '0';
 
-                // Update child ages
                 updateChildAges('hotel');
                 setTimeout(() => {
                     const hotelInputs = document.querySelectorAll('#hotel-child-ages .child-age-input');
                     (state.hotel.childAges || []).forEach((age, i) => {
                         if (hotelInputs[i]) hotelInputs[i].value = age;
                     });
-                    validateChildAges(); // Validate after setting
+                    validateChildAges();
                 }, 0);
 
                 updateChildAges('flight');
@@ -4527,10 +4646,9 @@
                     (state.flight.childAges || []).forEach((age, i) => {
                         if (flightInputs[i]) flightInputs[i].value = age;
                     });
-                    validateChildAges(); // Validate after setting
+                    validateChildAges();
                 }, 0);
 
-                // Set dates
                 if (state.hotel.checkin) {
                     const dates = state.hotel.checkin.split(' to ');
                     if (dates.length === 2) {
@@ -4566,7 +4684,6 @@
                 if (selectedEl) selectedEl.classList.add('selected');
             }
 
-            // Restore collapsed states
             const sections = ['customer', 'currency', 'hotel', 'flight', 'totals', 'email'];
             sections.forEach(id => {
                 const sec = document.getElementById(id);
@@ -4578,7 +4695,6 @@
                 }
             });
 
-            // Suppliers
             const hotelComparison = document.getElementById('hotel-comparison');
             const flightComparison = document.getElementById('flight-comparison');
             savedHotelSuppliers = [];
@@ -4597,7 +4713,6 @@
                     initCancellationPickers(document.getElementById(newId));
                     if (data.isSaved) {
                         document.getElementById(newId).classList.add('saved');
-                        // Hide saved fields
                         const savedItem = document.getElementById(newId);
                         savedItem.querySelectorAll('.form-row, .supplier-details, .return-controls, .return-section').forEach(el => el.style.display = 'none');
                         generateHotelSummary(newId, data);
@@ -4620,7 +4735,6 @@
                     initCancellationPickers(document.getElementById(newId));
                     if (data.isSaved) {
                         document.getElementById(newId).classList.add('saved');
-                        // Hide saved fields
                         const savedItem = document.getElementById(newId);
                         savedItem.querySelectorAll('.form-row, .supplier-details, .return-controls, .return-section').forEach(el => el.style.display = 'none');
                         generateFlightSummary(newId, data);
@@ -4710,11 +4824,11 @@
                     <span class="supplier-summary-value">${cancelText}</span>
                 </div>
                 <div class="supplier-summary-row">
-                    <span class="supplier-summary-label">Net Price:</span>
+                    <span class="supplier-summary-label">Net:</span>
                     <span class="supplier-summary-value">£${(data.netPrice || 0).toFixed(2)}</span>
                 </div>
                 <div class="supplier-summary-row">
-                    <span class="supplier-summary-label">Selling Price:</span>
+                    <span class="supplier-summary-label">Selling:</span>
                     <span class="supplier-summary-value">£${(data.sellingPrice || 0).toFixed(2)}</span>
                 </div>
             `;
@@ -4764,11 +4878,11 @@
                     <span class="supplier-summary-value">${cancelText}</span>
                 </div>
                 <div class="supplier-summary-row">
-                    <span class="supplier-summary-label">Net Price:</span>
+                    <span class="supplier-summary-label">Net:</span>
                     <span class="supplier-summary-value">£${(data.netPrice || 0).toFixed(2)}</span>
                 </div>
                 <div class="supplier-summary-row">
-                    <span class="supplier-summary-label">Selling Price:</span>
+                    <span class="supplier-summary-label">Selling:</span>
                     <span class="supplier-summary-value">£${(data.sellingPrice || 0).toFixed(2)}</span>
                 </div>
             `;
