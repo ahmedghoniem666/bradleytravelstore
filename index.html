@@ -3171,9 +3171,9 @@
             const commissionRate = parseCommissionRate(commissionInput);
             
             if (commissionRate !== null) {
-                const multiplier = 1 + commissionRate;
+                const divisor = (1 - commissionRate).toFixed(3);
                 document.getElementById('commission-display-text').textContent = 
-                    `${(commissionRate * 100).toFixed(2)}% (multiplier ${multiplier.toFixed(3)})`;
+                    `${(commissionRate * 100).toFixed(2)}% (divisor ${divisor})`;
                 
                 document.getElementById('commission-interpretation').textContent = 
                     `Interpreted rate: ${(commissionRate * 100).toFixed(2)}% (${commissionRate.toFixed(3)})`;
@@ -3223,8 +3223,11 @@
         }
 
         function calculateCommission(baseAmount, commissionRate) {
-            const commissionAmount = roundToTwo(baseAmount * commissionRate);
-            const sellingPrice = roundToTwo(baseAmount + commissionAmount);
+            if (commissionRate >= 1 || commissionRate < 0) {
+                return { commissionAmount: 0, sellingPrice: baseAmount };
+            }
+            const sellingPrice = roundToTwo(baseAmount / (1 - commissionRate));
+            const commissionAmount = roundToTwo(sellingPrice * commissionRate);
             
             return {
                 commissionAmount,
@@ -3523,6 +3526,8 @@
             
             if (checkbox.checked) {
                 item.classList.add('best-price');
+                const includeEmailCb = item.querySelector('input[id$="-include-email"]');
+                if (includeEmailCb) includeEmailCb.checked = true;
             } else {
                 item.classList.remove('best-price');
             }
@@ -3583,7 +3588,8 @@
             if (commissionAmountInput) commissionAmountInput.value = commissionAmount.toFixed(2);
             
             if (calculationDiv) {
-                calculationDiv.textContent = `${netPrice.toFixed(2)} × ${commissionRate.toFixed(3)} = ${commissionAmount.toFixed(2)} → Selling Price £${sellingPrice.toFixed(2)}`;
+                const divisor = (1 - commissionRate).toFixed(3);
+                calculationDiv.textContent = `${netPrice.toFixed(2)} / ${divisor} = ${sellingPrice.toFixed(2)}`;
             }
             
             if (item.closest('.hotel-option-section')) {
@@ -3621,7 +3627,11 @@
                     row.classList.remove('best-price');
                     const checkbox = row.querySelector('input[type="checkbox"][id$="-best"]');
                     if (checkbox) checkbox.checked = (index === 0);
-                    if (index === 0) row.classList.add('best-price');
+                    const includeEmailCb = row.querySelector('input[id$="-include-email"]');
+                    if (includeEmailCb) includeEmailCb.checked = (index === 0);
+                    if (index === 0) {
+                        row.classList.add('best-price');
+                    }
                 });
             });
             calculateBalanceDueDate();
@@ -3651,7 +3661,11 @@
                 row.classList.remove('best-price');
                 const checkbox = row.querySelector('input[type="checkbox"][id$="-best"]');
                 if (checkbox) checkbox.checked = (index === 0);
-                if (index === 0) row.classList.add('best-price');
+                const includeEmailCb = row.querySelector('input[id$="-include-email"]');
+                if (includeEmailCb) includeEmailCb.checked = (index === 0);
+                if (index === 0) {
+                    row.classList.add('best-price');
+                }
             });
         }
 
