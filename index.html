@@ -832,6 +832,13 @@
             font-size: 0.9rem;
         }
         
+        .price-per-room-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        
         @media (max-width: 768px) {
             .form-row {
                 flex-direction: column;
@@ -1151,14 +1158,6 @@
                     <button class="btn btn-secondary" onclick="highlightBestFlightPrice()"><i class="fas fa-star"></i> Highlight Best Price</button>
                 </div>
                 
-                <div class="optional-extras-section">
-                    <h4>Optional Extras</h4>
-                    <div id="optional-extras-list">
-                        <!-- Dynamic extras added here -->
-                    </div>
-                    <button class="btn btn-sm" onclick="addOptionalExtra()"><i class="fas fa-plus"></i> Add Optional Extra</button>
-                </div>
-                
                 <div class="section-totals">
                     <h3>Flight Totals</h3>
                     <div class="totals-row">
@@ -1174,6 +1173,20 @@
                         <span id="flight-total-selling-rounded" class="totals-value">£0.00</span>
                     </div>
                 </div>
+            </div>
+        </section>
+
+        <section id="optional-extras" class="card" style="display: none;">
+            <div class="section-toggle" onclick="toggleSection('optional-extras')">
+                <h2 class="section-title">Optional Extras</h2>
+                <i class="fas fa-chevron-down"></i>
+            </div>
+            
+            <div class="section-content">
+                <div id="optional-extras-list">
+                    <!-- Dynamic extras added here -->
+                </div>
+                <button class="btn btn-sm" onclick="addOptionalExtra()"><i class="fas fa-plus"></i> Add Optional Extra</button>
             </div>
         </section>
 
@@ -1222,13 +1235,13 @@
                 <div class="booking-type-selector">
                     <div class="form-group">
                         <label for="booking-type">Booking Type</label>
-                        <select id="booking-type" class="form-control" onchange="updateEmailTemplate(); saveState();">
+                        <select id="booking-type" class="form-control" onchange="toggleSectionsBasedOnBookingType(); saveState();">
                             <option value="hotel">Hotel Only</option>
                             <option value="flight">Flight Only</option>
                             <option value="package">Package (Flight + Hotel)</option>
                         </select>
                     </div>
-                    <div class="form-group">
+                    <div class="price-per-room-group" id="price-per-room-group" style="display: block;">
                         <label>
                             <input type="checkbox" id="price-per-room" onchange="updateEmailTemplate(); saveState();"> Price per Room
                         </label>
@@ -1334,6 +1347,15 @@
             </div>
         </div>
     </footer>
+
+    <datalist id="roomTypes">
+        <option value="Standard Double/Twin">
+        <option value="Superior Double/Twin">
+        <option value="Deluxe Double/Twin">
+        <option value="Junior Suite">
+        <option value="Family Room">
+        <option value="Other">
+    </datalist>
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -3018,6 +3040,7 @@
             updateCommission();
             updateAgentSignature();
             updateEmailTemplate();
+            toggleSectionsBasedOnBookingType();
             loadState();
             validateChildAges();
             // Add initial suppliers
@@ -3025,6 +3048,33 @@
             addFlightOption();
             addOptionalExtra(); // Add one initial optional extra
         });
+
+        function toggleSectionsBasedOnBookingType() {
+            const bookingType = document.getElementById('booking-type').value;
+            const hotelSection = document.getElementById('hotel');
+            const flightSection = document.getElementById('flight');
+            const optionalExtrasSection = document.getElementById('optional-extras');
+            const pricePerRoomGroup = document.getElementById('price-per-room-group');
+
+            if (bookingType === 'hotel') {
+                hotelSection.style.display = 'block';
+                flightSection.style.display = 'none';
+                if (optionalExtrasSection) optionalExtrasSection.style.display = 'none';
+                if (pricePerRoomGroup) pricePerRoomGroup.style.display = 'block';
+            } else if (bookingType === 'flight') {
+                hotelSection.style.display = 'none';
+                flightSection.style.display = 'block';
+                if (optionalExtrasSection) optionalExtrasSection.style.display = 'none';
+                if (pricePerRoomGroup) pricePerRoomGroup.style.display = 'none';
+            } else { // package
+                hotelSection.style.display = 'block';
+                flightSection.style.display = 'block';
+                if (optionalExtrasSection) optionalExtrasSection.style.display = 'block';
+                if (pricePerRoomGroup) pricePerRoomGroup.style.display = 'block';
+            }
+            updateTotals();
+            updateEmailTemplate();
+        }
 
         function toggleSection(sectionId) {
             const section = document.getElementById(sectionId);
@@ -3269,7 +3319,7 @@
                 <td><input type="text" class="form-control commission-rate" placeholder="Use global" value="${data.commissionRate || ''}" onchange="updateSupplierPrice('${id}'); saveState();"></td>
                 <td><input type="text" class="form-control selling-price" readonly placeholder="0.00" value="${(data.sellingPrice || 0).toFixed(2)}"></td>
                 <td><input type="text" class="form-control commission-amount" readonly placeholder="0.00" value="${(data.commissionAmount || 0).toFixed(2)}"></td>
-                <td><input type="text" class="form-control room-type" placeholder="Room Type" value="${data.roomType || ''}" onchange="updateEmailTemplate(); saveState();"></td>
+                <td><input type="text" class="form-control room-type" list="roomTypes" placeholder="Room Type" value="${data.roomType || ''}" onchange="updateEmailTemplate(); saveState();"></td>
                 <td><input type="number" class="form-control rooms" min="1" value="${data.rooms || 1}" onchange="updateEmailTemplate(); saveState();"></td>
                 <td><select class="form-control board-basis" onchange="updateEmailTemplate(); saveState();">
                     <option ${data.boardBasis === 'Room Only' ? 'selected' : ''}>Room Only</option>
@@ -3757,162 +3807,168 @@
             
             let hotelOptions = '';
             let hotelOptionsCount = 0;
-            hotelItems.forEach(item => {
-                const includeInEmail = item.querySelector('input[id$="-include-email"]');
-                const upgradeCheckbox = item.querySelector('input[id$="-upgrade"]');
-                
-                if (includeInEmail && includeInEmail.checked) {
-                    const supplierHotelNameInput = item.querySelector('.supplier-hotel-name');
-                    const roomTypeInput = item.querySelector('.room-type');
-                    const roomsInput = item.querySelector('.rooms');
-                    const boardBasisInput = item.querySelector('.board-basis');
-                    const cancelPolicySelect = item.querySelector('.cancellation-policy');
-                    const cancelFeeInput = item.querySelector('.cancellation-fee');
-                    const deadlineInput = item.querySelector('.cancellation-deadline');
-                    const upgradeDescInput = item.querySelector('.upgrade-desc');
-                    const upgradeAmountInput = item.querySelector('.upgrade-amount');
+            if (bookingType === 'hotel' || bookingType === 'package') {
+                hotelItems.forEach(item => {
+                    const includeInEmail = item.querySelector('input[id$="-include-email"]');
+                    const upgradeCheckbox = item.querySelector('input[id$="-upgrade"]');
                     
-                    const supplierHotelName = supplierHotelNameInput ? supplierHotelNameInput.value.trim() : '';
-                    const roomType = roomTypeInput ? roomTypeInput.value : '[Room Type]';
-                    const rooms = parseInt(roomsInput ? roomsInput.value : '1') || 1;
-                    const boardBasis = boardBasisInput ? boardBasisInput.value : '[Board Basis]';
-                    const upgradeDesc = upgradeDescInput ? upgradeDescInput.value : '';
-                    const upgradeAmount = parseFloat(upgradeAmountInput ? upgradeAmountInput.value : '0') || 0;
-                    
-                    const cancelPolicy = cancelPolicySelect ? cancelPolicySelect.value : '';
-                    const cancelFee = parseFloat(cancelFeeInput ? cancelFeeInput.value || '0.00' : '0.00') || 0;
-                    const deadline = deadlineInput ? deadlineInput.value || '' : '';
-                    const cancelText = getCancellationText(cancelPolicy, cancelFee, deadline);
-                    
-                    const isUpgrade = upgradeCheckbox && upgradeCheckbox.checked;
-                    
-                    hotelOptionsCount++;
-                    
-                    let optionText = '';
-                    if (supplierHotelName) {
-                        optionText += `${supplierHotelName.toUpperCase()}\n`;
+                    if (includeInEmail && includeInEmail.checked) {
+                        const supplierHotelNameInput = item.querySelector('.supplier-hotel-name');
+                        const roomTypeInput = item.querySelector('.room-type');
+                        const roomsInput = item.querySelector('.rooms');
+                        const boardBasisInput = item.querySelector('.board-basis');
+                        const cancelPolicySelect = item.querySelector('.cancellation-policy');
+                        const cancelFeeInput = item.querySelector('.cancellation-fee');
+                        const deadlineInput = item.querySelector('.cancellation-deadline');
+                        const upgradeDescInput = item.querySelector('.upgrade-desc');
+                        const upgradeAmountInput = item.querySelector('.upgrade-amount');
+                        
+                        const supplierHotelName = supplierHotelNameInput ? supplierHotelNameInput.value.trim() : '';
+                        const roomType = roomTypeInput ? roomTypeInput.value : '[Room Type]';
+                        const rooms = parseInt(roomsInput ? roomsInput.value : '1') || 1;
+                        const boardBasis = boardBasisInput ? boardBasisInput.value : '[Board Basis]';
+                        const upgradeDesc = upgradeDescInput ? upgradeDescInput.value : '';
+                        const upgradeAmount = parseFloat(upgradeAmountInput ? upgradeAmountInput.value : '0') || 0;
+                        
+                        const cancelPolicy = cancelPolicySelect ? cancelPolicySelect.value : '';
+                        const cancelFee = parseFloat(cancelFeeInput ? cancelFeeInput.value || '0.00' : '0.00') || 0;
+                        const deadline = deadlineInput ? deadlineInput.value || '' : '';
+                        const cancelText = getCancellationText(cancelPolicy, cancelFee, deadline);
+                        
+                        const isUpgrade = upgradeCheckbox && upgradeCheckbox.checked;
+                        
+                        hotelOptionsCount++;
+                        
+                        let optionText = '';
+                        if (supplierHotelName) {
+                            optionText += `${supplierHotelName.toUpperCase()}\n`;
+                        }
+                        
+                        if (isUpgrade) {
+                            const upgradeText = upgradeDesc || `${roomType} (${rooms} room${rooms > 1 ? 's' : ''}), ${boardBasis}`;
+                            optionText += `Upgrade to ${boldWrap(upgradeText)} add ${boldWrap('£' + Math.round(upgradeAmount).toFixed(0))} per family\n`;
+                        } else {
+                            optionText += `${boldWrap(roomType + ' (' + rooms + ' room' + (rooms > 1 ? 's' : '') + ')')} on ${boldWrap(boardBasis)} Basis\n`;
+                        }
+                        
+                        if (cancelText) {
+                            optionText += `${boldWrap(cancelText)}\n`;
+                        }
+                        
+                        if (hotelOptionsCount === 1) {
+                            hotelOptions += optionText;
+                        } else {
+                            hotelOptions += `\n${boldWrap('OPTION ' + hotelOptionsCount)}\n${optionText}`;
+                        }
                     }
-                    
-                    if (isUpgrade) {
-                        const upgradeText = upgradeDesc || `${roomType} (${rooms} room${rooms > 1 ? 's' : ''}), ${boardBasis}`;
-                        optionText += `Upgrade to ${boldWrap(upgradeText)} add ${boldWrap('£' + Math.round(upgradeAmount).toFixed(0))} per family\n`;
-                    } else {
-                        optionText += `${boldWrap(roomType + ' (' + rooms + ' room' + (rooms > 1 ? 's' : '') + ')')} on ${boldWrap(boardBasis)} Basis\n`;
-                    }
-                    
-                    if (cancelText) {
-                        optionText += `${boldWrap(cancelText)}\n`;
-                    }
-                    
-                    if (hotelOptionsCount === 1) {
-                        hotelOptions += optionText;
-                    } else {
-                        hotelOptions += `\n${boldWrap('OPTION ' + hotelOptionsCount)}\n${optionText}`;
-                    }
-                }
-            });
+                });
+            }
             
             let flightOptions = '';
             let outboundFlights = [];
             let returnFlights = [];
             let flightOptionsCount = 0;
-            const flightItems = document.querySelectorAll('#flight-comparison .supplier-table-row');
-            flightItems.forEach(item => {
-                const includeInEmail = item.querySelector('input[id$="-include-email"]');
-                const upgradeCheckbox = item.querySelector('input[id$="-upgrade"]');
-                const returnFlightCheckbox = item.querySelector('input[id$="-return-flight"]');
-                const returnFlight = returnFlightCheckbox ? returnFlightCheckbox.checked : false;
-                
-                if (includeInEmail && includeInEmail.checked) {
-                    const airlineInput = item.querySelector('.airline');
-                    const depAirportInput = item.querySelector('.departure-airport');
-                    const arrAirportInput = item.querySelector('.arrival-airport');
-                    const outboundDepTimeInput = item.querySelector('.outbound-departure-time');
-                    const outboundArrTimeInput = item.querySelector('.outbound-arrival-time');
-                    const upgradeDescInput = item.querySelector('.upgrade-desc');
-                    const upgradeAmountInput = item.querySelector('.upgrade-amount');
-                    const baggageSelect = item.querySelector('.baggage-allowance');
-                    const baggageNumberInput = item.querySelector('.baggage-number');
+            if (bookingType === 'flight' || bookingType === 'package') {
+                const flightItems = document.querySelectorAll('#flight-comparison .supplier-table-row');
+                flightItems.forEach(item => {
+                    const includeInEmail = item.querySelector('input[id$="-include-email"]');
+                    const upgradeCheckbox = item.querySelector('input[id$="-upgrade"]');
+                    const returnFlightCheckbox = item.querySelector('input[id$="-return-flight"]');
+                    const returnFlight = returnFlightCheckbox ? returnFlightCheckbox.checked : false;
                     
-                    const airline = airlineInput ? airlineInput.value || '[Airline]' : '[Airline]';
-                    const depAirport = depAirportInput ? depAirportInput.value || '[DEP]' : '[DEP]';
-                    const arrAirport = arrAirportInput ? arrAirportInput.value || '[ARR]' : '[ARR]';
-                    const outboundDepTime = outboundDepTimeInput ? outboundDepTimeInput.value : '';
-                    const outboundArrTime = outboundArrTimeInput ? outboundArrTimeInput.value : '';
-                    const upgradeDesc = upgradeDescInput ? upgradeDescInput.value : '';
-                    const upgradeAmount = parseFloat(upgradeAmountInput ? upgradeAmountInput.value : '0') || 0;
-                    const baggage = baggageSelect ? baggageSelect.value : '';
-                    const baggageNumber = parseInt(baggageNumberInput ? baggageNumberInput.value : '1') || 1;
-                    
-                    const isUpgrade = upgradeCheckbox && upgradeCheckbox.checked;
-                    
-                    const flightData = {
-                        airline,
-                        depAirport,
-                        arrAirport,
-                        outboundDepTime,
-                        outboundArrTime,
-                        baggage,
-                        baggageNumber,
-                        upgradeDesc,
-                        upgradeAmount,
-                        isUpgrade
-                    };
-                    
-                    if (returnFlight) {
-                        returnFlights.push(flightData);
-                    } else {
-                        outboundFlights.push(flightData);
+                    if (includeInEmail && includeInEmail.checked) {
+                        const airlineInput = item.querySelector('.airline');
+                        const depAirportInput = item.querySelector('.departure-airport');
+                        const arrAirportInput = item.querySelector('.arrival-airport');
+                        const outboundDepTimeInput = item.querySelector('.outbound-departure-time');
+                        const outboundArrTimeInput = item.querySelector('.outbound-arrival-time');
+                        const upgradeDescInput = item.querySelector('.upgrade-desc');
+                        const upgradeAmountInput = item.querySelector('.upgrade-amount');
+                        const baggageSelect = item.querySelector('.baggage-allowance');
+                        const baggageNumberInput = item.querySelector('.baggage-number');
+                        
+                        const airline = airlineInput ? airlineInput.value || '[Airline]' : '[Airline]';
+                        const depAirport = depAirportInput ? depAirportInput.value || '[DEP]' : '[DEP]';
+                        const arrAirport = arrAirportInput ? arrAirportInput.value || '[ARR]' : '[ARR]';
+                        const outboundDepTime = outboundDepTimeInput ? outboundDepTimeInput.value : '';
+                        const outboundArrTime = outboundArrTimeInput ? outboundArrTimeInput.value : '';
+                        const upgradeDesc = upgradeDescInput ? upgradeDescInput.value : '';
+                        const upgradeAmount = parseFloat(upgradeAmountInput ? upgradeAmountInput.value : '0') || 0;
+                        const baggage = baggageSelect ? baggageSelect.value : '';
+                        const baggageNumber = parseInt(baggageNumberInput ? baggageNumberInput.value : '1') || 1;
+                        
+                        const isUpgrade = upgradeCheckbox && upgradeCheckbox.checked;
+                        
+                        const flightData = {
+                            airline,
+                            depAirport,
+                            arrAirport,
+                            outboundDepTime,
+                            outboundArrTime,
+                            baggage,
+                            baggageNumber,
+                            upgradeDesc,
+                            upgradeAmount,
+                            isUpgrade
+                        };
+                        
+                        if (returnFlight) {
+                            returnFlights.push(flightData);
+                        } else {
+                            outboundFlights.push(flightData);
+                        }
                     }
-                }
-            });
+                });
 
-            // Generate flight options
-            [...outboundFlights, ...returnFlights].forEach((flightData, index) => {
-                const isReturn = index >= outboundFlights.length;
-                flightOptionsCount++;
-                
-                if (flightData.isUpgrade) {
-                    let upgradeRoute = `${flightData.depAirport} to ${flightData.arrAirport}`;
-                    const upgradeText = flightData.upgradeDesc || `${flightData.airline} ${upgradeRoute}${flightData.baggage ? ', ' + flightData.baggageNumber + ' x ' + flightData.baggage : ''}`;
-                    if (flightOptionsCount > 1) {
-                        flightOptions += `\n${boldWrap('OPTION ' + flightOptionsCount)}\n`;
+                // Generate flight options
+                [...outboundFlights, ...returnFlights].forEach((flightData, index) => {
+                    const isReturn = index >= outboundFlights.length;
+                    flightOptionsCount++;
+                    
+                    if (flightData.isUpgrade) {
+                        let upgradeRoute = `${flightData.depAirport} to ${flightData.arrAirport}`;
+                        const upgradeText = flightData.upgradeDesc || `${flightData.airline} ${upgradeRoute}${flightData.baggage ? ', ' + flightData.baggageNumber + ' x ' + flightData.baggage : ''}`;
+                        if (flightOptionsCount > 1) {
+                            flightOptions += `\n${boldWrap('OPTION ' + flightOptionsCount)}\n`;
+                        }
+                        flightOptions += `Upgrade to ${boldWrap(upgradeText)} add ${boldWrap('£' + Math.round(flightData.upgradeAmount).toFixed(0))}\n`;
+                    } else {
+                        if (flightOptionsCount > 1) {
+                            flightOptions += `\n${boldWrap('OPTION ' + flightOptionsCount)}\n`;
+                        }
+                        const flightType = isReturn ? 'RETURN FLIGHT' : 'ONE WAY FLIGHT';
+                        flightOptions += `${boldWrap(flightData.airline.toUpperCase() + ' ' + flightType)}\n`;
+                        const date = isReturn ? returnDate : departDate;
+                        flightOptions += `${date} ${flightData.depAirport.toUpperCase()} - ${flightData.arrAirport.toUpperCase()}`;
+                        if (flightData.outboundDepTime) {
+                            flightOptions += ` DEP ${flightData.outboundDepTime.replace(':', '')}`;
+                        }
+                        if (flightData.outboundArrTime) {
+                            flightOptions += ` ARR ${flightData.outboundArrTime.replace(':', '')}`;
+                        }
+                        flightOptions += `\n`;
+                        if (flightData.baggage) {
+                            flightOptions += `${boldWrap('Baggage: ' + flightData.baggageNumber + ' x ' + flightData.baggage)}\n`;
+                        }
                     }
-                    flightOptions += `Upgrade to ${boldWrap(upgradeText)} add ${boldWrap('£' + Math.round(flightData.upgradeAmount).toFixed(0))}\n`;
-                } else {
-                    if (flightOptionsCount > 1) {
-                        flightOptions += `\n${boldWrap('OPTION ' + flightOptionsCount)}\n`;
-                    }
-                    const flightType = isReturn ? 'RETURN FLIGHT' : 'ONE WAY FLIGHT';
-                    flightOptions += `${boldWrap(flightData.airline.toUpperCase() + ' ' + flightType)}\n`;
-                    const date = isReturn ? returnDate : departDate;
-                    flightOptions += `${date} ${flightData.depAirport.toUpperCase()} - ${flightData.arrAirport.toUpperCase()}`;
-                    if (flightData.outboundDepTime) {
-                        flightOptions += ` DEP ${flightData.outboundDepTime.replace(':', '')}`;
-                    }
-                    if (flightData.outboundArrTime) {
-                        flightOptions += ` ARR ${flightData.outboundArrTime.replace(':', '')}`;
-                    }
-                    flightOptions += `\n`;
-                    if (flightData.baggage) {
-                        flightOptions += `${boldWrap('Baggage: ' + flightData.baggageNumber + ' x ' + flightData.baggage)}\n`;
-                    }
-                }
-            });
+                });
+            }
             
             let optionalExtrasText = '';
-            document.querySelectorAll('#optional-extras-list .optional-extra-item').forEach(item => {
-                const checkbox = item.querySelector('input[type="checkbox"]');
-                if (checkbox.checked) {
-                    const nameInput = item.querySelector('input[type="text"]');
-                    const costInput = item.querySelector('input[type="number"]');
-                    const name = nameInput.value;
-                    const cost = parseFloat(costInput.value) || 0;
-                    if (name && cost > 0) {
-                        optionalExtrasText += `${boldWrap(name)} ${boldWrap('£' + Math.round(cost).toFixed(0))}\n`;
+            if (bookingType === 'package') {
+                document.querySelectorAll('#optional-extras-list .optional-extra-item').forEach(item => {
+                    const checkbox = item.querySelector('input[type="checkbox"]');
+                    if (checkbox.checked) {
+                        const nameInput = item.querySelector('input[type="text"]');
+                        const costInput = item.querySelector('input[type="number"]');
+                        const name = nameInput.value;
+                        const cost = parseFloat(costInput.value) || 0;
+                        if (name && cost > 0) {
+                            optionalExtrasText += `${boldWrap(name)} ${boldWrap('£' + Math.round(cost).toFixed(0))}\n`;
+                        }
                     }
-                }
-            });
+                });
+            }
             
             const hotelSellingRounded = parseFloat(document.getElementById('hotel-total-selling-rounded').textContent.replace('£', ''));
             const flightSellingRounded = parseFloat(document.getElementById('flight-total-selling-rounded').textContent.replace('£', ''));
@@ -4256,7 +4312,7 @@
             };
 
             // Save collapsed states
-            const sections = ['customer', 'hotel', 'flight', 'totals', 'email'];
+            const sections = ['customer', 'hotel', 'flight', 'totals', 'email', 'optional-extras'];
             sections.forEach(secId => {
                 const sec = document.getElementById(secId);
                 state.collapsed[secId] = sec.classList.contains('collapsed');
@@ -4381,7 +4437,7 @@
             }
 
             // Restore collapsed states
-            const sections = ['customer', 'hotel', 'flight', 'totals', 'email'];
+            const sections = ['customer', 'hotel', 'flight', 'totals', 'email', 'optional-extras'];
             sections.forEach(id => {
                 const sec = document.getElementById(id);
                 sec.classList.remove('collapsed', 'expanded');
