@@ -51,7 +51,7 @@
             pointer-events: none;
             z-index: -1;
             background: transparent;
-            animation: float 60s linear infinite;
+            animation: float 120s linear infinite;
         }
         
         .stars::before {
@@ -76,21 +76,49 @@
                 radial-gradient(1.1px 1.1px at 75px 55px, rgba(255, 255, 200, 0.6), transparent),
                 radial-gradient(0.8px 0.8px at 95px 65px, rgba(255, 255, 255, 0.9), transparent),
                 radial-gradient(0.4px 0.4px at 35px 5px, rgba(255, 255, 200, 0.5), transparent),
-                radial-gradient(1px 1px at 5px 45px, rgba(255, 255, 255, 0.8), transparent);
+                radial-gradient(1px 1px at 5px 45px, rgba(255, 255, 255, 0.8), transparent),
+                radial-gradient(0.6px 0.6px at 20px 15px, rgba(255, 255, 255, 0.4), transparent),
+                radial-gradient(0.3px 0.3px at 40px 70px, rgba(255, 255, 200, 0.3), transparent),
+                radial-gradient(1px 1px at 60px 30px, rgba(255, 255, 255, 0.6), transparent),
+                radial-gradient(0.5px 0.5px at 80px 50px, rgba(255, 255, 200, 0.7), transparent),
+                radial-gradient(0.8px 0.8px at 100px 80px, rgba(255, 255, 255, 0.5), transparent),
+                radial-gradient(0.4px 0.4px at 12px 90px, rgba(255, 255, 200, 0.4), transparent),
+                radial-gradient(1.2px 1.2px at 32px 10px, rgba(255, 255, 255, 0.9), transparent),
+                radial-gradient(0.7px 0.7px at 52px 60px, rgba(255, 255, 200, 0.6), transparent),
+                radial-gradient(0.9px 0.9px at 72px 20px, rgba(255, 255, 255, 0.7), transparent),
+                radial-gradient(0.5px 0.5px at 92px 40px, rgba(255, 255, 200, 0.5), transparent),
+                radial-gradient(1px 1px at 8px 75px, rgba(255, 255, 255, 0.8), transparent),
+                radial-gradient(0.6px 0.6px at 28px 35px, rgba(255, 255, 200, 0.4), transparent),
+                radial-gradient(0.3px 0.3px at 48px 85px, rgba(255, 255, 255, 0.6), transparent),
+                radial-gradient(1.1px 1.1px at 68px 5px, rgba(255, 255, 200, 0.7), transparent),
+                radial-gradient(0.8px 0.8px at 88px 65px, rgba(255, 255, 255, 0.5), transparent),
+                radial-gradient(0.4px 0.4px at 108px 25px, rgba(255, 255, 200, 0.8), transparent),
+                radial-gradient(1px 1px at 18px 55px, rgba(255, 255, 255, 0.7), transparent),
+                radial-gradient(0.7px 0.7px at 38px 95px, rgba(255, 255, 200, 0.6), transparent),
+                radial-gradient(0.5px 0.5px at 58px 15px, rgba(255, 255, 255, 0.9), transparent),
+                radial-gradient(1.2px 1.2px at 78px 75px, rgba(255, 255, 200, 0.5), transparent),
+                radial-gradient(0.9px 0.9px at 98px 35px, rgba(255, 255, 255, 0.4), transparent),
+                radial-gradient(0.6px 0.6px at 118px 95px, rgba(255, 255, 200, 0.3), transparent),
+                radial-gradient(1px 1px at 22px 45px, rgba(255, 255, 255, 0.6), transparent),
+                radial-gradient(0.4px 0.4px at 42px 5px, rgba(255, 255, 200, 0.7), transparent),
+                radial-gradient(0.8px 0.8px at 62px 65px, rgba(255, 255, 255, 0.5), transparent),
+                radial-gradient(1.1px 1.1px at 82px 25px, rgba(255, 255, 200, 0.8), transparent),
+                radial-gradient(0.5px 0.5px at 102px 85px, rgba(255, 255, 255, 0.7), transparent),
+                radial-gradient(0.7px 0.7px at 122px 45px, rgba(255, 255, 200, 0.6), transparent);
             background-repeat: repeat;
-            background-size: 100px 100px;
-            animation: sparkle 4s ease-in-out infinite alternate;
-            opacity: 0.8;
+            background-size: 150px 150px;
+            animation: sparkle 8s ease-in-out infinite alternate;
+            opacity: 0.9;
         }
         
         @keyframes sparkle {
-            from { opacity: 0.6; }
+            from { opacity: 0.7; }
             to { opacity: 1; }
         }
         
         @keyframes float {
             0% { transform: translateX(0) translateY(0); }
-            100% { transform: translateX(-10px) translateY(-5px); }
+            100% { transform: translateX(-20px) translateY(-10px); }
         }
         
         .container {
@@ -194,7 +222,7 @@
             margin-bottom: 48px;
             position: relative;
             border-radius: 0 0 var(--border-radius) var(--border-radius);
-            animation: pan 30s ease-in-out infinite alternate;
+            animation: pan 120s ease-in-out infinite alternate;
         }
         
         @keyframes pan {
@@ -4534,8 +4562,8 @@
       let last = performance.now();
       function animate(now){
         const dt=(now-last)/1000; last=now;
-        if(earthMesh) earthMesh.rotation.y += (Math.PI*2)*(dt/60);
-        if(cloudMesh) cloudMesh.rotation.y += (Math.PI*2)*(dt/45);
+        if(earthMesh) earthMesh.rotation.y += (Math.PI*2)*(dt/600); // Slowed down to 10 minutes per rotation
+        if(cloudMesh) cloudMesh.rotation.y += (Math.PI*2)*(dt/450); // Proportionally slower
         renderer.render(scene,camera);
         requestAnimationFrame(animate);
       }
