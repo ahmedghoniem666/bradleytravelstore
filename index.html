@@ -4112,12 +4112,8 @@
                 if (depositAmount !== '[deposit]' && depositAmount !== '') {
                     templateParts.push(`${boldWrap('Deposit')} ${boldWrap('£' + depositAmount + 'pp')}`);
                 }
-                if (balanceDueDate !== '[balance_due_date]' && balanceDueDate !== '') {
-                    if (balanceDueDate === 'Pay Now') {
-                        templateParts.push(`${boldWrap('Balance due')} ${boldWrap(balanceDueDate)}`);
-                    } else {
-                        templateParts.push(`${boldWrap('Balance due by')} ${balanceDueDate}`);
-                    }
+                if (balanceDueDate !== '[balance_due_date]' && balanceDueDate !== '' && balanceDueDate !== 'Pay Now') {
+                    templateParts.push(`${boldWrap('Balance due by')} ${balanceDueDate}`);
                 }
                 templateParts.push('');
                 templateParts.push(`${boldWrap('Includes 5GB eSim Promo')}`);
@@ -4148,12 +4144,8 @@
                 if (depositAmount !== '[deposit]' && depositAmount !== '') {
                     templateParts.push(`${boldWrap('Deposit')} ${boldWrap('£' + depositAmount + 'pp')}`);
                 }
-                if (balanceDueDate !== '[balance_due_date]' && balanceDueDate !== '') {
-                    if (balanceDueDate === 'Pay Now') {
-                        templateParts.push(`${boldWrap('Balance due')} ${boldWrap(balanceDueDate)}`);
-                    } else {
-                        templateParts.push(`${boldWrap('Balance due by')} ${balanceDueDate}`);
-                    }
+                if (balanceDueDate !== '[balance_due_date]' && balanceDueDate !== '' && balanceDueDate !== 'Pay Now') {
+                    templateParts.push(`${boldWrap('Balance due by')} ${balanceDueDate}`);
                 }
                 templateParts.push('');
                 templateParts.push(`${boldWrap('Our Flight Includes')}`);
@@ -4199,12 +4191,8 @@
                     templateParts.push('');
                     templateParts.push(`${boldWrap('Deposit')} ${boldWrap('£' + depositAmount + 'pp')}`);
                 }
-                if (balanceDueDate !== '[balance_due_date]' && balanceDueDate !== '') {
-                    if (balanceDueDate === 'Pay Now') {
-                        templateParts.push(`${boldWrap('Balance due')} ${boldWrap(balanceDueDate)}`);
-                    } else {
-                        templateParts.push(`${boldWrap('Balance due by')} ${balanceDueDate}`);
-                    }
+                if (balanceDueDate !== '[balance_due_date]' && balanceDueDate !== '' && balanceDueDate !== 'Pay Now') {
+                    templateParts.push(`${boldWrap('Balance due by')} ${balanceDueDate}`);
                 }
                 templateParts.push('');
                 templateParts.push(`${boldWrap('Our Package Includes')}`);
