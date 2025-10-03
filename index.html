@@ -8,24 +8,24 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
         :root {
-            --primary: #4a90e2; /* Lighter blue */
-            --secondary: #7ab8f0; /* Even lighter blue variant */
-            --accent: #E6B800; /* Muted gold for accents */
-            --light: #F5F5F5; /* Soft light gray */
-            --dark: #2c3e50; /* Lighter dark gray-blue */
+            --primary: #1e3a8a; /* Softer, more balanced blue */
+            --secondary: #1e40af; /* Softer blue variant */
+            --accent: #b45309; /* Softer amber for accents */
+            --light: #f1f5f9; /* Softer light gray */
+            --dark: #334155; /* Softer dark */
             --success: #059669;
             --danger: #dc2626;
-            --warning: #E6B800;
+            --warning: #b45309;
             --border-radius: 12px;
             --box-shadow: 0 1px 3px rgba(0,0,0,0.1); /* Softer shadow */
-            --hotel-color: #E6F0FF; /* Light navy */
-            --flight-color: #FFF8E1; /* Light gold */
-            --supplier-color: #F9F9F9;
-            --bg: #FAFAFA; /* Off-white/light gray background */
-            --text: #2C2C2C; /* Dark gray text */
-            --card-bg: #FFFFFF;
-            --border: #E0E0E0; /* Lighter border */
-            --muted-text: #666666;
+            --hotel-color: #dbeafe; /* Softer light blue */
+            --flight-color: #fef3c7; /* Softer light amber */
+            --supplier-color: #f1f5f9;
+            --bg: #e0f2fe; /* Solid, softer light blue background */
+            --text: #475569; /* Softer gray text */
+            --card-bg: #ffffff;
+            --border: #e2e8f0; /* Lighter border */
+            --muted-text: #64748b;
         }
         
         * {
@@ -51,7 +51,6 @@
             pointer-events: none;
             z-index: -1;
             background: transparent;
-            animation: float 120s linear infinite;
         }
         
         .stars::before {
@@ -62,63 +61,20 @@
             width: 100%;
             height: 100%;
             background-image: 
-                radial-gradient(1px 1px at 10px 20px, rgba(255, 255, 255, 0.8), transparent),
-                radial-gradient(0.5px 0.5px at 30px 50px, rgba(255, 255, 200, 0.6), transparent),
-                radial-gradient(0.8px 0.8px at 50px 10px, rgba(255, 255, 255, 0.7), transparent),
-                radial-gradient(0.3px 0.3px at 70px 60px, rgba(255, 255, 200, 0.5), transparent),
-                radial-gradient(1.2px 1.2px at 90px 30px, rgba(255, 255, 255, 0.9), transparent),
-                radial-gradient(0.7px 0.7px at 15px 70px, rgba(255, 255, 200, 0.4), transparent),
-                radial-gradient(0.4px 0.4px at 45px 40px, rgba(255, 255, 255, 0.6), transparent),
-                radial-gradient(1px 1px at 65px 80px, rgba(255, 255, 200, 0.7), transparent),
-                radial-gradient(0.6px 0.6px at 85px 15px, rgba(255, 255, 255, 0.5), transparent),
-                radial-gradient(0.9px 0.9px at 25px 85px, rgba(255, 255, 200, 0.8), transparent),
-                radial-gradient(0.5px 0.5px at 55px 25px, rgba(255, 255, 255, 0.7), transparent),
-                radial-gradient(1.1px 1.1px at 75px 55px, rgba(255, 255, 200, 0.6), transparent),
-                radial-gradient(0.8px 0.8px at 95px 65px, rgba(255, 255, 255, 0.9), transparent),
-                radial-gradient(0.4px 0.4px at 35px 5px, rgba(255, 255, 200, 0.5), transparent),
-                radial-gradient(1px 1px at 5px 45px, rgba(255, 255, 255, 0.8), transparent),
-                radial-gradient(0.6px 0.6px at 20px 15px, rgba(255, 255, 255, 0.4), transparent),
-                radial-gradient(0.3px 0.3px at 40px 70px, rgba(255, 255, 200, 0.3), transparent),
-                radial-gradient(1px 1px at 60px 30px, rgba(255, 255, 255, 0.6), transparent),
-                radial-gradient(0.5px 0.5px at 80px 50px, rgba(255, 255, 200, 0.7), transparent),
-                radial-gradient(0.8px 0.8px at 100px 80px, rgba(255, 255, 255, 0.5), transparent),
-                radial-gradient(0.4px 0.4px at 12px 90px, rgba(255, 255, 200, 0.4), transparent),
-                radial-gradient(1.2px 1.2px at 32px 10px, rgba(255, 255, 255, 0.9), transparent),
-                radial-gradient(0.7px 0.7px at 52px 60px, rgba(255, 255, 200, 0.6), transparent),
-                radial-gradient(0.9px 0.9px at 72px 20px, rgba(255, 255, 255, 0.7), transparent),
-                radial-gradient(0.5px 0.5px at 92px 40px, rgba(255, 255, 200, 0.5), transparent),
-                radial-gradient(1px 1px at 8px 75px, rgba(255, 255, 255, 0.8), transparent),
-                radial-gradient(0.6px 0.6px at 28px 35px, rgba(255, 255, 200, 0.4), transparent),
-                radial-gradient(0.3px 0.3px at 48px 85px, rgba(255, 255, 255, 0.6), transparent),
-                radial-gradient(1.1px 1.1px at 68px 5px, rgba(255, 255, 200, 0.7), transparent),
-                radial-gradient(0.8px 0.8px at 88px 65px, rgba(255, 255, 255, 0.5), transparent),
-                radial-gradient(0.4px 0.4px at 108px 25px, rgba(255, 255, 200, 0.8), transparent),
-                radial-gradient(1px 1px at 18px 55px, rgba(255, 255, 255, 0.7), transparent),
-                radial-gradient(0.7px 0.7px at 38px 95px, rgba(255, 255, 200, 0.6), transparent),
-                radial-gradient(0.5px 0.5px at 58px 15px, rgba(255, 255, 255, 0.9), transparent),
-                radial-gradient(1.2px 1.2px at 78px 75px, rgba(255, 255, 200, 0.5), transparent),
-                radial-gradient(0.9px 0.9px at 98px 35px, rgba(255, 255, 255, 0.4), transparent),
-                radial-gradient(0.6px 0.6px at 118px 95px, rgba(255, 255, 200, 0.3), transparent),
-                radial-gradient(1px 1px at 22px 45px, rgba(255, 255, 255, 0.6), transparent),
-                radial-gradient(0.4px 0.4px at 42px 5px, rgba(255, 255, 200, 0.7), transparent),
-                radial-gradient(0.8px 0.8px at 62px 65px, rgba(255, 255, 255, 0.5), transparent),
-                radial-gradient(1.1px 1.1px at 82px 25px, rgba(255, 255, 200, 0.8), transparent),
-                radial-gradient(0.5px 0.5px at 102px 85px, rgba(255, 255, 255, 0.7), transparent),
-                radial-gradient(0.7px 0.7px at 122px 45px, rgba(255, 255, 200, 0.6), transparent);
+                radial-gradient(0.5px 0.5px at 10px 20px, rgba(59, 130, 246,0.4), transparent),
+                radial-gradient(0.5px 0.5px at 30px 50px, rgba(59, 130, 246,0.3), transparent),
+                radial-gradient(0.5px 0.5px at 50px 10px, rgba(59, 130, 246,0.35), transparent),
+                radial-gradient(0.5px 0.5px at 70px 60px, rgba(59, 130, 246,0.2), transparent),
+                radial-gradient(0.5px 0.5px at 90px 30px, rgba(59, 130, 246,0.45), transparent);
             background-repeat: repeat;
-            background-size: 150px 150px;
-            animation: sparkle 8s ease-in-out infinite alternate;
-            opacity: 0.9;
+            background-size: 100px 100px;
+            animation: sparkle 4s ease-in-out infinite alternate;
+            opacity: 0.6;
         }
         
         @keyframes sparkle {
-            from { opacity: 0.7; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes float {
-            0% { transform: translateX(0) translateY(0); }
-            100% { transform: translateX(-20px) translateY(-10px); }
+            from { opacity: 0.4; }
+            to { opacity: 0.8; }
         }
         
         .container {
@@ -149,7 +105,7 @@
         
         .logo-icon {
             font-size: 2.2rem;
-            animation: rotate 60s linear infinite;
+            animation: rotate 20s linear infinite;
         }
         
         @keyframes rotate {
@@ -215,14 +171,14 @@
         }
         
         .hero {
-            background: linear-gradient(rgba(0, 0, 0, 0.1), rgba(0, 0, 0, 0.1)), url('https://images.unsplash.com/photo-1488646953014-85cb44e25828?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80') no-repeat center center/cover; /* Softer overlay */
+            background: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)), url('https://images.unsplash.com/photo-1488646953014-85cb44e25828?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80') no-repeat center center/cover; /* Softer overlay */
             color: white;
             padding: 100px 0;
             text-align: center;
             margin-bottom: 48px;
             position: relative;
             border-radius: 0 0 var(--border-radius) var(--border-radius);
-            animation: pan 120s ease-in-out infinite alternate;
+            animation: pan 30s ease-in-out infinite alternate;
         }
         
         @keyframes pan {
@@ -237,7 +193,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.1); /* Softer overlay */
+            background: rgba(0, 0, 0, 0.2); /* Softer overlay */
         }
         
         .hero-content {
@@ -276,7 +232,7 @@
         }
         
         .btn:hover {
-            background: #D4A700; /* Softer hover */
+            background: #92400e; /* Softer hover */
             box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
         
@@ -362,7 +318,7 @@
         .form-control:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1); /* Softer focus */
+            box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.1); /* Softer focus */
         }
         
         .form-row {
@@ -410,7 +366,7 @@
         }
         
         tr:hover {
-            background-color: rgba(74, 144, 226, 0.05); /* Softer hover */
+            background-color: rgba(30, 58, 138, 0.05); /* Softer hover */
         }
         
         .best-price {
@@ -431,7 +387,7 @@
         }
         
         .btn-secondary:hover {
-            background: #4a90e2;
+            background: #1e3a8a;
         }
         
         .btn-danger {
@@ -502,7 +458,7 @@
         .delivery-option.selected {
             border-color: var(--secondary);
             background: #eff6ff;
-            box-shadow: 0 2px 4px rgba(122, 184, 240, 0.15); /* Softer shadow */
+            box-shadow: 0 2px 4px rgba(30, 64, 175, 0.15); /* Softer shadow */
         }
         
         .delivery-option i {
@@ -604,7 +560,7 @@
         }
         
         .counter-btn:hover {
-            background: #4a90e2;
+            background: #1e3a8a;
         }
         
         .counter-value {
@@ -1011,12 +967,11 @@
     </style>
 </head>
 <body>
-    <div class="stars">
-    </div>
+    <div class="stars"></div>
     <header>
         <div class="container header-content">
             <div class="logo">
-                <div class="logo-icon" aria-hidden="false" title="Bradley Travelstore"><canvas id="logo-globe" width="56" height="56" aria-hidden="true"></canvas></div>
+                <div class="logo-icon"><i class="fas fa-globe-americas"></i></div>
                 <div class="logo-text">Bradley Travelstore</div>
             </div>
             <div class="header-controls">
@@ -4527,49 +4482,5 @@
             updateEmailTemplate();
         }
     </script>
-
-    <!-- Three.js -->
-    <script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"></script>
-    <script>
-    (function initHeaderEarth(){
-      const canvas = document.getElementById('logo-globe');
-      if (!canvas) return;
-      const w = canvas.width, h = canvas.height;
-      const renderer = new THREE.WebGLRenderer({ canvas, alpha: true, antialias: true });
-      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-      renderer.setSize(w, h, false);
-      renderer.setClearColor(0x000000, 0);
-      const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(45, w/h, 0.1, 100);
-      camera.position.set(0,0,2.6);
-      const hemi = new THREE.HemisphereLight(0xffffff, 0x444444, 0.6);
-      scene.add(hemi);
-      const dir = new THREE.DirectionalLight(0xffffff, 0.9);
-      dir.position.set(5,3,5);
-      scene.add(dir);
-      const geometry = new THREE.SphereGeometry(0.9, 32, 32);
-      const loader = new THREE.TextureLoader();
-      let earthMesh=null, cloudMesh=null;
-      loader.load("https://threejs.org/examples/textures/land_ocean_ice_cloud_2048.jpg", function(map){
-        earthMesh = new THREE.Mesh(geometry, new THREE.MeshPhongMaterial({ map, shininess: 6 }));
-        scene.add(earthMesh);
-        loader.load("https://threejs.org/examples/textures/earth_clouds_1024.png", function(cloudTex){
-          cloudMesh = new THREE.Mesh(new THREE.SphereGeometry(0.92,32,32),
-            new THREE.MeshPhongMaterial({ map: cloudTex, transparent:true, opacity:0.8, depthWrite:false }));
-          scene.add(cloudMesh);
-        });
-      });
-      let last = performance.now();
-      function animate(now){
-        const dt=(now-last)/1000; last=now;
-        if(earthMesh) earthMesh.rotation.y += (Math.PI*2)*(dt/600); // Slowed down to 10 minutes per rotation
-        if(cloudMesh) cloudMesh.rotation.y += (Math.PI*2)*(dt/450); // Proportionally slower
-        renderer.render(scene,camera);
-        requestAnimationFrame(animate);
-      }
-      requestAnimationFrame(animate);
-    })();
-    </script>
-
 </body>
 </html>
