@@ -1077,17 +1077,6 @@
                         <input type="number" id="hotel-nights" class="form-control" placeholder="Nights" readonly>
                     </div>
                 </div>
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="balance-due-date">Balance Due Date</label>
-                        <input type="text" id="balance-due-date" class="form-control" placeholder="Select balance due date" onchange="updateEmailTemplate(); saveState();">
-                    </div>
-                    <div class="form-group">
-                        <label for="excludes-note">Excludes Note (e.g., local taxes)</label>
-                        <input type="text" id="excludes-note" class="form-control" placeholder="e.g., Climate Resilience Tax EUR15 per room, per night, pay locally" onchange="updateEmailTemplate(); saveState();">
-                    </div>
-                </div>
 
                 <h3>Hotel Options</h3>
                 <div id="hotel-options-container">
@@ -1103,6 +1092,16 @@
                         <div class="form-group">
                             <label for="deposit-amount">Deposit (£ per person)</label>
                             <input type="number" id="deposit-amount" class="form-control" placeholder="Enter deposit amount" step="0.01" onchange="updateEmailTemplate(); saveState();">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="balance-due-date">Balance Due Date</label>
+                            <input type="text" id="balance-due-date" class="form-control" placeholder="Select balance due date" onchange="updateEmailTemplate(); saveState();">
+                        </div>
+                        <div class="form-group">
+                            <label for="excludes-note">Excludes Note (e.g., local taxes)</label>
+                            <input type="text" id="excludes-note" class="form-control" placeholder="e.g., Climate Resilience Tax EUR15 per room, per night, pay locally" onchange="updateEmailTemplate(); saveState();">
                         </div>
                     </div>
                     <div class="totals-row">
@@ -3002,6 +3001,7 @@
                     flatpickr(input, {
                         dateFormat: "Y-m-d",
                         onChange: function(selectedDates, dateStr) {
+                            calculateBalanceDueDate();
                             updateEmailTemplate();
                             saveState();
                         }
@@ -3031,6 +3031,7 @@
             addHotelOptionSection();
             addFlightOption();
             addOptionalExtra(); // Add one initial optional extra
+            calculateBalanceDueDate();
         });
 
         function toggleSectionsBasedOnBookingType() {
@@ -3238,12 +3239,13 @@
         function getCancellationText(cancelPolicy, cancelFee, cancellationDeadline) {
             if (cancelPolicy === 'non-refundable') {
                 return "Non-refundable";
-            } else if (cancelPolicy === 'refundable') {
-                return `Free cancellation until ${formatDate(cancellationDeadline)}`;
-            } else if (cancelPolicy === 'refundable-with-fee') {
+            } else if (cancelPolicy === 'refundable' || cancelPolicy === 'refundable-with-fee') {
                 let text = '';
                 if (cancellationDeadline) {
-                    text += `Free cancellation until ${formatDate(cancellationDeadline)}`;
+                    let displayDate = new Date(cancellationDeadline);
+                    displayDate.setDate(displayDate.getDate() - 7);
+                    const formatted = formatDate(displayDate.toISOString().split('T')[0]);
+                    text += `Free cancellation until ${formatted}`;
                 }
                 if (cancelFee > 0) {
                     if (text) text += ' or ';
@@ -3343,19 +3345,19 @@
                     <option ${data.boardBasis === 'All Inclusive' ? 'selected' : ''}>All Inclusive</option>
                 </select></td>
                 <td>
-                    <select class="form-control cancellation-policy" onchange="toggleCancellationFee('${id}'); updateEmailTemplate(); saveState();">
+                    <select class="form-control cancellation-policy" onchange="toggleCancellationFee('${id}'); calculateBalanceDueDate(); updateEmailTemplate(); saveState();">
                         <option value="non-refundable" ${data.cancellationPolicy === 'non-refundable' ? 'selected' : ''}>Non-Refundable</option>
                         <option value="refundable" ${data.cancellationPolicy === 'refundable' ? 'selected' : ''}>Refundable</option>
                         <option value="refundable-with-fee" ${data.cancellationPolicy === 'refundable-with-fee' ? 'selected' : ''}>Refundable with Fee</option>
                     </select>
                     <div class="cancellation-deadline-group" style="display:none;">
-                        <input type="text" class="form-control cancellation-deadline" placeholder="Select cancellation deadline" value="${data.cancellationDeadline || ''}" onchange="updateEmailTemplate(); saveState();">
+                        <input type="text" class="form-control cancellation-deadline" placeholder="Select cancellation deadline" value="${data.cancellationDeadline || ''}" onchange="calculateBalanceDueDate(); updateEmailTemplate(); saveState();">
                     </div>
                     <div class="cancellation-fee-group" style="display:none;">
                         <input type="number" class="form-control cancellation-fee" step="0.01" placeholder="0.00" value="${(data.cancellationFee || 0).toFixed(2)}" onchange="updateEmailTemplate(); saveState();">
                     </div>
                 </td>
-                <td><input type="checkbox" id="${id}-best" ${data.best ? 'checked' : ''} onchange="toggleBestPrice('${id}')"></td>
+                <td><input type="checkbox" id="${id}-best" ${data.best ? 'checked' : ''} onchange="toggleBestPrice('${id}'); calculateBalanceDueDate();"></td>
                 <td>
                     <input type="checkbox" id="${id}-upgrade" ${data.upgrade ? 'checked' : ''} onchange="toggleUpgrade('${id}')">
                     <input type="text" class="form-control upgrade-desc" placeholder="Upgrade description" value="${data.upgradeDesc || ''}" style="display: ${data.upgrade ? 'block' : 'none'};" onchange="updateEmailTemplate(); saveState();">
@@ -3481,6 +3483,7 @@
                     element.remove();
                     if (element.closest('.hotel-option-section')) {
                         sortAndHighlightHotelOptions();
+                        calculateBalanceDueDate();
                     } else {
                         sortAndHighlightFlightOptions();
                     }
@@ -3510,6 +3513,7 @@
                 if (deadlineGroup) deadlineGroup.style.display = 'none';
             }
             initCancellationPickers(item);
+            calculateBalanceDueDate();
             saveState();
         }
 
@@ -3521,6 +3525,12 @@
                 item.classList.add('best-price');
             } else {
                 item.classList.remove('best-price');
+            }
+            if (item.closest('.hotel-option-section')) {
+                sortAndHighlightHotelOptions();
+                calculateBalanceDueDate();
+            } else {
+                sortAndHighlightFlightOptions();
             }
             updateEmailTemplate();
             saveState();
@@ -3614,6 +3624,7 @@
                     if (index === 0) row.classList.add('best-price');
                 });
             });
+            calculateBalanceDueDate();
         }
 
         function sortAndHighlightFlightOptions() {
@@ -3642,6 +3653,46 @@
                 if (checkbox) checkbox.checked = (index === 0);
                 if (index === 0) row.classList.add('best-price');
             });
+        }
+
+        function calculateBalanceDueDate() {
+            let bestDeadline = null;
+            let bestPolicy = null;
+            hotelOptionSections.forEach(sectionId => {
+                const comparison = document.getElementById(`${sectionId}-comparison`);
+                if (!comparison) return;
+                const bestRow = Array.from(comparison.querySelectorAll('.supplier-table-row')).find(row => {
+                    const cb = row.querySelector('input[id$="-best"]');
+                    return cb && cb.checked;
+                });
+                if (bestRow) {
+                    bestPolicy = bestRow.querySelector('.cancellation-policy').value;
+                    const deadlineInput = bestRow.querySelector('.cancellation-deadline');
+                    if (deadlineInput && deadlineInput.value) {
+                        bestDeadline = deadlineInput.value;
+                    }
+                    return; // Take the first best found
+                }
+            });
+
+            const balanceInput = document.getElementById('balance-due-date');
+            if (!bestPolicy) {
+                balanceInput.value = '';
+                return;
+            }
+
+            if (bestPolicy === 'non-refundable') {
+                balanceInput.value = 'Pay Now';
+            } else if (bestDeadline) {
+                const deadlineDate = new Date(bestDeadline);
+                const balanceDate = new Date(deadlineDate);
+                balanceDate.setDate(balanceDate.getDate() - 14);
+                balanceInput.value = balanceDate.toISOString().split('T')[0];
+            } else {
+                balanceInput.value = '';
+            }
+            updateEmailTemplate();
+            saveState();
         }
 
         function updateTotals() {
@@ -3755,7 +3806,7 @@
         }
 
         function formatDate(dateString) {
-            if (!dateString) return '';
+            if (!dateString || dateString === 'Pay Now') return dateString;
             const date = new Date(dateString);
             const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
             const day = date.getDate().toString().padStart(2, '0');
@@ -3830,7 +3881,14 @@
             const childAges = getChildAgesList();
             
             const balanceDueInput = document.getElementById('balance-due-date').value;
-            const balanceDueDate = balanceDueInput ? formatDate(balanceDueInput) : '[balance_due_date]';
+            let balanceDueDate;
+            if (balanceDueInput === 'Pay Now') {
+                balanceDueDate = 'Pay Now';
+            } else if (balanceDueInput) {
+                balanceDueDate = formatDate(balanceDueInput);
+            } else {
+                balanceDueDate = '[balance_due_date]';
+            }
             
             const flightDatesInput = document.getElementById('flight-dates').value;
             let departDate = '', returnDate = '';
@@ -4029,7 +4087,6 @@
                 }
             }
             
-            const isNonRefundable = bookingType === 'package' ? (isAllNonRefundable('hotel') && isAllNonRefundable('flight')) : isAllNonRefundable(bookingType);
             const pricePerRoom = document.getElementById('price-per-room').checked;
             const priceSuffix = pricePerRoom ? 'per room' : '';
             
@@ -4052,11 +4109,17 @@
                 if (excludesNote) {
                     templateParts.push(`${boldWrap('Excludes')} ${excludesNote}\n`);
                 }
-                if (!isNonRefundable) {
+                if (depositAmount !== '[deposit]' && depositAmount !== '') {
                     templateParts.push(`${boldWrap('Deposit')} ${boldWrap('£' + depositAmount + 'pp')}`);
-                    templateParts.push(`${boldWrap('Balance due by')} ${balanceDueDate}`);
-                    templateParts.push('');
                 }
+                if (balanceDueDate !== '[balance_due_date]' && balanceDueDate !== '') {
+                    if (balanceDueDate === 'Pay Now') {
+                        templateParts.push(`${boldWrap('Balance due')} ${boldWrap(balanceDueDate)}`);
+                    } else {
+                        templateParts.push(`${boldWrap('Balance due by')} ${balanceDueDate}`);
+                    }
+                }
+                templateParts.push('');
                 templateParts.push(`${boldWrap('Includes 5GB eSim Promo')}`);
                 templateParts.push('');
                 templateParts.push('Prices are live and subject to change prior to confirmation.');
@@ -4082,11 +4145,17 @@
                 if (excludesNote) {
                     templateParts.push(`${boldWrap('Excludes')} ${excludesNote}\n`);
                 }
-                if (!isNonRefundable) {
+                if (depositAmount !== '[deposit]' && depositAmount !== '') {
                     templateParts.push(`${boldWrap('Deposit')} ${boldWrap('£' + depositAmount + 'pp')}`);
-                    templateParts.push(`${boldWrap('Balance due by')} ${balanceDueDate}`);
-                    templateParts.push('');
                 }
+                if (balanceDueDate !== '[balance_due_date]' && balanceDueDate !== '') {
+                    if (balanceDueDate === 'Pay Now') {
+                        templateParts.push(`${boldWrap('Balance due')} ${boldWrap(balanceDueDate)}`);
+                    } else {
+                        templateParts.push(`${boldWrap('Balance due by')} ${balanceDueDate}`);
+                    }
+                }
+                templateParts.push('');
                 templateParts.push(`${boldWrap('Our Flight Includes')}`);
                 templateParts.push('');
                 templateParts.push(`${boldWrap('Free 5GB eSim Promo included')}`);
@@ -4126,10 +4195,16 @@
                 if (excludesNote) {
                     templateParts.push(`${boldWrap('Excludes')} ${excludesNote}\n`);
                 }
-                if (!isNonRefundable) {
+                if (depositAmount !== '[deposit]' && depositAmount !== '') {
                     templateParts.push('');
                     templateParts.push(`${boldWrap('Deposit')} ${boldWrap('£' + depositAmount + 'pp')}`);
-                    templateParts.push(`${boldWrap('Balance due by')} ${balanceDueDate}`);
+                }
+                if (balanceDueDate !== '[balance_due_date]' && balanceDueDate !== '') {
+                    if (balanceDueDate === 'Pay Now') {
+                        templateParts.push(`${boldWrap('Balance due')} ${boldWrap(balanceDueDate)}`);
+                    } else {
+                        templateParts.push(`${boldWrap('Balance due by')} ${balanceDueDate}`);
+                    }
                 }
                 templateParts.push('');
                 templateParts.push(`${boldWrap('Our Package Includes')}`);
@@ -4402,6 +4477,7 @@
                     }
                 }
                 if (state.hotel.balanceDue) {
+                    document.getElementById('balance-due-date').value = state.hotel.balanceDue;
                     balanceDueFp.setDate(state.hotel.balanceDue);
                 }
                 if (state.flight.dates) {
@@ -4478,6 +4554,7 @@
 
             updateTotals();
             updateEmailTemplate();
+            calculateBalanceDueDate();
         }
     </script>
 </body>
