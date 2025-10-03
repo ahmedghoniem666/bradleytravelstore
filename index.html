@@ -8,23 +8,23 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <style>
         :root {
-            --primary: #2563eb; /* Softer, more modern blue for professionalism */
-            --secondary: #3b82f6; /* Lighter blue variant */
-            --accent: #f59e0b; /* Softer orange for accents */
-            --light: #f9fafb; /* Warmer light gray */
-            --dark: #1f2937; /* Softer dark */
-            --success: #10b981;
-            --danger: #ef4444;
-            --warning: #f59e0b;
+            --primary: #4f46e5; /* Soft indigo for calmness */
+            --secondary: #6366f1; /* Lighter indigo variant */
+            --accent: #10b981; /* Soft emerald green for accents */
+            --light: #f0fdf4; /* Light green for warmth */
+            --dark: #065f46; /* Deep green for depth */
+            --success: #059669;
+            --danger: #dc2626;
+            --warning: #d97706;
             --border-radius: 12px; /* Slightly larger for softer look */
             --box-shadow: 0 4px 20px rgba(0,0,0,0.08); /* Softer shadow */
-            --hotel-color: #eff6ff; /* Softer light blue */
-            --flight-color: #fef3c7; /* Softer light orange */
-            --supplier-color: #f9fafb;
-            --bg: #f8fafc; /* Warmer background */
-            --text: #374151; /* Softer gray text */
+            --hotel-color: #d1fae5; /* Light green for hotels */
+            --flight-color: #dbeafe; /* Light blue for flights */
+            --supplier-color: #f8fafc;
+            --bg: #f0fdf4; /* Relaxing light green background */
+            --text: #1f2937; /* Softer gray text */
             --card-bg: #ffffff;
-            --border: #e5e7eb; /* Lighter border */
+            --border: #d1d5db; /* Lighter border */
             --muted-text: #6b7280;
         }
         
@@ -182,13 +182,13 @@
             cursor: pointer;
             min-height: 48px;
             font-size: 1.05rem;
-            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
         }
         
         .btn:hover {
-            background: #d97706;
+            background: #059669;
             transform: translateY(-2px);
-            box-shadow: 0 8px 24px rgba(245, 158, 11, 0.4);
+            box-shadow: 0 8px 24px rgba(16, 185, 129, 0.4);
         }
         
         .section-title {
@@ -243,7 +243,7 @@
         }
         
         .supplier-best-price {
-            background-color: #ecfdf5 !important;
+            background-color: #d1fae5 !important;
             border: 2px solid var(--success);
         }
         
@@ -273,7 +273,7 @@
         .form-control:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
         }
         
         .form-row {
@@ -317,15 +317,15 @@
         }
         
         tr:nth-child(even) {
-            background-color: rgba(248, 250, 252, 0.5);
+            background-color: rgba(240, 253, 244, 0.5);
         }
         
         tr:hover {
-            background-color: rgba(37, 99, 235, 0.05);
+            background-color: rgba(79, 70, 229, 0.05);
         }
         
         .best-price {
-            background-color: #ecfdf5 !important;
+            background-color: #d1fae5 !important;
             font-weight: 600;
         }
         
@@ -338,16 +338,16 @@
         
         .btn-secondary {
             background: var(--secondary);
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
         }
         
         .btn-secondary:hover {
-            background: #2563eb;
+            background: #4f46e5;
         }
         
         .btn-danger {
             background: var(--danger);
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+            box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
         }
         
         .btn-danger:hover {
@@ -356,7 +356,7 @@
         
         .btn-success {
             background: var(--success);
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
         }
         
         .btn-success:hover {
@@ -364,7 +364,7 @@
         }
         
         .conversion-box {
-            background: #eff6ff;
+            background: #d1fae5;
             padding: 24px;
             border-radius: var(--border-radius);
             margin-bottom: 24px;
@@ -413,8 +413,8 @@
         
         .delivery-option.selected {
             border-color: var(--secondary);
-            background: #eff6ff;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+            background: #d1fae5;
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.15);
         }
         
         .delivery-option i {
@@ -516,7 +516,7 @@
         }
         
         .counter-btn:hover {
-            background: #2563eb;
+            background: #4f46e5;
             transform: scale(1.05);
         }
         
@@ -663,7 +663,7 @@
         }
         
         .totals-panel {
-            background: #eff6ff;
+            background: #d1fae5;
             padding: 24px;
             border-radius: var(--border-radius);
             margin-bottom: 24px;
@@ -749,7 +749,7 @@
         }
         
         .supplier-table-row.best-price {
-            background-color: #ecfdf5 !important;
+            background-color: #d1fae5 !important;
             border-color: var(--success);
         }
         
