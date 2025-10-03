@@ -838,6 +838,16 @@
             gap: 12px;
             margin-bottom: 16px;
         }
+
+        .checkbox-label {
+            display: block;
+            margin-top: 5px;
+            font-size: 0.8rem;
+        }
+
+        .checkbox-label input[type="checkbox"] {
+            margin-right: 4px;
+        }
         
         @media (max-width: 768px) {
             .form-row {
@@ -3298,6 +3308,21 @@
             }
         }
 
+        function toggleSpecificHotel(id) {
+            const supplierTd = document.getElementById(id + '-supplier-td');
+            const specificTd = document.getElementById(id + '-specific-hotel-td');
+            const checkbox = document.getElementById(id + '-specific-hotel');
+            if (checkbox.checked) {
+                supplierTd.colSpan = '1';
+                specificTd.style.display = 'table-cell';
+            } else {
+                supplierTd.colSpan = '2';
+                specificTd.style.display = 'none';
+            }
+            updateEmailTemplate();
+            saveState();
+        }
+
         function addHotelTable(data = {}) {
             const comparison = document.getElementById('hotel-comparison');
             let table = comparison.querySelector('table');
@@ -3309,12 +3334,21 @@
             const tbody = table.querySelector('tbody') || document.createElement('tbody');
             if (!table.querySelector('tbody')) table.appendChild(tbody);
             const id = data.id || 'hotel-' + Date.now();
+            const specificHotel = data.specificHotel || false;
             const tr = document.createElement('tr');
             tr.id = id;
             tr.classList.add('supplier-table-row');
             tr.innerHTML = `
-                <td><input type="text" class="form-control supplier-name" placeholder="Supplier Name" value="${data.supplierName || ''}" onchange="updateEmailTemplate(); saveState();"></td>
-                <td><input type="text" class="form-control supplier-hotel-name" placeholder="Use global hotel name" value="${data.supplierHotelName || ''}" onchange="updateEmailTemplate(); saveState();"></td>
+                <td id="${id}-supplier-td" colspan="${specificHotel ? '1' : '2'}">
+                    <input type="text" class="form-control supplier-name" placeholder="Supplier Name" value="${data.supplierName || ''}" onchange="updateEmailTemplate(); saveState();">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="${id}-specific-hotel" ${specificHotel ? 'checked' : ''} onchange="toggleSpecificHotel('${id}')">
+                        Specific Hotel?
+                    </label>
+                </td>
+                <td id="${id}-specific-hotel-td" style="display: ${specificHotel ? 'table-cell' : 'none'};">
+                    <input type="text" class="form-control supplier-hotel-name" placeholder="Use global hotel name" value="${data.supplierHotelName || ''}" onchange="updateEmailTemplate(); saveState();">
+                </td>
                 <td><input type="number" class="form-control net-price" step="0.01" placeholder="0.00" value="${(data.netPrice || 0).toFixed(2)}" onchange="updateSupplierPrice('${id}'); saveState();"></td>
                 <td><input type="text" class="form-control commission-rate" placeholder="Use global" value="${data.commissionRate || ''}" onchange="updateSupplierPrice('${id}'); saveState();"></td>
                 <td><input type="text" class="form-control selling-price" readonly placeholder="0.00" value="${(data.sellingPrice || 0).toFixed(2)}"></td>
@@ -3670,7 +3704,7 @@
                 });
                 
                 const bestCheckbox = bestItem.querySelector('input[type="checkbox"][id$="-best"]');
-                const includeEmailCheckbox = bestItem.querySelector('input[type="checkbox"][id$="-include-email"]');
+                const includeEmailCheckbox = bestItem.querySelector('input[id$="-include-email"]');
                 if (bestCheckbox) bestCheckbox.checked = true;
                 if (includeEmailCheckbox) includeEmailCheckbox.checked = true;
                 bestItem.classList.add('best-price');
@@ -4250,6 +4284,7 @@
 
             if (type === 'hotel') {
                 data.supplierHotelName = item.querySelector('.supplier-hotel-name').value;
+                data.specificHotel = item.querySelector(`#${item.id}-specific-hotel`) ? item.querySelector(`#${item.id}-specific-hotel`).checked : false;
                 data.roomType = item.querySelector('.room-type').value;
                 data.rooms = parseInt(item.querySelector('.rooms').value) || 1;
                 data.boardBasis = item.querySelector('.board-basis').value;
