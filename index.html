@@ -1126,45 +1126,13 @@
             </div>
         </section>
 
-        <section id="hotel" class="card expanded">
-            <div class="section-toggle" onclick="toggleSection('hotel')">
-                <h2 class="section-title">Hotel Quote Details</h2>
-                <i class="fas fa-chevron-down"></i>
+        <section id="hotel">
+            <h2 class="section-title">Hotel Quote Details</h2>
+            <div id="hotel-quotes-container">
+                <!-- Hotel quote sections will be added here -->
             </div>
-            
-            <div class="section-content">
-                <div id="hotel-quotes-container">
-                    <!-- Hotel quote sections will be added here -->
-                </div>
-                <div class="comparison-controls">
-                    <button class="btn" onclick="addHotelQuoteSection()"><i class="fas fa-plus"></i> Add Hotel Quote</button>
-                </div>
-                
-                <div class="section-totals">
-                    <h3>Hotel Totals</h3>
-                    <div class="form-row">
-                        <div class="form-group" style="display:none;">
-                            <label for="balance-due-date">Balance Due Date</label>
-                            <input type="text" id="balance-due-date" class="form-control" placeholder="Select balance due date" onchange="updateEmailTemplate(); saveState();">
-                        </div>
-                        <div class="form-group">
-                            <label for="excludes-note">Excludes Note (e.g., local taxes)</label>
-                            <input type="text" id="excludes-note" class="form-control" placeholder="e.g., Climate Resilience Tax EUR15 per room, per night, pay locally" onchange="updateEmailTemplate(); saveState();">
-                        </div>
-                    </div>
-                    <div class="totals-row">
-                        <span class="totals-label">Total Net (Hotel):</span>
-                        <span id="hotel-total-net" class="totals-value">£0.00</span>
-                    </div>
-                    <div class="totals-row">
-                        <span class="totals-label">Total Selling - Exact (Hotel):</span>
-                        <span id="hotel-total-selling-exact" class="totals-value">£0.00</span>
-                    </div>
-                    <div class="totals-row">
-                        <span class="totals-label">Total Selling - Rounded (Hotel):</span>
-                        <span id="hotel-total-selling-rounded" class="totals-value">£0.00</span>
-                    </div>
-                </div>
+            <div class="comparison-controls">
+                <button class="btn" onclick="addHotelQuoteSection()"><i class="fas fa-plus"></i> Add Hotel Quote</button>
             </div>
         </section>
 
@@ -3030,9 +2998,11 @@
                         dateFormat: "Y-m-d",
                         minDate: "today",
                         onChange: function(selectedDates, dateStr) {
-                            calculateBalanceDueDate();
-                            if (root.closest('.hotel-quote-section')) {
-                                sortAndHighlightHotelOptions(root.closest('.hotel-quote-section'));
+                            const section = input.closest('.card');
+                            if (section) {
+                                const sectionId = section.id;
+                                calculateBalanceDueDateForSection(sectionId);
+                                sortAndHighlightHotelOptions(section);
                             } else {
                                 sortAndHighlightFlightOptions();
                             }
@@ -3056,7 +3026,7 @@
             addHotelQuoteSection();
             addFlightOption();
             addOptionalExtra(); // Add one initial optional extra
-            calculateBalanceDueDate();
+            calculateAllBalanceDueDates();
         });
 
         function toggleSectionsBasedOnBookingType() {
@@ -3319,40 +3289,70 @@
             const container = document.getElementById('hotel-quotes-container');
             hotelQuoteCounter++;
             const sectionId = 'hotel-quote-' + hotelQuoteCounter;
-            const section = document.createElement('div');
-            section.className = 'hotel-quote-section';
-            section.id = sectionId;
+            const card = document.createElement('div');
+            card.className = 'card expanded hotel-quote-section';
+            card.id = sectionId;
             const includeChecked = data.include !== undefined ? data.include : true;
-            section.innerHTML = `
-                <div class="hotel-quote-header">
+            card.innerHTML = `
+                <div class="section-toggle" onclick="toggleSection('${sectionId}')">
                     <h3 class="hotel-quote-title">Hotel Quote ${hotelQuoteCounter}</h3>
-                    <label class="checkbox-group">
-                        <input type="checkbox" class="quote-include" ${includeChecked ? 'checked' : ''} onchange="toggleQuoteInclude('${sectionId}'); updateTotals(); updateEmailTemplate(); saveState();"> Include in Quote
-                    </label>
-                    <button class="btn btn-danger btn-sm" onclick="removeHotelQuoteSection('${sectionId}')"><i class="fas fa-trash"></i> Remove</button>
+                    <i class="fas fa-chevron-down"></i>
                 </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Check-in & Check-out Dates</label>
-                        <input type="text" class="form-control hotel-checkin" placeholder="Select dates" value="${data.checkin || ''}">
+                <div class="section-content">
+                    <div class="hotel-quote-header">
+                        <label class="checkbox-group">
+                            <input type="checkbox" class="quote-include" ${includeChecked ? 'checked' : ''} onchange="toggleQuoteInclude('${sectionId}'); updateTotals(); updateEmailTemplate(); saveState();"> Include in Quote
+                        </label>
+                        <button class="btn btn-danger btn-sm" onclick="removeHotelQuoteSection('${sectionId}')"><i class="fas fa-trash"></i> Remove</button>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Check-in & Check-out Dates</label>
+                            <input type="text" class="form-control hotel-checkin" placeholder="Select dates" value="${data.checkin || ''}">
+                        </div>
+                        <div class="form-group">
+                            <label>Nights</label>
+                            <input type="number" class="form-control hotel-nights" placeholder="Nights" readonly value="${data.nights || ''}">
+                        </div>
                     </div>
                     <div class="form-group">
-                        <label>Nights</label>
-                        <input type="number" class="form-control hotel-nights" placeholder="Nights" readonly value="${data.nights || ''}">
+                        <label for="${sectionId}-hotel-name">Hotel Name</label>
+                        <input type="text" id="${sectionId}-hotel-name" class="form-control" placeholder="Hotel name" value="${data.hotelName || ''}" onchange="updateEmailTemplate(); saveState();">
                     </div>
-                </div>
-                <div class="form-group">
-                    <label for="${sectionId}-hotel-name">Hotel Name</label>
-                    <input type="text" id="${sectionId}-hotel-name" class="form-control" placeholder="Hotel name" value="${data.hotelName || ''}" onchange="updateEmailTemplate(); saveState();">
-                </div>
-                <h4>Supplier Comparison</h4>
-                <div id="${sectionId}-comparison" class="supplier-comparison">
-                </div>
-                <div class="comparison-controls">
-                    <button class="btn" onclick="addHotelSupplier('${sectionId}')"><i class="fas fa-plus"></i> Add Supplier</button>
+                    <h4>Supplier Comparison</h4>
+                    <div id="${sectionId}-comparison" class="supplier-comparison">
+                    </div>
+                    <div class="comparison-controls">
+                        <button class="btn" onclick="addHotelSupplier('${sectionId}')"><i class="fas fa-plus"></i> Add Supplier</button>
+                    </div>
+                    <div class="section-totals">
+                        <h3>Hotel Totals</h3>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="${sectionId}-excludes-note">Excludes Note (e.g., local taxes)</label>
+                                <input type="text" id="${sectionId}-excludes-note" class="form-control excludes-note-input" placeholder="e.g., Climate Resilience Tax EUR15 per room, per night, pay locally" value="${data.excludes || ''}" onchange="updateEmailTemplate(); saveState();">
+                            </div>
+                            <div class="form-group">
+                                <label for="${sectionId}-balance-due-date">Balance Due Date</label>
+                                <input type="text" id="${sectionId}-balance-due-date" class="form-control balance-due-input" placeholder="Select balance due date" value="${data.balanceDue || ''}" onchange="updateEmailTemplate(); saveState();">
+                            </div>
+                        </div>
+                        <div class="totals-row">
+                            <span class="totals-label">Total Net:</span>
+                            <span id="${sectionId}-total-net" class="totals-value">£0.00</span>
+                        </div>
+                        <div class="totals-row">
+                            <span class="totals-label">Total Selling - Exact:</span>
+                            <span id="${sectionId}-total-selling-exact" class="totals-value">£0.00</span>
+                        </div>
+                        <div class="totals-row">
+                            <span class="totals-label">Total Selling - Rounded:</span>
+                            <span id="${sectionId}-total-selling-rounded" class="totals-value">£0.00</span>
+                        </div>
+                    </div>
                 </div>
             `;
-            container.appendChild(section);
+            container.appendChild(card);
             hotelQuoteSections.push(sectionId);
             initQuoteDates(sectionId, data.checkin);
             // Add initial supplier to this section
@@ -3361,7 +3361,9 @@
             } else {
                 addHotelSupplier(sectionId);
             }
-            sortAndHighlightHotelOptions(section);
+            sortAndHighlightHotelOptions(card);
+            updateQuoteTotals(sectionId);
+            calculateBalanceDueDateForSection(sectionId);
             updateTotals();
             updateEmailTemplate();
             saveState();
@@ -3396,7 +3398,7 @@
                     hotelQuoteSections = hotelQuoteSections.filter(id => id !== sectionId);
                     updateTotals();
                     updateEmailTemplate();
-                    calculateBalanceDueDate();
+                    calculateAllBalanceDueDates();
                     saveState();
                 }
             }
@@ -3410,9 +3412,11 @@
             } else {
                 section.style.opacity = '0.5';
             }
+            updateQuoteTotals(sectionId);
+            calculateBalanceDueDateForSection(sectionId);
             updateTotals();
             updateEmailTemplate();
-            calculateBalanceDueDate();
+            saveState();
         }
 
         function addHotelSupplier(sectionId, data = {}) {
@@ -3447,20 +3451,20 @@
                     <option ${data.boardBasis === 'All Inclusive' ? 'selected' : ''}>All Inclusive</option>
                 </select></td>
                 <td>
-                    <select class="form-control cancellation-policy" onchange="toggleCancellationFee('${id}'); calculateBalanceDueDate(); sortAndHighlightHotelOptions(document.getElementById('${sectionId}')); updateEmailTemplate(); saveState();">
+                    <select class="form-control cancellation-policy" onchange="toggleCancellationFee('${id}'); calculateBalanceDueDateForSection('${sectionId}'); sortAndHighlightHotelOptions(document.getElementById('${sectionId}')); updateEmailTemplate(); saveState();">
                         <option value="">-- Select Policy --</option>
                         <option value="non-refundable" ${data.cancellationPolicy === 'non-refundable' ? 'selected' : ''}>Non-Refundable</option>
                         <option value="refundable" ${data.cancellationPolicy === 'refundable' ? 'selected' : ''}>Refundable</option>
                         <option value="refundable-with-fee" ${data.cancellationPolicy === 'refundable-with-fee' ? 'selected' : ''}>Refundable with Fee</option>
                     </select>
                     <div class="cancellation-deadline-group" style="display:none;">
-                        <input type="text" class="form-control cancellation-deadline" placeholder="Select cancellation deadline" value="${data.cancellationDeadline || ''}" onchange="calculateBalanceDueDate(); sortAndHighlightHotelOptions(document.getElementById('${sectionId}')); updateEmailTemplate(); saveState();">
+                        <input type="text" class="form-control cancellation-deadline" placeholder="Select cancellation deadline" value="${data.cancellationDeadline || ''}" onchange="calculateBalanceDueDateForSection('${sectionId}'); sortAndHighlightHotelOptions(document.getElementById('${sectionId}')); updateEmailTemplate(); saveState();">
                     </div>
                     <div class="cancellation-fee-group" style="display:none;">
                         <input type="number" class="form-control cancellation-fee" step="0.01" placeholder="0.00" value="${(data.cancellationFee || 0).toFixed(2)}" onchange="sortAndHighlightHotelOptions(document.getElementById('${sectionId}')); updateEmailTemplate(); saveState();">
                     </div>
                 </td>
-                <td><input type="checkbox" id="${id}-best" ${data.best ? 'checked' : ''} onchange="toggleBestPrice('${id}'); calculateBalanceDueDate();"></td>
+                <td><input type="checkbox" id="${id}-best" ${data.best ? 'checked' : ''} onchange="toggleBestPrice('${id}'); calculateBalanceDueDateForSection('${sectionId}');"></td>
                 <td>
                     <input type="checkbox" id="${id}-upgrade" ${data.upgrade ? 'checked' : ''} onchange="toggleUpgrade('${id}')">
                     <input type="text" class="form-control upgrade-desc" placeholder="Upgrade description" value="${data.upgradeDesc || ''}" style="display: ${data.upgrade ? 'block' : 'none'};" onchange="updateEmailTemplate(); saveState();">
@@ -3478,6 +3482,7 @@
             if (data.best) toggleBestPrice(id);
             if (data.upgrade) toggleUpgrade(id);
             sortAndHighlightHotelOptions(document.getElementById(sectionId));
+            updateQuoteTotals(sectionId);
         }
 
         function addFlightTable(data = {}) {
@@ -3566,11 +3571,13 @@
             if (confirm('Are you sure you want to remove this supplier option?')) {
                 const element = document.getElementById(id);
                 if (element) {
+                    const sectionId = element.closest('.card').id;
                     element.remove();
-                    const section = element.closest('.hotel-quote-section');
+                    const section = document.getElementById(sectionId);
                     if (section) {
                         sortAndHighlightHotelOptions(section);
-                        calculateBalanceDueDate();
+                        updateQuoteTotals(sectionId);
+                        calculateBalanceDueDateForSection(sectionId);
                     } else {
                         sortAndHighlightFlightOptions();
                     }
@@ -3619,13 +3626,15 @@
                 if (deadlineGroup) deadlineGroup.style.display = 'none';
             }
             initCancellationPickers(item);
-            const section = item.closest('.hotel-quote-section');
+            const section = item.closest('.card');
             if (section) {
+                const sectionId = section.id;
                 sortAndHighlightHotelOptions(section);
+                updateQuoteTotals(sectionId);
+                calculateBalanceDueDateForSection(sectionId);
             } else {
                 sortAndHighlightFlightOptions();
             }
-            calculateBalanceDueDate();
             saveState();
         }
 
@@ -3640,10 +3649,12 @@
             } else {
                 item.classList.remove('best-price');
             }
-            const section = item.closest('.hotel-quote-section');
+            const section = item.closest('.card');
             if (section) {
+                const sectionId = section.id;
                 sortAndHighlightHotelOptions(section);
-                calculateBalanceDueDate();
+                calculateBalanceDueDateForSection(sectionId);
+                updateQuoteTotals(sectionId);
             } else {
                 sortAndHighlightFlightOptions();
             }
@@ -3665,6 +3676,10 @@
                 if (amtInput) amtInput.style.display = 'none';
             }
             
+            const section = item.closest('.card');
+            if (section) {
+                updateQuoteTotals(section.id);
+            }
             updateTotals();
             updateEmailTemplate();
             saveState();
@@ -3702,9 +3717,11 @@
                 calculationDiv.textContent = `${netPrice.toFixed(2)} / ${divisor} = ${sellingPrice.toFixed(2)}`;
             }
             
-            const section = item.closest('.hotel-quote-section');
+            const section = item.closest('.card');
             if (section) {
+                const sectionId = section.id;
                 sortAndHighlightHotelOptions(section);
+                updateQuoteTotals(sectionId);
             } else {
                 sortAndHighlightFlightOptions();
             }
@@ -3722,11 +3739,13 @@
             if (!tbody) return;
 
             const rows = Array.from(tbody.querySelectorAll('.supplier-table-row'));
-            // Uncheck all best checkboxes first
+            // Uncheck all best checkboxes first and uncheck include-email on non-best
             rows.forEach(row => {
                 const checkbox = row.querySelector('input[type="checkbox"][id$="-best"]');
                 if (checkbox) checkbox.checked = false;
                 row.classList.remove('best-price');
+                const includeEmailCb = row.querySelector('input[id$="-include-email"]');
+                if (includeEmailCb) includeEmailCb.checked = false;
             });
 
             // Filter complete rows
@@ -3750,7 +3769,9 @@
 
             // Move the best row to the top
             tbody.insertBefore(bestRow, tbody.firstChild);
-            calculateBalanceDueDate();
+            const sectionId = quoteSection.id;
+            calculateBalanceDueDateForSection(sectionId);
+            updateQuoteTotals(sectionId);
         }
 
         function sortAndHighlightFlightOptions() {
@@ -3762,11 +3783,13 @@
             if (!tbody) return;
 
             const rows = Array.from(tbody.querySelectorAll('.supplier-table-row'));
-            // Uncheck all best checkboxes first
+            // Uncheck all best checkboxes first and uncheck include-email on non-best
             rows.forEach(row => {
                 const checkbox = row.querySelector('input[type="checkbox"][id$="-best"]');
                 if (checkbox) checkbox.checked = false;
                 row.classList.remove('best-price');
+                const includeEmailCb = row.querySelector('input[id$="-include-email"]');
+                if (includeEmailCb) includeEmailCb.checked = false;
             });
 
             // Filter complete rows
@@ -3792,18 +3815,14 @@
             tbody.insertBefore(bestRow, tbody.firstChild);
         }
 
-        function calculateBalanceDueDate() {
-            // Find first checked quote section
-            const checkedSection = hotelQuoteSections.find(id => {
-                const checkbox = document.querySelector(`#${id} .quote-include`);
-                return checkbox && checkbox.checked;
-            });
-            if (!checkedSection) {
-                document.getElementById('balance-due-date').value = '';
+        function calculateBalanceDueDateForSection(sectionId) {
+            const checkbox = document.querySelector(`#${sectionId} .quote-include`);
+            if (!checkbox || !checkbox.checked) {
+                document.getElementById(`${sectionId}-balance-due-date`).value = '';
                 return;
             }
 
-            const section = document.getElementById(checkedSection);
+            const section = document.getElementById(sectionId);
             const comparison = section.querySelector('.supplier-comparison');
             if (!comparison) return;
 
@@ -3812,7 +3831,7 @@
                 return cb && cb.checked;
             });
             if (!bestRow) {
-                document.getElementById('balance-due-date').value = '';
+                document.getElementById(`${sectionId}-balance-due-date`).value = '';
                 return;
             }
 
@@ -3820,7 +3839,7 @@
             const deadlineInput = bestRow.querySelector('.cancellation-deadline');
             const deadline = deadlineInput ? deadlineInput.value : '';
 
-            const balanceInput = document.getElementById('balance-due-date');
+            const balanceInput = document.getElementById(`${sectionId}-balance-due-date`);
             if (!bestPolicy) {
                 balanceInput.value = '';
                 return;
@@ -3838,6 +3857,12 @@
             }
             updateEmailTemplate();
             saveState();
+        }
+
+        function calculateAllBalanceDueDates() {
+            hotelQuoteSections.forEach(sectionId => {
+                calculateBalanceDueDateForSection(sectionId);
+            });
         }
 
         function isHotelRefundable() {
@@ -3862,47 +3887,63 @@
             return bestPolicy !== 'non-refundable' && bestPolicy !== '';
         }
 
+        function updateQuoteTotals(sectionId) {
+            let netTotal = 0;
+            let sellingExact = 0;
+            let sellingRounded = 0;
+            let upgradeTotal = 0;
+            
+            const section = document.getElementById(sectionId);
+            const comparison = section.querySelector('.supplier-comparison');
+            if (!comparison) return;
+            
+            comparison.querySelectorAll('.supplier-table-row').forEach(item => {
+                const includeEmail = item.querySelector('input[id$="-include-email"]')?.checked || false;
+                const isUpgrade = item.querySelector('input[type="checkbox"][id$="-upgrade"]')?.checked || false;
+                
+                const netPrice = parseFloat(item.querySelector('.net-price').value) || 0;
+                const sellingPrice = parseFloat(item.querySelector('.selling-price').value) || 0;
+                const upgradeAmount = parseFloat(item.querySelector('.upgrade-amount').value) || 0;
+                
+                if (!isUpgrade && includeEmail) {
+                    netTotal += netPrice;
+                    sellingExact += sellingPrice;
+                    sellingRounded += Math.ceil(sellingPrice);
+                }
+                
+                if (includeEmail) {
+                    upgradeTotal += upgradeAmount;
+                }
+            });
+            
+            // Add upgrades to rounded total
+            sellingRounded += Math.ceil(upgradeTotal);
+            
+            document.getElementById(`${sectionId}-total-net`).textContent = `£${netTotal.toFixed(2)}`;
+            document.getElementById(`${sectionId}-total-selling-exact`).textContent = `£${sellingExact.toFixed(2)}`;
+            document.getElementById(`${sectionId}-total-selling-rounded`).textContent = `£${sellingRounded.toFixed(2)}`;
+        }
+
         function updateTotals() {
             let hotelNetTotal = 0;
             let hotelSellingExact = 0;
             let hotelSellingRounded = 0;
-            let hotelUpgradeTotal = 0;
             
             // Collect from checked hotel quote sections
             hotelQuoteSections.forEach(sectionId => {
                 const checkbox = document.querySelector(`#${sectionId} .quote-include`);
                 if (!checkbox || !checkbox.checked) return;
                 
-                const section = document.getElementById(sectionId);
-                const comparison = section.querySelector('.supplier-comparison');
-                if (!comparison) return;
+                const netEl = document.getElementById(`${sectionId}-total-net`);
+                const exactEl = document.getElementById(`${sectionId}-total-selling-exact`);
+                const roundedEl = document.getElementById(`${sectionId}-total-selling-rounded`);
                 
-                comparison.querySelectorAll('.supplier-table-row').forEach(item => {
-                    const includeEmail = item.querySelector('input[id$="-include-email"]')?.checked || false;
-                    const isUpgrade = item.querySelector('input[type="checkbox"][id$="-upgrade"]')?.checked || false;
-                    
-                    const netPrice = parseFloat(item.querySelector('.net-price').value) || 0;
-                    const sellingPrice = parseFloat(item.querySelector('.selling-price').value) || 0;
-                    const upgradeAmount = parseFloat(item.querySelector('.upgrade-amount').value) || 0;
-                    
-                    if (!isUpgrade && includeEmail) {
-                        hotelNetTotal += netPrice;
-                        hotelSellingExact += sellingPrice;
-                        hotelSellingRounded += Math.ceil(sellingPrice);
-                    }
-                    
-                    if (includeEmail) {
-                        hotelUpgradeTotal += upgradeAmount;
-                    }
-                });
+                if (netEl && exactEl && roundedEl) {
+                    hotelNetTotal += parseFloat(netEl.textContent.replace('£', '')) || 0;
+                    hotelSellingExact += parseFloat(exactEl.textContent.replace('£', '')) || 0;
+                    hotelSellingRounded += parseFloat(roundedEl.textContent.replace('£', '')) || 0;
+                }
             });
-            
-            // Add upgrades to rounded total
-            hotelSellingRounded += Math.ceil(hotelUpgradeTotal);
-            
-            document.getElementById('hotel-total-net').textContent = `£${hotelNetTotal.toFixed(2)}`;
-            document.getElementById('hotel-total-selling-exact').textContent = `£${hotelSellingExact.toFixed(2)}`;
-            document.getElementById('hotel-total-selling-rounded').textContent = `£${hotelSellingRounded.toFixed(2)}`;
             
             let flightNetTotal = 0;
             let flightSellingExact = 0;
@@ -4036,7 +4077,6 @@
             const agentName = document.getElementById('agent-name').value;
             const agentEmail = document.getElementById('agent-email').value;
             const agentPhone = document.getElementById('agent-phone').value;
-            const excludesNote = document.getElementById('excludes-note').value;
             const quoteReference = document.getElementById('quote-reference').value || '[quote_reference]';
             
             const depositAmount = '25';
@@ -4045,7 +4085,17 @@
             const children = parseInt(document.getElementById('children-count').textContent) || 0;
             const childAges = getChildAgesList();
             
-            const balanceDueInput = document.getElementById('balance-due-date').value;
+            // Find first checked hotel quote for excludes and balance
+            let firstCheckedSectionId = null;
+            hotelQuoteSections.forEach(sectionId => {
+                const checkbox = document.querySelector(`#${sectionId} .quote-include`);
+                if (checkbox && checkbox.checked && !firstCheckedSectionId) {
+                    firstCheckedSectionId = sectionId;
+                }
+            });
+            const excludesNote = firstCheckedSectionId ? document.getElementById(`${firstCheckedSectionId}-excludes-note`).value : '';
+            const balanceDueInput = firstCheckedSectionId ? document.getElementById(`${firstCheckedSectionId}-balance-due-date`).value : '';
+            
             let balanceDueDate;
             if (balanceDueInput === 'Pay Now') {
                 balanceDueDate = 'Pay Now';
@@ -4259,7 +4309,6 @@
                 });
             }
             
-            const hotelSellingRounded = parseFloat(document.getElementById('hotel-total-selling-rounded').textContent.replace('£', ''));
             const flightSellingRounded = parseFloat(document.getElementById('flight-total-selling-rounded').textContent.replace('£', ''));
             const totalSellingRounded = parseFloat(document.getElementById('total-selling-rounded').textContent.replace('£', ''));
             
@@ -4307,7 +4356,7 @@
                     templateParts.push('');
                     templateParts.push(quote.options);
                 }
-                templateParts.push(`${boldWrap('Total Cost')} ${boldWrap('£' + Math.round(hotelSellingRounded).toFixed(0))} ${priceSuffix}`);
+                templateParts.push(`${boldWrap('Total Cost')} ${boldWrap('£' + Math.round(totalSellingRounded).toFixed(0))} ${priceSuffix}`);
                 if (excludesNote) {
                     templateParts.push(`${boldWrap('Excludes')} ${excludesNote}\n`);
                 }
@@ -4592,8 +4641,6 @@
                     childAges: Array.from(document.querySelectorAll('#child-ages .child-age-input')).map(input => input.value)
                 },
                 hotel: {
-                    excludes: document.getElementById('excludes-note').value,
-                    balanceDue: document.getElementById('balance-due-date').value,
                     quoteSections: hotelQuoteSections.map(sectionId => {
                         const checkbox = document.querySelector(`#${sectionId} .quote-include`);
                         const include = checkbox ? checkbox.checked : true;
@@ -4602,6 +4649,8 @@
                         const nightsInput = document.querySelector(`#${sectionId} .hotel-nights`);
                         const checkin = checkinInput ? checkinInput.value : '';
                         const nights = nightsInput ? nightsInput.value : '';
+                        const excludes = document.getElementById(`${sectionId}-excludes-note`).value;
+                        const balanceDue = document.getElementById(`${sectionId}-balance-due-date`).value;
                         const comparison = document.getElementById(`${sectionId}-comparison`);
                         const suppliers = [];
                         if (comparison) {
@@ -4609,7 +4658,7 @@
                                 suppliers.push(collectSupplierData(item, 'hotel'));
                             });
                         }
-                        return { id: sectionId, include, hotelName, checkin, nights, suppliers };
+                        return { id: sectionId, include, hotelName, checkin, nights, excludes, balanceDue, suppliers };
                     })
                 },
                 flight: {
@@ -4638,6 +4687,10 @@
             // Save collapsed states
             const sections = ['customer', 'hotel', 'flight', 'totals', 'email', 'optional-extras'];
             sections.forEach(secId => {
+                const sec = document.getElementById(secId);
+                state.collapsed[secId] = sec.classList.contains('collapsed');
+            });
+            hotelQuoteSections.forEach(secId => {
                 const sec = document.getElementById(secId);
                 state.collapsed[secId] = sec.classList.contains('collapsed');
             });
@@ -4675,11 +4728,6 @@
                     });
                     validateChildAges();
                 }, 0);
-
-                document.getElementById('excludes-note').value = state.hotel.excludes || '';
-                if (state.hotel.balanceDue) {
-                    document.getElementById('balance-due-date').value = state.hotel.balanceDue;
-                }
 
                 document.getElementById('commission-rate').value = state.commission || '11%';
                 updateCommission();
@@ -4724,12 +4772,29 @@
                             hotelName: secData.hotelName,
                             checkin: secData.checkin,
                             nights: secData.nights,
+                            excludes: secData.excludes,
+                            balanceDue: secData.balanceDue,
                             suppliers: secData.suppliers
                         });
                     });
                 } else {
                     // Fallback if no sections saved
                     addHotelQuoteSection();
+                }
+
+                // Restore collapsed for hotel quotes
+                if (state.collapsed) {
+                    hotelQuoteSections.forEach(id => {
+                        const sec = document.getElementById(id);
+                        if (sec) {
+                            sec.classList.remove('collapsed', 'expanded');
+                            if (state.collapsed[id]) {
+                                sec.classList.add('collapsed');
+                            } else {
+                                sec.classList.add('expanded');
+                            }
+                        }
+                    });
                 }
 
                 // Load flight suppliers
@@ -4768,7 +4833,7 @@
 
             updateTotals();
             updateEmailTemplate();
-            calculateBalanceDueDate();
+            calculateAllBalanceDueDates();
         }
 
         const flightDatesFp = flatpickr("#flight-dates", {
