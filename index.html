@@ -560,6 +560,41 @@
             color: rgba(255,255,255,0.7);
         }
         
+        .rooms-selector {
+            margin-bottom: 24px;
+        }
+        
+        .room-type {
+            border: 1px solid var(--border);
+            border-radius: var(--border-radius);
+            padding: 20px;
+            margin-bottom: 16px;
+            background: var(--light);
+        }
+        
+        .room-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        
+        .room-number {
+            font-weight: 600;
+            color: var(--primary);
+        }
+        
+        .room-remove {
+            background: var(--danger);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-size: 0.9rem;
+        }
+        
         .people-selector {
             display: flex;
             gap: 16px;
@@ -1041,6 +1076,15 @@
             .hero p {
                 font-size: 1.1rem;
             }
+
+            .room-type {
+                padding: 16px;
+            }
+
+            .people-selector {
+                flex-direction: column;
+                gap: 12px;
+            }
         }
         
         @media (max-width: 480px) {
@@ -1104,35 +1148,18 @@
                     </div>
                 </div>
 
-                <div class="people-selector">
-                    <div class="people-type">
-                        <h3>Adults</h3>
+                <div class="rooms-selector">
+                    <div class="people-type" style="justify-content: center;">
+                        <h3>Rooms</h3>
                         <div class="counter">
-                            <button class="counter-btn" onclick="changeCount('adults', -1)">-</button>
-                            <span id="adults-count" class="counter-value">2</span>
-                            <button class="counter-btn" onclick="changeCount('adults', 1)">+</button>
+                            <button class="counter-btn" onclick="changeRoomCount(-1)">-</button>
+                            <span id="rooms-count" class="counter-value">1</span>
+                            <button class="counter-btn" onclick="changeRoomCount(1)">+</button>
                         </div>
                     </div>
-                    <div class="people-type">
-                        <h3>Children</h3>
-                        <div class="counter">
-                            <button class="counter-btn" onclick="changeCount('children', -1)">-</button>
-                            <span id="children-count" class="counter-value">0</span>
-                            <button class="counter-btn" onclick="changeCount('children', 1)">+</button>
-                        </div>
+                    <div id="rooms-container">
+                        <!-- Dynamic room details added here -->
                     </div>
-                    <div class="people-type">
-                        <h3>Infants</h3>
-                        <div class="counter">
-                            <button class="counter-btn" onclick="changeCount('infants', -1)">-</button>
-                            <span id="infants-count" class="counter-value">0</span>
-                            <button class="counter-btn" onclick="changeCount('infants', 1)">+</button>
-                        </div>
-                        <div class="age-label">Under 2 years old</div>
-                    </div>
-                </div>
-                
-                <div id="child-ages" class="child-ages-container">
                 </div>
             </div>
         </section>
@@ -1381,6 +1408,7 @@
         let hotelQuoteSections = []; // Track hotel quote sections
         let usedQuoteNumbers = new Set(); // Track used quote numbers for reuse
         let hotelQuoteCounter = 0;
+        let roomsData = []; // Track room configurations: [{adults: 2, children: 0, infants: 0, childAges: []}, ...]
         let AIRPORTS = {
             'AAR': 'Aarhus, Denmark',
             'ABD': 'Abadan, Iran',
@@ -2946,7 +2974,7 @@
             'JJ': 'LATAM Airlines Brasil',
             'JP': 'Adria Airways',
             'JU': 'Jat Airways',
-            'KF': 'Kuwait Airways',
+            'KF': 'Kuwit Airways',
             'LG': 'Luxair',
             'LO': 'LOT Polish Airlines',
             'LP': 'LAN Peru',
@@ -3019,7 +3047,7 @@
                             if (section) {
                                 const sectionId = section.id;
                                 calculateBalanceDueDateForSection(sectionId);
-                                sortAndHighlightHotelOptions(section);
+                                sortAndHighlightPerRoom(sectionId);
                             } else {
                                 sortAndHighlightFlightOptions();
                             }
@@ -3047,13 +3075,259 @@
             updateEmailTemplate();
             toggleSectionsBasedOnBookingType();
             loadState();
-            validateChildAges();
+            // Initialize rooms
+            initializeRooms();
             // Add initial hotel quote section
             addHotelQuoteSection();
             addFlightOption();
             addOptionalExtra(); // Add one initial optional extra
             calculateAllBalanceDueDates();
         });
+
+        function initializeRooms() {
+            changeRoomCount(0); // Initialize with 1 room
+        }
+
+        function changeRoomCount(delta) {
+            const oldCount = parseInt(document.getElementById('rooms-count').textContent);
+            let count = oldCount + delta;
+            if (count < 1) count = 1; // Minimum 1 room
+            document.getElementById('rooms-count').textContent = count;
+            
+            // Handle removal of rooms if count decreased
+            if (count < oldCount) {
+                for (let removedRoomIndex = count; removedRoomIndex < oldCount; removedRoomIndex++) {
+                    hotelQuoteSections.forEach(sectionId => {
+                        const comparison = document.getElementById(`${sectionId}-comparison`);
+                        if (comparison) {
+                            const rowsToRemove = comparison.querySelectorAll(`.supplier-table-row[data-room="${removedRoomIndex}"]`);
+                            rowsToRemove.forEach(row => {
+                                row.remove();
+                            });
+                        }
+                    });
+                    // Resort and highlight after removal
+                    hotelQuoteSections.forEach(sectionId => {
+                        sortAndHighlightPerRoom(sectionId);
+                    });
+                }
+            }
+            
+            updateRoomsContainer();
+            
+            // If count increased, add rows for new rooms in all hotel sections
+            if (count > oldCount) {
+                for (let newRoomIndex = oldCount; newRoomIndex < count; newRoomIndex++) {
+                    hotelQuoteSections.forEach(sectionId => {
+                        addRowsForNewRoom(newRoomIndex, sectionId);
+                    });
+                }
+            }
+            
+            updateTotals();
+            updateEmailTemplate();
+            saveState();
+        }
+
+        function updateRoomsContainer() {
+            const count = parseInt(document.getElementById('rooms-count').textContent);
+            const container = document.getElementById('rooms-container');
+            container.innerHTML = '';
+            roomsData = []; // Reset data
+
+            for (let i = 0; i < count; i++) {
+                const roomDiv = document.createElement('div');
+                roomDiv.className = 'room-type';
+                roomDiv.id = `room-${i}`;
+                roomDiv.innerHTML = `
+                    <div class="room-header">
+                        <h4 class="room-number">Room ${i + 1}</h4>
+                    </div>
+                    <div class="people-selector">
+                        <div class="people-type">
+                            <h3>Adults</h3>
+                            <div class="counter">
+                                <button class="counter-btn" onclick="changeRoomOccupancy(${i}, 'adults', -1)">-</button>
+                                <span id="room-${i}-adults-count" class="counter-value">2</span>
+                                <button class="counter-btn" onclick="changeRoomOccupancy(${i}, 'adults', 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="people-type">
+                            <h3>Children</h3>
+                            <div class="counter">
+                                <button class="counter-btn" onclick="changeRoomOccupancy(${i}, 'children', -1)">-</button>
+                                <span id="room-${i}-children-count" class="counter-value">0</span>
+                                <button class="counter-btn" onclick="changeRoomOccupancy(${i}, 'children', 1)">+</button>
+                            </div>
+                        </div>
+                        <div class="people-type">
+                            <h3>Infants</h3>
+                            <div class="counter">
+                                <button class="counter-btn" onclick="changeRoomOccupancy(${i}, 'infants', -1)">-</button>
+                                <span id="room-${i}-infants-count" class="counter-value">0</span>
+                                <button class="counter-btn" onclick="changeRoomOccupancy(${i}, 'infants', 1)">+</button>
+                            </div>
+                            <div class="age-label">Under 2 years old</div>
+                        </div>
+                    </div>
+                    <div id="room-${i}-child-ages" class="child-ages-container"></div>
+                `;
+                container.appendChild(roomDiv);
+                // Initialize room data
+                roomsData.push({
+                    adults: 2,
+                    children: 0,
+                    infants: 0,
+                    childAges: []
+                });
+                updateRoomChildAges(i);
+            }
+        }
+
+        function addRowsForNewRoom(roomIndex, sectionId) {
+            const comparison = document.getElementById(`${sectionId}-comparison`);
+            if (!comparison) return;
+
+            // Find existing base suppliers (without room index)
+            const existingBaseIds = new Set();
+            comparison.querySelectorAll('.supplier-table-row[data-room]').forEach(row => {
+                const baseId = row.id.replace(/-\d+$/, '');
+                existingBaseIds.add(baseId);
+            });
+
+            existingBaseIds.forEach(baseId => {
+                // Use the first room's row as template (room 0)
+                const templateRow = comparison.querySelector(`tr[id^="${baseId}-"][data-room="0"]`);
+                if (templateRow) {
+                    const newRow = templateRow.cloneNode(true);
+                    newRow.id = `${baseId}-${roomIndex}`;
+                    newRow.setAttribute('data-room', roomIndex);
+
+                    // Update supplier name for new room
+                    const supNameInput = newRow.querySelector('.supplier-name');
+                    if (supNameInput) {
+                        let currentValue = supNameInput.value;
+                        // Extract base name if it has room info
+                        const match = currentValue.match(/^(.*?) Room \d+ \([^)]*\)$/);
+                        const baseName = match ? match[1].trim() : currentValue;
+                        const roomData = roomsData[roomIndex] || { adults: 2, children: 0, infants: 0 };
+                        supNameInput.value = `${baseName} Room ${roomIndex + 1} (${roomData.adults}A${roomData.children > 0 ? ` ${roomData.children}C` : ''}${roomData.infants > 0 ? ` ${roomData.infants}I` : ''})`;
+                    }
+
+                    // Clear prices and selections for new row
+                    newRow.querySelector('.net-price').value = '';
+                    newRow.querySelector('.selling-price').value = '';
+                    newRow.querySelector('.commission-amount').value = '';
+                    newRow.querySelector('input[id$="-best"]').checked = false;
+                    newRow.querySelector('input[id$="-upgrade"]').checked = false;
+                    newRow.querySelector('input[id$="-include-email"]').checked = false;
+                    newRow.classList.remove('best-price');
+
+                    // Append to tbody
+                    const tbody = comparison.querySelector('tbody');
+                    if (tbody) {
+                        tbody.appendChild(newRow);
+                    }
+
+                    // Update price calculation
+                    updateSupplierPrice(newRow.id);
+                    initCancellationPickers(newRow);
+                    toggleCancellationFee(newRow.id);
+                }
+            });
+
+            // Re-sort and highlight per room
+            sortAndHighlightPerRoom(sectionId);
+        }
+
+        function changeRoomOccupancy(roomIndex, type, delta) {
+            const countElement = document.getElementById(`room-${roomIndex}-${type}-count`);
+            let count = parseInt(countElement.textContent);
+            count += delta;
+            if (count < 0) count = 0;
+            countElement.textContent = count;
+            // Update roomsData
+            roomsData[roomIndex][type] = count;
+            if (type === 'children') {
+                updateRoomChildAges(roomIndex);
+            }
+            // Update supplier names for this room in all sections
+            updateSupplierNamesForRoom(roomIndex);
+            updateTotals();
+            updateEmailTemplate();
+            saveState();
+        }
+
+        function updateSupplierNamesForRoom(roomIndex) {
+            const roomData = roomsData[roomIndex];
+            const roomSuffix = ` Room ${roomIndex + 1} (${roomData.adults}A${roomData.children > 0 ? ` ${roomData.children}C` : ''}${roomData.infants > 0 ? ` ${roomData.infants}I` : ''})`;
+            hotelQuoteSections.forEach(sectionId => {
+                const comparison = document.getElementById(`${sectionId}-comparison`);
+                if (comparison) {
+                    comparison.querySelectorAll(`.supplier-table-row[data-room="${roomIndex}"] .supplier-name`).forEach(input => {
+                        let currentValue = input.value;
+                        const match = currentValue.match(/^(.*?) Room \d+ \([^)]*\)$/);
+                        const baseName = match ? match[1].trim() : currentValue.replace(roomSuffix, '');
+                        input.value = `${baseName}${roomSuffix}`;
+                    });
+                }
+            });
+            updateEmailTemplate();
+        }
+
+        function updateRoomChildAges(roomIndex) {
+            const count = parseInt(document.getElementById(`room-${roomIndex}-children-count`).textContent);
+            const container = document.getElementById(`room-${roomIndex}-child-ages`);
+            container.innerHTML = '';
+            roomsData[roomIndex].childAges = [];
+
+            for (let j = 0; j < count; j++) {
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.className = 'child-age-input form-control';
+                input.placeholder = `Child ${j+1} Age`;
+                input.min = '0';
+                input.max = '17';
+                input.onchange = function() {
+                    validateRoomChildAges(roomIndex);
+                    updateEmailTemplate();
+                    saveState();
+                };
+                container.appendChild(input);
+                roomsData[roomIndex].childAges.push('');
+            }
+            updateEmailTemplate();
+            saveState();
+        }
+
+        function validateRoomChildAges(roomIndex) {
+            const childInputs = document.querySelectorAll(`#room-${roomIndex}-child-ages .child-age-input`);
+            let allValid = true;
+            
+            childInputs.forEach((input, j) => {
+                const age = parseInt(input.value);
+                if (isNaN(age) || age < 0 || age > 17) {
+                    input.style.borderColor = 'var(--danger)';
+                    allValid = false;
+                } else {
+                    input.style.borderColor = '';
+                    roomsData[roomIndex].childAges[j] = input.value;
+                }
+            });
+            
+            return allValid;
+        }
+
+        function getTotalTravelers() {
+            let totalAdults = 0, totalChildren = 0, totalInfants = 0, allChildAges = [];
+            roomsData.forEach(room => {
+                totalAdults += room.adults;
+                totalChildren += room.children;
+                totalInfants += room.infants;
+                allChildAges = allChildAges.concat(room.childAges.filter(age => age));
+            });
+            return { adults: totalAdults, children: totalChildren, infants: totalInfants, childAges: allChildAges };
+        }
 
         function getNextQuoteNumber() {
             let number = 1;
@@ -3101,72 +3375,6 @@
                 section.classList.add('expanded');
             }
             saveState();
-        }
-
-        function changeCount(type, delta) {
-            const countElement = document.getElementById(`${type}-count`);
-            let count = parseInt(countElement.textContent);
-            count += delta;
-            
-            if (count < 0) count = 0;
-            
-            countElement.textContent = count;
-            
-            if (type === 'children') {
-                updateChildAges();
-            }
-            
-            updateTotals();
-            updateEmailTemplate();
-            saveState();
-        }
-
-        function updateChildAges() {
-            const count = parseInt(document.getElementById('children-count').textContent);
-            const container = document.getElementById('child-ages');
-            
-            container.innerHTML = '';
-            
-            for (let i = 0; i < count; i++) {
-                const input = document.createElement('input');
-                input.type = 'number';
-                input.className = 'child-age-input form-control';
-                input.placeholder = `Child ${i+1} Age`;
-                input.min = '0';
-                input.max = '17';
-                input.onchange = function() {
-                    validateChildAges();
-                    updateEmailTemplate();
-                    saveState();
-                };
-                container.appendChild(input);
-            }
-            updateEmailTemplate();
-            saveState();
-        }
-
-        function validateChildAges() {
-            const childInputs = document.querySelectorAll('.child-age-input');
-            let allValid = true;
-            
-            childInputs.forEach(input => {
-                const age = parseInt(input.value);
-                if (isNaN(age) || age < 0 || age > 17) {
-                    input.style.borderColor = 'var(--danger)';
-                    allValid = false;
-                } else {
-                    input.style.borderColor = '';
-                }
-            });
-            
-            return allValid;
-        }
-
-        function validateCustomerInfo() {
-            const customerName = document.getElementById('customer-name').value.trim();
-            const destination = document.getElementById('destination').value.trim();
-            
-            return customerName !== '' && destination !== '';
         }
 
         function selectDeliveryOption(element, option) {
@@ -3372,8 +3580,12 @@
                             <h3>Hotel Totals</h3>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="${sectionId}-excludes-note">Excludes Note (e.g., local taxes)</label>
-                                    <input type="text" id="${sectionId}-excludes-note" class="form-control excludes-note-input" placeholder="e.g., Climate Resilience Tax EUR15 per room, per night, pay locally" value="${data.excludes || ''}" onchange="updateEmailTemplate(); saveState();">
+                                    <label>Excludes Currency</label>
+                                    <input type="text" id="${sectionId}-excludes-currency" class="form-control" placeholder="e.g., EUR" value="${data.excludesCurrency || ''}" onchange="updateEmailTemplate(); saveState();">
+                                </div>
+                                <div class="form-group">
+                                    <label>Excludes Amount</label>
+                                    <input type="number" id="${sectionId}-excludes-amount" class="form-control" placeholder="e.g., 15" step="0.01" value="${data.excludesAmount || ''}" onchange="updateEmailTemplate(); saveState();">
                                 </div>
                             </div>
                             <div class="totals-row">
@@ -3428,8 +3640,12 @@
                             <h3>Hotel Totals</h3>
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="${sectionId}-excludes-note">Excludes Note (e.g., local taxes)</label>
-                                    <input type="text" id="${sectionId}-excludes-note" class="form-control excludes-note-input" placeholder="e.g., Climate Resilience Tax EUR15 per room, per night, pay locally" value="${data.excludes || ''}" onchange="updateEmailTemplate(); saveState();">
+                                    <label>Excludes Currency</label>
+                                    <input type="text" id="${sectionId}-excludes-currency" class="form-control" placeholder="e.g., EUR" value="${data.excludesCurrency || ''}" onchange="updateEmailTemplate(); saveState();">
+                                </div>
+                                <div class="form-group">
+                                    <label>Excludes Amount</label>
+                                    <input type="number" id="${sectionId}-excludes-amount" class="form-control" placeholder="e.g., 15" step="0.01" value="${data.excludesAmount || ''}" onchange="updateEmailTemplate(); saveState();">
                                 </div>
                             </div>
                             <div class="totals-row">
@@ -3460,7 +3676,7 @@
                 addHotelSupplier(sectionId);
             }
             initCancellationPickers(card);
-            sortAndHighlightHotelOptions(card);
+            sortAndHighlightPerRoom(sectionId);
             updateQuoteTotals(sectionId);
             calculateBalanceDueDateForSection(sectionId);
             updateTotals();
@@ -3520,6 +3736,7 @@
         }
 
         function addHotelSupplier(sectionId, data = {}) {
+            const numRooms = parseInt(document.getElementById('rooms-count').textContent);
             const comparison = document.getElementById(`${sectionId}-comparison`);
             let table = comparison.querySelector('table');
             if (!table) {
@@ -3529,77 +3746,168 @@
             }
             const tbody = table.querySelector('tbody') || document.createElement('tbody');
             if (!table.querySelector('tbody')) table.appendChild(tbody);
-            const id = data.id || sectionId + '-supplier-' + Date.now();
-            const tr = document.createElement('tr');
-            tr.id = id;
-            tr.classList.add('supplier-table-row');
-            tr.innerHTML = `
-                <td>
-                    <input type="text" class="form-control supplier-name" placeholder="Supplier Name" value="${data.supplierName || ''}" onchange="updateEmailTemplate(); saveState();">
-                </td>
-                <td><input type="number" class="form-control net-price" step="0.01" placeholder="0.00" value="${(data.netPrice || 0).toFixed(2)}" onchange="updateSupplierPrice('${id}'); saveState();"></td>
-                <td><input type="text" class="form-control commission-rate" placeholder="Use global" value="${data.commissionRate || ''}" onchange="updateSupplierPrice('${id}'); saveState();"></td>
-                <td><input type="text" class="form-control selling-price" readonly placeholder="0.00" value="${(data.sellingPrice || 0).toFixed(2)}"></td>
-                <td><input type="text" class="form-control commission-amount" readonly placeholder="0.00" value="${(data.commissionAmount || 0).toFixed(2)}"></td>
-                <td><input type="text" class="form-control room-type" list="roomTypes" placeholder="Room Type" value="${data.roomType || ''}" onchange="updateEmailTemplate(); saveState();"></td>
-                <td><input type="number" class="form-control rooms" min="1" value="${data.rooms || 1}" onchange="updateEmailTemplate(); saveState();"></td>
-                <td><select class="form-control board-basis" onchange="updateEmailTemplate(); saveState();">
-                    <option ${data.boardBasis === 'Room Only' ? 'selected' : ''}>Room Only</option>
-                    <option ${data.boardBasis === 'Bed & Breakfast' ? 'selected' : ''}>Bed & Breakfast</option>
-                    <option ${data.boardBasis === 'Half Board' ? 'selected' : ''}>Half Board</option>
-                    <option ${data.boardBasis === 'Full Board' ? 'selected' : ''}>Full Board</option>
-                    <option ${data.boardBasis === 'All Inclusive' ? 'selected' : ''}>All Inclusive</option>
-                </select></td>
-                <td>
-                    <select class="form-control cancellation-policy" onchange="toggleCancellationFee('${id}'); calculateBalanceDueDateForSection('${sectionId}'); sortAndHighlightHotelOptions(document.getElementById('${sectionId}')); updateEmailTemplate(); saveState();">
-                        <option value="">-- Select Policy --</option>
-                        <option value="non-refundable" ${data.cancellationPolicy === 'non-refundable' ? 'selected' : ''}>Non-Refundable</option>
-                        <option value="refundable" ${data.cancellationPolicy === 'refundable' ? 'selected' : ''}>Refundable</option>
-                        <option value="refundable-with-fee" ${data.cancellationPolicy === 'refundable-with-fee' ? 'selected' : ''}>Refundable with Fee</option>
-                    </select>
-                    <div class="cancellation-deadline-group" style="display:none;">
-                        <input type="text" class="form-control cancellation-deadline" placeholder="Select cancellation deadline" value="${data.cancellationDeadline || ''}" onchange="calculateBalanceDueDateForSection('${sectionId}'); sortAndHighlightHotelOptions(document.getElementById('${sectionId}')); updateEmailTemplate(); saveState();">
-                    </div>
-                    <div class="cancellation-fee-group" style="display:none;">
-                        <input type="number" class="form-control cancellation-fee" step="0.01" placeholder="0.00" value="${(data.cancellationFee || 0).toFixed(2)}" onchange="sortAndHighlightHotelOptions(document.getElementById('${sectionId}')); updateEmailTemplate(); saveState();">
-                    </div>
-                </td>
-                <td><input type="checkbox" id="${id}-best" ${data.best ? 'checked' : ''} onchange="toggleBestPrice('${id}'); calculateBalanceDueDateForSection('${sectionId}'); updateEmailTemplate();"></td>
-                <td class="upgrade-cell">
-                    <input type="checkbox" id="${id}-upgrade" ${data.upgrade ? 'checked' : ''} onchange="toggleUpgrade('${id}'); updateEmailTemplate(); saveState();">
-                    <div class="upgrade-modes" style="display: ${data.upgrade ? 'block' : 'none'};">
-                        <label><input type="checkbox" id="${id}-upgrade-auto" ${data.upgradeAuto ? 'checked' : ''} onchange="handleUpgradeMode('${id}', 'auto'); updateEmailTemplate(); saveState();"> Auto-upgrade from base</label>
-                        <label><input type="checkbox" id="${id}-upgrade-manual" ${data.upgradeManual ? 'checked' : ''} onchange="handleUpgradeMode('${id}', 'manual'); updateEmailTemplate(); saveState();"> Manual upgrade</label>
-                    </div>
-                    <div id="${id}-auto-section" style="display: ${data.upgrade && data.upgradeAuto ? 'block' : 'none'}; margin-top: 5px;">
-                        <small>Upgrade amount: <span id="${id}-auto-amount" class="auto-upgrade-amount">£0.00</span></small>
-                    </div>
-                    <div id="${id}-manual-section" style="display: ${data.upgrade && data.upgradeManual ? 'block' : 'none'}; margin-top: 5px;">
-                        <input type="text" class="form-control upgrade-desc" placeholder="Upgrade description" value="${data.upgradeDesc || ''}" style="margin-bottom: 5px;" onchange="updateEmailTemplate(); saveState();">
-                        <input type="number" class="form-control upgrade-amount" step="0.01" placeholder="0.00" value="${(data.upgradeAmount || 0).toFixed(2)}" onchange="updateEmailTemplate(); saveState();">
-                    </div>
-                </td>
-                <td><input type="checkbox" id="${id}-include-email" ${data.includeEmail ? 'checked' : ''} onchange="toggleIncludeEmail('${id}', '${sectionId}'); updateEmailTemplate();"></td>
-                <td>
-                    <button class="btn btn-danger btn-sm" onclick="removeSupplier('${id}')"><i class="fas fa-trash"></i></button>
-                </td>
-            `;
-            tbody.appendChild(tr);
-            updateSupplierPrice(id);
-            initCancellationPickers(tr);
-            toggleCancellationFee(id);
-            if (data.best) toggleBestPrice(id);
-            if (data.upgrade) toggleUpgrade(id);
-            if (data.upgradeAuto) {
-                document.getElementById(id + '-upgrade-auto').checked = true;
-                handleUpgradeMode(id, 'auto');
+
+            // Add one row per room
+            for (let roomIndex = 0; roomIndex < numRooms; roomIndex++) {
+                const roomData = roomsData[roomIndex] || { adults: 2, children: 0, infants: 0 };
+                const supId = data.id ? data.id.replace(/-\d+$/, `-${roomIndex}`) : `${sectionId}-supplier-${Date.now()}-${roomIndex}`;
+                const tr = document.createElement('tr');
+                tr.id = supId;
+                tr.classList.add('supplier-table-row');
+                tr.setAttribute('data-room', roomIndex);
+                const roomSuffix = ` Room ${roomIndex + 1} (${roomData.adults}A${roomData.children > 0 ? ` ${roomData.children}C` : ''}${roomData.infants > 0 ? ` ${roomData.infants}I` : ''})`;
+                tr.innerHTML = `
+                    <td>
+                        <input type="text" class="form-control supplier-name" placeholder="Supplier Name${roomSuffix}" value="${(data.supplierName || '') + roomSuffix}" onchange="updateEmailTemplate(); saveState();">
+                    </td>
+                    <td><input type="number" class="form-control net-price" step="0.01" placeholder="0.00" value="${(data.netPrice || 0).toFixed(2)}" onchange="updateSupplierPrice('${supId}'); saveState();"></td>
+                    <td><input type="text" class="form-control commission-rate" placeholder="Use global" value="${data.commissionRate || ''}" onchange="updateSupplierPrice('${supId}'); saveState();"></td>
+                    <td><input type="text" class="form-control selling-price" readonly placeholder="0.00" value="${(data.sellingPrice || 0).toFixed(2)}"></td>
+                    <td><input type="text" class="form-control commission-amount" readonly placeholder="0.00" value="${(data.commissionAmount || 0).toFixed(2)}"></td>
+                    <td><input type="text" class="form-control room-type" list="roomTypes" placeholder="Room Type" value="${data.roomType || ''}" onchange="updateEmailTemplate(); saveState();"></td>
+                    <td><input type="number" class="form-control rooms" min="1" value="1" readonly></td>
+                    <td><select class="form-control board-basis" onchange="updateEmailTemplate(); saveState();">
+                        <option ${data.boardBasis === 'Room Only' ? 'selected' : ''}>Room Only</option>
+                        <option ${data.boardBasis === 'Bed & Breakfast' ? 'selected' : ''}>Bed & Breakfast</option>
+                        <option ${data.boardBasis === 'Half Board' ? 'selected' : ''}>Half Board</option>
+                        <option ${data.boardBasis === 'Full Board' ? 'selected' : ''}>Full Board</option>
+                        <option ${data.boardBasis === 'All Inclusive' ? 'selected' : ''}>All Inclusive</option>
+                    </select></td>
+                    <td>
+                        <select class="form-control cancellation-policy" onchange="toggleCancellationFee('${supId}'); calculateBalanceDueDateForSection('${sectionId}'); sortAndHighlightPerRoom('${sectionId}'); updateEmailTemplate(); saveState();">
+                            <option value="">-- Select Policy --</option>
+                            <option value="non-refundable" ${data.cancellationPolicy === 'non-refundable' ? 'selected' : ''}>Non-Refundable</option>
+                            <option value="refundable" ${data.cancellationPolicy === 'refundable' ? 'selected' : ''}>Refundable</option>
+                            <option value="refundable-with-fee" ${data.cancellationPolicy === 'refundable-with-fee' ? 'selected' : ''}>Refundable with Fee</option>
+                        </select>
+                        <div class="cancellation-deadline-group" style="display:none;">
+                            <input type="text" class="form-control cancellation-deadline" placeholder="Select cancellation deadline" value="${data.cancellationDeadline || ''}" onchange="calculateBalanceDueDateForSection('${sectionId}'); sortAndHighlightPerRoom('${sectionId}'); updateEmailTemplate(); saveState();">
+                        </div>
+                        <div class="cancellation-fee-group" style="display:none;">
+                            <input type="number" class="form-control cancellation-fee" step="0.01" placeholder="0.00" value="${(data.cancellationFee || 0).toFixed(2)}" onchange="sortAndHighlightPerRoom('${sectionId}'); updateEmailTemplate(); saveState();">
+                        </div>
+                    </td>
+                    <td><input type="checkbox" id="${supId}-best" ${data.best ? 'checked' : ''} onchange="toggleBestPrice('${supId}', '${sectionId}'); calculateBalanceDueDateForSection('${sectionId}'); updateEmailTemplate();"></td>
+                    <td class="upgrade-cell">
+                        <input type="checkbox" id="${supId}-upgrade" ${data.upgrade ? 'checked' : ''} onchange="toggleUpgrade('${supId}'); updateEmailTemplate(); saveState();">
+                        <div class="upgrade-modes" style="display: ${data.upgrade ? 'block' : 'none'};">
+                            <label><input type="checkbox" id="${supId}-upgrade-auto" ${data.upgradeAuto ? 'checked' : ''} onchange="handleUpgradeMode('${supId}', 'auto'); updateEmailTemplate(); saveState();"> Auto-upgrade from base</label>
+                            <label><input type="checkbox" id="${supId}-upgrade-manual" ${data.upgradeManual ? 'checked' : ''} onchange="handleUpgradeMode('${supId}', 'manual'); updateEmailTemplate(); saveState();"> Manual upgrade</label>
+                        </div>
+                        <div id="${supId}-auto-section" style="display: ${data.upgrade && data.upgradeAuto ? 'block' : 'none'}; margin-top: 5px;">
+                            <small>Upgrade amount: <span id="${supId}-auto-amount" class="auto-upgrade-amount">£0.00</span></small>
+                        </div>
+                        <div id="${supId}-manual-section" style="display: ${data.upgrade && data.upgradeManual ? 'block' : 'none'}; margin-top: 5px;">
+                            <input type="text" class="form-control upgrade-desc" placeholder="Upgrade description" value="${data.upgradeDesc || ''}" style="margin-bottom: 5px;" onchange="updateEmailTemplate(); saveState();">
+                            <input type="number" class="form-control upgrade-amount" step="0.01" placeholder="0.00" value="${(data.upgradeAmount || 0).toFixed(2)}" onchange="updateEmailTemplate(); saveState();">
+                        </div>
+                    </td>
+                    <td><input type="checkbox" id="${supId}-include-email" ${data.includeEmail ? 'checked' : ''} onchange="toggleIncludeEmail('${supId}', '${sectionId}'); updateEmailTemplate();"></td>
+                    <td>
+                        <button class="btn btn-danger btn-sm" onclick="removeSupplier('${supId}')"><i class="fas fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+                updateSupplierPrice(supId);
+                initCancellationPickers(tr);
+                toggleCancellationFee(supId);
+                if (data.best) toggleBestPrice(supId, sectionId);
+                if (data.upgrade) toggleUpgrade(supId);
+                if (data.upgradeAuto) {
+                    document.getElementById(supId + '-upgrade-auto').checked = true;
+                    handleUpgradeMode(supId, 'auto');
+                }
+                if (data.upgradeManual) {
+                    document.getElementById(supId + '-upgrade-manual').checked = true;
+                    handleUpgradeMode(supId, 'manual');
+                }
             }
-            if (data.upgradeManual) {
-                document.getElementById(id + '-upgrade-manual').checked = true;
-                handleUpgradeMode(id, 'manual');
-            }
-            sortAndHighlightHotelOptions(document.getElementById(sectionId));
+            sortAndHighlightPerRoom(sectionId);
             updateQuoteTotals(sectionId);
+        }
+
+        function sortAndHighlightPerRoom(sectionId) {
+            const comparison = document.getElementById(`${sectionId}-comparison`);
+            if (!comparison) return;
+            const table = comparison.querySelector('table');
+            if (!table) return;
+            const tbody = table.querySelector('tbody');
+            if (!tbody) return;
+
+            // Group rows by room
+            const groups = {};
+            comparison.querySelectorAll('.supplier-table-row[data-room]').forEach(row => {
+                const room = row.getAttribute('data-room');
+                if (!groups[room]) groups[room] = [];
+                groups[room].push(row);
+            });
+
+            // For each room group, uncheck bests, filter complete, sort, pick lowest as best
+            Object.keys(groups).forEach(room => {
+                const roomRows = groups[room];
+
+                // Uncheck all best in this group
+                roomRows.forEach(row => {
+                    const cb = row.querySelector('input[id$="-best"]');
+                    if (cb) cb.checked = false;
+                    row.classList.remove('best-price');
+                });
+
+                // Filter complete rows
+                const completeRows = roomRows.filter(isPolicyComplete);
+                if (completeRows.length === 0) return;
+
+                completeRows.sort((a, b) => {
+                    const priceA = parseFloat(a.querySelector('.selling-price').value) || Infinity;
+                    const priceB = parseFloat(b.querySelector('.selling-price').value) || Infinity;
+                    return priceA - priceB;
+                });
+
+                // Set lowest as best
+                const bestRow = completeRows[0];
+                const bestCb = bestRow.querySelector('input[id$="-best"]');
+                if (bestCb) bestCb.checked = true;
+                bestRow.classList.add('best-price');
+
+                const includeEmailCb = bestRow.querySelector('input[id$="-include-email"]');
+                if (includeEmailCb) includeEmailCb.checked = true;
+            });
+
+            calculateBalanceDueDateForSection(sectionId);
+            updateQuoteTotals(sectionId);
+            updateEmailTemplate();
+        }
+
+        function toggleBestPrice(id, sectionId) {
+            const checkbox = document.getElementById(`${id}-best`);
+            const item = document.getElementById(id);
+            const roomIndex = item.getAttribute('data-room');
+            
+            if (checkbox.checked) {
+                item.classList.add('best-price');
+                const includeEmailCb = item.querySelector('input[id$="-include-email"]');
+                if (includeEmailCb) includeEmailCb.checked = true;
+
+                // Uncheck other bests in the same room
+                const comparison = document.getElementById(`${sectionId}-comparison`);
+                if (comparison) {
+                    comparison.querySelectorAll(`.supplier-table-row[data-room="${roomIndex}"]`).forEach(row => {
+                        if (row.id !== id) {
+                            const otherCb = row.querySelector('input[id$="-best"]');
+                            if (otherCb && otherCb.checked) {
+                                otherCb.checked = false;
+                                row.classList.remove('best-price');
+                            }
+                        }
+                    });
+                }
+            } else {
+                item.classList.remove('best-price');
+            }
+            calculateBalanceDueDateForSection(sectionId);
+            updateQuoteTotals(sectionId);
+            updateEmailTemplate();
+            saveState();
         }
 
         function toggleIncludeEmail(id, sectionId) {
@@ -3608,7 +3916,8 @@
             if (checkbox.checked) {
                 const comparison = document.getElementById(`${sectionId}-comparison`);
                 if (comparison) {
-                    comparison.querySelectorAll('.supplier-table-row').forEach(row => {
+                    const roomIndex = document.getElementById(id).getAttribute('data-room');
+                    comparison.querySelectorAll(`.supplier-table-row[data-room="${roomIndex}"]`).forEach(row => {
                         if (row.id !== id) {
                             const otherCheckbox = document.getElementById(`${row.id}-include-email`);
                             if (otherCheckbox) {
@@ -3619,7 +3928,7 @@
                 }
             }
             updateEmailTemplate();
-            sortAndHighlightHotelOptions(document.getElementById(sectionId));
+            sortAndHighlightPerRoom(sectionId);
             updateQuoteTotals(sectionId);
             updateTotals();
             saveState();
@@ -3756,7 +4065,7 @@
                     element.remove();
                     const section = document.getElementById(sectionId);
                     if (section) {
-                        sortAndHighlightHotelOptions(section);
+                        sortAndHighlightPerRoom(sectionId);
                         updateQuoteTotals(sectionId);
                         calculateBalanceDueDateForSection(sectionId);
                     } else {
@@ -3810,53 +4119,12 @@
             const section = item.closest('.card');
             if (section) {
                 const sectionId = section.id;
-                sortAndHighlightHotelOptions(section);
+                sortAndHighlightPerRoom(sectionId);
                 updateQuoteTotals(sectionId);
                 calculateBalanceDueDateForSection(sectionId);
             } else {
                 sortAndHighlightFlightOptions();
             }
-            saveState();
-        }
-
-        function toggleBestPrice(id) {
-            const checkbox = document.getElementById(`${id}-best`);
-            const item = document.getElementById(id);
-            
-            if (checkbox.checked) {
-                item.classList.add('best-price');
-                const includeEmailCb = item.querySelector('input[id$="-include-email"]');
-                if (includeEmailCb) includeEmailCb.checked = true;
-
-                // Uncheck other bests and their include emails
-                const table = item.closest('table');
-                if (table) {
-                    const allRows = Array.from(table.querySelectorAll('.supplier-table-row'));
-                    allRows.forEach(row => {
-                        if (row.id !== id) {
-                            const otherCb = document.getElementById(`${row.id}-best`);
-                            if (otherCb && otherCb.checked) {
-                                otherCb.checked = false;
-                                row.classList.remove('best-price');
-                                const prevInclude = row.querySelector('input[id$="-include-email"]');
-                                if (prevInclude) prevInclude.checked = false;
-                            }
-                        }
-                    });
-                }
-            } else {
-                item.classList.remove('best-price');
-            }
-            const section = item.closest('.card');
-            if (section) {
-                const sectionId = section.id;
-                sortAndHighlightHotelOptions(section);
-                calculateBalanceDueDateForSection(sectionId);
-                updateQuoteTotals(sectionId);
-            } else {
-                sortAndHighlightFlightOptions();
-            }
-            updateEmailTemplate();
             saveState();
         }
 
@@ -3926,7 +4194,8 @@
                 section = document.getElementById('flight');
             }
             let basePrice = Infinity;
-            const rows = section.querySelectorAll('.supplier-table-row');
+            const roomIndex = item.getAttribute('data-room');
+            const rows = section.querySelectorAll(`.supplier-table-row[data-room="${roomIndex}"]`);
             rows.forEach(row => {
                 if (row.id === id) return;
                 const incCb = row.querySelector('input[id$="-include-email"]');
@@ -3996,7 +4265,7 @@
             const section = item.closest('.card');
             if (section) {
                 const sectionId = section.id;
-                sortAndHighlightHotelOptions(section);
+                sortAndHighlightPerRoom(sectionId);
                 updateQuoteTotals(sectionId);
             } else {
                 sortAndHighlightFlightOptions();
@@ -4004,65 +4273,6 @@
             updateTotals();
             updateEmailTemplate();
             saveState();
-        }
-
-        function sortAndHighlightHotelOptions(quoteSection) {
-            const comparison = quoteSection.querySelector('.supplier-comparison');
-            if (!comparison) return;
-            const table = comparison.querySelector('table');
-            if (!table) return;
-            const tbody = table.querySelector('tbody');
-            if (!tbody) return;
-
-            const rows = Array.from(tbody.querySelectorAll('.supplier-table-row'));
-            
-            // Find current best
-            let currentBestRow = null;
-            rows.forEach(row => {
-                const checkbox = row.querySelector('input[type="checkbox"][id$="-best"]');
-                if (checkbox && checkbox.checked) {
-                    currentBestRow = row;
-                }
-            });
-
-            // Uncheck all best checkboxes first
-            rows.forEach(row => {
-                const checkbox = row.querySelector('input[type="checkbox"][id$="-best"]');
-                if (checkbox) checkbox.checked = false;
-                row.classList.remove('best-price');
-            });
-
-            // Filter complete rows
-            const completeRows = rows.filter(isPolicyComplete);
-            if (completeRows.length === 0) return;
-
-            completeRows.sort((a, b) => {
-                const priceA = parseFloat(a.querySelector('.selling-price').value) || Infinity;
-                const priceB = parseFloat(b.querySelector('.selling-price').value) || Infinity;
-                return priceA - priceB;
-            });
-
-            // Set the lowest complete as best
-            const bestRow = completeRows[0];
-            const bestCheckbox = bestRow.querySelector('input[type="checkbox"][id$="-best"]');
-            if (bestCheckbox) bestCheckbox.checked = true;
-            bestRow.classList.add('best-price');
-
-            const includeEmailCb = bestRow.querySelector('input[id$="-include-email"]');
-            if (includeEmailCb) includeEmailCb.checked = true;
-
-            // If there was a previous best and it's not the current best, uncheck its includeEmail
-            if (currentBestRow && currentBestRow !== bestRow) {
-                const prevIncludeEmail = currentBestRow.querySelector('input[id$="-include-email"]');
-                if (prevIncludeEmail) prevIncludeEmail.checked = false;
-            }
-
-            // Move the best row to the top
-            tbody.insertBefore(bestRow, tbody.firstChild);
-            const sectionId = quoteSection.id;
-            calculateBalanceDueDateForSection(sectionId);
-            updateQuoteTotals(sectionId);
-            updateEmailTemplate();
         }
 
         function sortAndHighlightFlightOptions() {
@@ -4131,10 +4341,8 @@
             const comparison = section.querySelector('.supplier-comparison');
             if (!comparison) return;
 
-            const bestRow = Array.from(comparison.querySelectorAll('.supplier-table-row')).find(row => {
-                const cb = row.querySelector('input[id$="-best"]');
-                return cb && cb.checked;
-            });
+            // For balance due, use the best row across all rooms (or first room's best)
+            const bestRow = Array.from(comparison.querySelectorAll('.supplier-table-row.best-price')).find(row => row.querySelector('input[id$="-best"]').checked);
             if (!bestRow) {
                 return;
             }
@@ -4280,10 +4488,11 @@
             document.getElementById('flight-total-selling-rounded').textContent = `£${flightSellingRounded.toFixed(2)}`;
             
             let optionalExtrasTotal = 0;
+            const numRooms = parseInt(document.getElementById('rooms-count').textContent);
             document.querySelectorAll('#optional-extras-list .optional-extra-item input[type="checkbox"]:checked').forEach(cb => {
                 const item = cb.closest('.optional-extra-item');
                 const cost = parseFloat(item.querySelector('input[type="number"]').value) || 0;
-                optionalExtrasTotal += Math.ceil(cost);
+                optionalExtrasTotal += Math.ceil(cost * numRooms);
             });
             
             const totalNet = hotelNetTotal + flightNetTotal;
@@ -4332,14 +4541,11 @@
         }
 
         function getChildAgesList() {
-            const childInputs = document.querySelectorAll('#child-ages .child-age-input');
-            const ages = [];
-            childInputs.forEach(input => {
-                if (input.value) {
-                    ages.push(input.value);
-                }
+            let allAges = [];
+            roomsData.forEach(room => {
+                allAges = allAges.concat(room.childAges.filter(age => age));
             });
-            return ages;
+            return allAges;
         }
 
         function boldWrap(text) {
@@ -4387,8 +4593,9 @@
             
             const depositAmount = '25';
             
-            const adults = parseInt(document.getElementById('adults-count').textContent) || 0;
-            const children = parseInt(document.getElementById('children-count').textContent) || 0;
+            const travelers = getTotalTravelers();
+            const adults = travelers.adults;
+            const children = travelers.children;
             const childAges = getChildAgesList();
             
             // Find first checked hotel quote for excludes and balance
@@ -4399,7 +4606,9 @@
                     firstCheckedSectionId = sectionId;
                 }
             });
-            const excludesNote = firstCheckedSectionId ? document.getElementById(`${firstCheckedSectionId}-excludes-note`).value : '';
+            const excludesCurrency = firstCheckedSectionId ? document.getElementById(`${firstCheckedSectionId}-excludes-currency`).value : '';
+            const excludesAmount = firstCheckedSectionId ? document.getElementById(`${firstCheckedSectionId}-excludes-amount`).value : '';
+            const excludesNote = excludesCurrency && excludesAmount ? `Climate Resilience Tax ${excludesCurrency} ${excludesAmount} per room, per night, pay locally` : '';
             const balanceDueInput = firstCheckedSectionId ? document.getElementById(firstCheckedSectionId).getAttribute('data-balance-due') || '' : '';
             
             let balanceDueDate;
@@ -4648,6 +4857,7 @@
 
             // Collect user optional extras (always, for all types)
             let optionalExtrasText = '';
+            const numRooms = parseInt(document.getElementById('rooms-count').textContent);
             document.querySelectorAll('#optional-extras-list .optional-extra-item').forEach(item => {
                 const checkbox = item.querySelector('input[type="checkbox"]');
                 if (checkbox && checkbox.checked) {
@@ -4656,7 +4866,7 @@
                     const name = nameInput ? nameInput.value : '';
                     const cost = parseFloat(costInput ? costInput.value : '0') || 0;
                     if (name && cost > 0) {
-                        optionalExtrasText += `${boldWrap(name)} ${boldWrap('£' + Math.round(cost).toFixed(0))}${pricePerRoom ? ' per room' : ''}\n`;
+                        optionalExtrasText += `${boldWrap(name)} ${boldWrap('£' + Math.round(cost * numRooms).toFixed(0))}${pricePerRoom ? ' per room' : ''}\n`;
                     }
                 }
             });
@@ -4687,6 +4897,9 @@
                 const agesList = childAges.join(', ');
                 travelerText += ` & ${children} Child${children > 1 ? 'ren' : ''}${agesList.length > 0 ? ', ' + agesList : ''}`;
             }
+            if (travelers.infants > 0) {
+                travelerText += ` & ${travelers.infants} Infant${travelers.infants > 1 ? 's' : ''}`;
+            }
             
             if (bookingType === 'hotel') {
                 templateParts.push(`Hi ${customerName},`);
@@ -4698,7 +4911,11 @@
                         templateParts.push(`${boldWrap('OPTION ' + (index + 1))}`);
                         templateParts.push('');
                         if (quote.hotelName) {
-                            templateParts.push(`${quote.hotelName.toUpperCase()}${destination ? ', ' + destination.toUpperCase() : ''}`);
+                            templateParts.push(`${quote.hotelName.toUpperCase()}\n`);
+                        }
+                        for (let roomIndex = 0; roomIndex < roomsData.length; roomIndex++) {
+                            const room = roomsData[roomIndex];
+                            templateParts.push(`Room ${roomIndex + 1}: ${room.adults}A${room.children > 0 ? ` ${room.children}C` : ''}${room.infants > 0 ? ` ${room.infants}I` : ''}`);
                         }
                         templateParts.push(`${quote.startDate} - ${quote.endDate} - ${quote.nights} Night${quote.nights > 1 ? 's' : ''}`);
                         templateParts.push('');
@@ -4707,7 +4924,11 @@
                 } else if (checkedHotelQuotes.length === 1) {
                     const quote = checkedHotelQuotes[0];
                     if (quote.hotelName) {
-                        templateParts.push(`${quote.hotelName.toUpperCase()}${destination ? ', ' + destination.toUpperCase() : ''}`);
+                        templateParts.push(`${quote.hotelName.toUpperCase()}\n`);
+                    }
+                    for (let roomIndex = 0; roomIndex < roomsData.length; roomIndex++) {
+                        const room = roomsData[roomIndex];
+                        templateParts.push(`Room ${roomIndex + 1}: ${room.adults}A${room.children > 0 ? ` ${room.children}C` : ''}${room.infants > 0 ? ` ${room.infants}I` : ''}`);
                     }
                     templateParts.push(`${quote.startDate} - ${quote.endDate} - ${quote.nights} Night${quote.nights > 1 ? 's' : ''}`);
                     templateParts.push('');
@@ -4795,7 +5016,11 @@
                         templateParts.push(`${boldWrap('OPTION ' + (index + 1))}`);
                         templateParts.push('');
                         if (quote.hotelName) {
-                            templateParts.push(`${quote.hotelName.toUpperCase()}${destination ? ', ' + destination.toUpperCase() : ''}`);
+                            templateParts.push(`${quote.hotelName.toUpperCase()}\n`);
+                        }
+                        for (let roomIndex = 0; roomIndex < roomsData.length; roomIndex++) {
+                            const room = roomsData[roomIndex];
+                            templateParts.push(`Room ${roomIndex + 1}: ${room.adults}A${room.children > 0 ? ` ${room.children}C` : ''}${room.infants > 0 ? ` ${room.infants}I` : ''}`);
                         }
                         templateParts.push(`${quote.startDate} - ${quote.endDate} - ${quote.nights} Night${quote.nights > 1 ? 's' : ''}`);
                         templateParts.push('');
@@ -4804,7 +5029,11 @@
                 } else if (checkedHotelQuotes.length === 1) {
                     const quote = checkedHotelQuotes[0];
                     if (quote.hotelName) {
-                        templateParts.push(`${quote.hotelName.toUpperCase()}${destination ? ', ' + destination.toUpperCase() : ''}`);
+                        templateParts.push(`${quote.hotelName.toUpperCase()}\n`);
+                    }
+                    for (let roomIndex = 0; roomIndex < roomsData.length; roomIndex++) {
+                        const room = roomsData[roomIndex];
+                        templateParts.push(`Room ${roomIndex + 1}: ${room.adults}A${room.children > 0 ? ` ${room.children}C` : ''}${room.infants > 0 ? ` ${room.infants}I` : ''}`);
                     }
                     templateParts.push(`${quote.startDate} - ${quote.endDate} - ${quote.nights} Night${quote.nights > 1 ? 's' : ''}`);
                     templateParts.push('');
@@ -4912,6 +5141,7 @@
                 usedQuoteNumbers.clear();
                 hotelQuoteSections = [];
                 hotelQuoteCounter = 0;
+                roomsData = [];
                 location.reload();
             }
         }
@@ -5005,10 +5235,7 @@
                 customer: {
                     name: document.getElementById('customer-name').value,
                     destination: document.getElementById('destination').value,
-                    adults: document.getElementById('adults-count').textContent,
-                    children: document.getElementById('children-count').textContent,
-                    infants: document.getElementById('infants-count').textContent,
-                    childAges: Array.from(document.querySelectorAll('#child-ages .child-age-input')).map(input => input.value)
+                    roomsData: roomsData
                 },
                 hotel: {
                     quoteSections: hotelQuoteSections.map(sectionId => {
@@ -5020,7 +5247,8 @@
                         const nightsInput = document.querySelector(`#${sectionId} .hotel-nights`);
                         const checkin = checkinInput ? checkinInput.value : '';
                         const nights = nightsInput ? nightsInput.value : '';
-                        const excludes = document.getElementById(`${sectionId}-excludes-note`).value;
+                        const excludesCurrency = document.getElementById(`${sectionId}-excludes-currency`).value;
+                        const excludesAmount = document.getElementById(`${sectionId}-excludes-amount`).value;
                         const balanceDue = document.getElementById(sectionId).getAttribute('data-balance-due') || '';
                         const comparison = document.getElementById(`${sectionId}-comparison`);
                         const suppliers = [];
@@ -5029,7 +5257,7 @@
                                 suppliers.push(collectSupplierData(item, 'hotel'));
                             });
                         }
-                        return { id: sectionId, number, include, hotelName, checkin, nights, excludes, balanceDue, suppliers };
+                        return { id: sectionId, number, include, hotelName, checkin, nights, excludesCurrency, excludesAmount, balanceDue, suppliers };
                     })
                 },
                 flight: {
@@ -5082,19 +5310,22 @@
                 }
             }
 
-            // Populate static fields with defaults
-            document.getElementById('adults-count').textContent = '2';
-            document.getElementById('children-count').textContent = '0';
-            document.getElementById('infants-count').textContent = '0';
-
             if (state) {
                 document.getElementById('customer-name').value = state.customer.name || '';
                 document.getElementById('destination').value = state.customer.destination || '';
 
-                // Override counters
-                document.getElementById('adults-count').textContent = state.customer.adults || '2';
-                document.getElementById('children-count').textContent = state.customer.children || '0';
-                document.getElementById('infants-count').textContent = state.customer.infants || '0';
+                if (state.customer.roomsData) {
+                    roomsData = state.customer.roomsData;
+                    document.getElementById('rooms-count').textContent = roomsData.length;
+                    updateRoomsContainer();
+                    // Restore child ages
+                    roomsData.forEach((room, i) => {
+                        const inputs = document.querySelectorAll(`#room-${i}-child-ages .child-age-input`);
+                        room.childAges.forEach((age, j) => {
+                            if (inputs[j]) inputs[j].value = age;
+                        });
+                    });
+                }
 
                 document.getElementById('commission-rate').value = state.commission || '11%';
                 updateCommission();
@@ -5165,15 +5396,6 @@
                 }
             }
 
-            updateChildAges();
-            if (state && state.customer.childAges) {
-                const inputs = document.querySelectorAll('#child-ages .child-age-input');
-                state.customer.childAges.forEach((age, i) => {
-                    if (inputs[i]) inputs[i].value = age;
-                });
-                validateChildAges();
-            }
-
             // Re-init pickers after loading dynamic content
             hotelQuoteSections.forEach(id => {
                 const section = document.getElementById(id);
@@ -5186,31 +5408,40 @@
 
             // Restore collapsed states
             const sections = ['customer', 'hotel', 'flight', 'totals', 'email', 'optional-extras'];
-            sections.forEach(id => {
-                const sec = document.getElementById(id);
-                if (sec) {
-                    sec.classList.remove('collapsed', 'expanded');
-                    if (state && state.collapsed && state.collapsed[id]) {
-                        sec.classList.add('collapsed');
-                    } else {
-                        sec.classList.add('expanded');
+            if (state && state.collapsed) {
+                sections.forEach(id => {
+                    const sec = document.getElementById(id);
+                    if (sec) {
+                        sec.classList.remove('collapsed', 'expanded');
+                        if (state.collapsed[id]) {
+                            sec.classList.add('collapsed');
+                        } else {
+                            sec.classList.add('expanded');
+                        }
                     }
-                }
-            });
-            hotelQuoteSections.forEach(id => {
-                const sec = document.getElementById(id);
-                if (sec) {
-                    sec.classList.remove('collapsed', 'expanded');
-                    if (state && state.collapsed && state.collapsed[id]) {
-                        sec.classList.add('collapsed');
-                    } else {
-                        sec.classList.add('expanded');
+                });
+                hotelQuoteSections.forEach(id => {
+                    const sec = document.getElementById(id);
+                    if (sec) {
+                        sec.classList.remove('collapsed', 'expanded');
+                        if (state.collapsed[id]) {
+                            sec.classList.add('collapsed');
+                        } else {
+                            sec.classList.add('expanded');
+                        }
                     }
-                }
-            });
+                });
+            }
 
             updateTotals();
             updateEmailTemplate();
+        }
+
+        function validateCustomerInfo() {
+            const customerName = document.getElementById('customer-name').value.trim();
+            const destination = document.getElementById('destination').value.trim();
+            
+            return customerName !== '' && destination !== '';
         }
     </script>
 </body>
