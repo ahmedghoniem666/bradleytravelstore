@@ -4793,7 +4793,7 @@ function updateEmailTemplate() {
                                 baseSellingPrice = sellingPrice;
                             }
                             let detailText = '';
-                            detailText += `${boldWrap(roomType + ' (' + rooms + ' room' + (rooms > 1 ? 's' : '') + ')')} on ${boldWrap(boardBasis)}\n`;
+                            detailText += `${roomType} (${rooms} room${rooms > 1 ? 's' : ''}) on ${boldWrap(boardBasis)}\n`;
                             roomOptions[roomIndex] += detailText;
                             if (cancelText) {
                                 cancelTexts[roomIndex] = cancelText;
@@ -4997,16 +4997,20 @@ function updateEmailTemplate() {
                 templateParts.push(`${boldWrap('OPTION ' + (index + 1))}`);
                 templateParts.push('');
                 if (quote.hotelName) {
-                    templateParts.push(`${boldWrap(quote.hotelName.toUpperCase())}${quote.roomOptions[0].trim() ? ': ' + quote.roomOptions[0].trim() : ''}\n`);
+                    templateParts.push(`${boldWrap(quote.hotelName.toUpperCase())}\n`);
+                }
+                if (quote.roomOptions[0].trim()) {
+                    templateParts.push(quote.roomOptions[0].trim());
                 }
                 templateParts.push(`${quote.startDate} - ${quote.endDate} - ${quote.nights} Night${quote.nights > 1 ? 's' : ''}`);
+                templateParts.push('');
+                templateParts.push(`${boldWrap('Total Cost')} ${boldWrap('£' + (totalSellingRounded > 0 ? Math.round(totalSellingRounded).toFixed(0) : '[Price]'))} ${priceSuffix}`);
                 if (quote.cancelTexts && quote.cancelTexts.some(text => text)) {
                     const allCancelTexts = quote.cancelTexts.filter(text => text).join(' ');
                     if (allCancelTexts) {
                         templateParts.push(`${boldWrap(allCancelTexts)}`);
                     }
                 }
-                templateParts.push(`${boldWrap('Total Cost')} ${boldWrap('£' + (totalSellingRounded > 0 ? Math.round(totalSellingRounded).toFixed(0) : '[Price]'))} ${priceSuffix}`);
                 if (excludesNote) {
                     templateParts.push(`Excludes ${excludesNote}\n`);
                 }
@@ -5026,16 +5030,20 @@ function updateEmailTemplate() {
         } else if (checkedHotelQuotes.length === 1) {
             const quote = checkedHotelQuotes[0];
             if (quote.hotelName) {
-                templateParts.push(`${boldWrap(quote.hotelName.toUpperCase())}${quote.roomOptions[0].trim() ? ': ' + quote.roomOptions[0].trim() : ''}\n`);
+                templateParts.push(`${boldWrap(quote.hotelName.toUpperCase())}\n`);
+            }
+            if (quote.roomOptions[0].trim()) {
+                templateParts.push(quote.roomOptions[0].trim());
             }
             templateParts.push(`${quote.startDate} - ${quote.endDate} - ${quote.nights} Night${quote.nights > 1 ? 's' : ''}`);
+            templateParts.push('');
+            templateParts.push(`${boldWrap('Total Cost')} ${boldWrap('£' + (totalSellingRounded > 0 ? Math.round(totalSellingRounded).toFixed(0) : '[Price]'))} ${priceSuffix}`);
             if (quote.cancelTexts && quote.cancelTexts.some(text => text)) {
                 const allCancelTexts = quote.cancelTexts.filter(text => text).join(' ');
                 if (allCancelTexts) {
                     templateParts.push(`${boldWrap(allCancelTexts)}`);
                 }
             }
-            templateParts.push(`${boldWrap('Total Cost')} ${boldWrap('£' + (totalSellingRounded > 0 ? Math.round(totalSellingRounded).toFixed(0) : '[Price]'))} ${priceSuffix}`);
             if (excludesNote) {
                 templateParts.push(`Excludes ${excludesNote}\n`);
             }
@@ -5057,12 +5065,12 @@ function updateEmailTemplate() {
         templateParts.push('Prices are live and subject to change prior to confirmation.');
         templateParts.push('');
         templateParts.push(`Kind regards`);
-        templateParts.push(boldWrap(agentName));
+        templateParts.push(`${agentName}`);
         templateParts.push('');
         templateParts.push('Bradley Travelstore');
-        templateParts.push(`T: ${boldWrap(agentPhone)}`);
-        templateParts.push(`E: ${boldWrap(agentEmail)}`);
-        templateParts.push(`W: ${boldWrap(websiteUrl)}`);
+        templateParts.push(`T: ${agentPhone}`);
+        templateParts.push(`E: ${agentEmail}`);
+        templateParts.push(`W: ${websiteUrl}`);
         templateParts.push('');
         templateParts.push('We are fully ATOL bonded for your peace of mind.');
         templateParts.push('');
@@ -5097,12 +5105,12 @@ function updateEmailTemplate() {
         templateParts.push('Prices are live and subject to change prior to confirmation.');
         templateParts.push('');
         templateParts.push(`Kind regards`);
-        templateParts.push(boldWrap(agentName));
+        templateParts.push(`${agentName}`);
         templateParts.push('');
         templateParts.push('Bradley Travelstore');
-        templateParts.push(`T: ${boldWrap(agentPhone)}`);
-        templateParts.push(`E: ${boldWrap(agentEmail)}`);
-        templateParts.push(`W: ${boldWrap(websiteUrl)}`);
+        templateParts.push(`T: ${agentPhone}`);
+        templateParts.push(`E: ${agentEmail}`);
+        templateParts.push(`W: ${websiteUrl}`);
         templateParts.push('');
         templateParts.push('We are fully ATOL bonded for your peace of mind.');
         templateParts.push('');
@@ -5118,16 +5126,20 @@ function updateEmailTemplate() {
                 templateParts.push(`${boldWrap('OPTION ' + (index + 1))}`);
                 templateParts.push('');
                 if (quote.hotelName) {
-                    templateParts.push(`${boldWrap(quote.hotelName.toUpperCase())}${quote.roomOptions[0].trim() ? ': ' + quote.roomOptions[0].trim() : ''}\n`);
+                    templateParts.push(`${boldWrap(quote.hotelName.toUpperCase())}\n`);
+                }
+                if (quote.roomOptions[0].trim()) {
+                    templateParts.push(quote.roomOptions[0].trim());
                 }
                 templateParts.push(`${quote.startDate} - ${quote.endDate} - ${quote.nights} Night${quote.nights > 1 ? 's' : ''}`);
+                templateParts.push('');
+                templateParts.push(`${boldWrap('Total Package Cost')} ${boldWrap('£' + (totalSellingRounded > 0 ? Math.round(totalSellingRounded).toFixed(0) : '[Price]'))} ${priceSuffix}`);
                 if (quote.cancelTexts && quote.cancelTexts.some(text => text)) {
                     const allCancelTexts = quote.cancelTexts.filter(text => text).join(' ');
                     if (allCancelTexts) {
                         templateParts.push(`${boldWrap(allCancelTexts)}`);
                     }
                 }
-                templateParts.push(`${boldWrap('Total Package Cost')} ${boldWrap('£' + (totalSellingRounded > 0 ? Math.round(totalSellingRounded).toFixed(0) : '[Price]'))} ${priceSuffix}`);
                 if (excludesNote) {
                     templateParts.push(`Excludes ${excludesNote}\n`);
                 }
@@ -5148,16 +5160,20 @@ function updateEmailTemplate() {
         } else if (checkedHotelQuotes.length === 1) {
             const quote = checkedHotelQuotes[0];
             if (quote.hotelName) {
-                templateParts.push(`${boldWrap(quote.hotelName.toUpperCase())}${quote.roomOptions[0].trim() ? ': ' + quote.roomOptions[0].trim() : ''}\n`);
+                templateParts.push(`${boldWrap(quote.hotelName.toUpperCase())}\n`);
+            }
+            if (quote.roomOptions[0].trim()) {
+                templateParts.push(quote.roomOptions[0].trim());
             }
             templateParts.push(`${quote.startDate} - ${quote.endDate} - ${quote.nights} Night${quote.nights > 1 ? 's' : ''}`);
+            templateParts.push('');
+            templateParts.push(`${boldWrap('Total Package Cost')} ${boldWrap('£' + (totalSellingRounded > 0 ? Math.round(totalSellingRounded).toFixed(0) : '[Price]'))} ${priceSuffix}`);
             if (quote.cancelTexts && quote.cancelTexts.some(text => text)) {
                 const allCancelTexts = quote.cancelTexts.filter(text => text).join(' ');
                 if (allCancelTexts) {
                     templateParts.push(`${boldWrap(allCancelTexts)}`);
                 }
             }
-            templateParts.push(`${boldWrap('Total Package Cost')} ${boldWrap('£' + (totalSellingRounded > 0 ? Math.round(totalSellingRounded).toFixed(0) : '[Price]'))} ${priceSuffix}`);
             if (excludesNote) {
                 templateParts.push(`Excludes ${excludesNote}\n`);
             }
@@ -5191,12 +5207,12 @@ function updateEmailTemplate() {
         templateParts.push('Prices are live and subject to change prior to confirmation.');
         templateParts.push('');
         templateParts.push(`Kind regards`);
-        templateParts.push(boldWrap(agentName));
+        templateParts.push(`${agentName}`);
         templateParts.push('');
         templateParts.push('Bradley Travelstore');
-        templateParts.push(`T: ${boldWrap(agentPhone)}`);
-        templateParts.push(`E: ${boldWrap(agentEmail)}`);
-        templateParts.push(`W: ${boldWrap(websiteUrl)}`);
+        templateParts.push(`T: ${agentPhone}`);
+        templateParts.push(`E: ${agentEmail}`);
+        templateParts.push(`W: ${websiteUrl}`);
         templateParts.push('');
         templateParts.push('We are fully ATOL bonded for your peace of mind.');
         templateParts.push('');
