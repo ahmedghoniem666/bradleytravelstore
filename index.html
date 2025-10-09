@@ -693,7 +693,7 @@
             gap: 12px;
             margin-bottom: 16px;
         }
-        
+
         .commission-display {
             display: flex;
             align-items: center;
@@ -739,33 +739,41 @@
             color: var(--secondary);
         }
         
-        .section-toggle i {
-            transition: transform 0.3s ease;
-            font-size: 1.2rem;
-            color: var(--muted-text);
-        }
+     .section-toggle i {
+    transition: transform 0.3s ease;
+    font-size: 1.2rem;
+    color: var(--muted-text);
+}
+
+.collapsed .section-toggle i {
+    transform: rotate(0deg) !important;
+}
+
+.expanded .section-toggle i {
+    transform: rotate(180deg) !important;
+}
+
         
-        .section-content {
-            overflow: hidden;
-            transition: max-height 0.4s ease-out;
-            margin-top: 16px;
-        }
-        
-        .collapsed .section-content {
-            max-height: 0;
-        }
+.section-content {
+    overflow: hidden;
+    transition: max-height 0.4s ease-out, height 0.4s ease-out, margin-top 0.4s ease-out;
+    margin-top: 16px;
+}
+
+.collapsed .section-content {
+    max-height: 0 !important;  /* !important just for testing—remove if no conflicts */
+    margin-top: 0;
+}
+
+.expanded .section-content {
+    max-height: none;
+}
         
         .expanded .section-content {
             max-height: 5000px;
         }
         
-        .collapsed .section-toggle i {
-            transform: rotate(0deg);
-        }
-        
-        .expanded .section-toggle i {
-            transform: rotate(180deg);
-        }
+
         
         .age-label {
             font-size: 0.85rem;
@@ -959,6 +967,20 @@
             font-weight: 600;
             color: var(--primary);
         }
+        .hotel-quote-section .section-toggle i {
+    transition: transform 0.3s ease !important;
+    font-size: 1.2rem !important;
+    color: var(--muted-text) !important;
+    transform: none !important;  /* Reset baseline */
+}
+
+.hotel-quote-section.collapsed .section-toggle i {
+    transform: rotate(0deg) !important;
+}
+
+.hotel-quote-section.expanded .section-toggle i {
+    transform: rotate(180deg) !important;
+}
 
         .hotel-option-name {
             margin-bottom: 12px;
@@ -3088,194 +3110,247 @@
             changeRoomCount(0); // Initialize with 1 room
         }
 
-        function changeRoomCount(delta) {
-            const oldCount = parseInt(document.getElementById('rooms-count').textContent);
-            let count = oldCount + delta;
-            if (count < 1) count = 1; // Minimum 1 room
-            document.getElementById('rooms-count').textContent = count;
-            
-            // Handle removal of rooms if count decreased
-            if (count < oldCount) {
-                for (let removedRoomIndex = count; removedRoomIndex < oldCount; removedRoomIndex++) {
-                    hotelQuoteSections.forEach(sectionId => {
-                        const comparison = document.getElementById(`${sectionId}-comparison`);
-                        if (comparison) {
-                            const rowsToRemove = comparison.querySelectorAll(`.supplier-table-row[data-room="${removedRoomIndex}"]`);
-                            rowsToRemove.forEach(row => {
-                                row.remove();
-                            });
-                        }
-                    });
-                    // Resort and highlight after removal
-                    hotelQuoteSections.forEach(sectionId => {
-                        sortAndHighlightPerRoom(sectionId);
-                    });
-                }
-            }
-            
-            updateRoomsContainer();
-            
-            // If count increased, add rows for new rooms in all hotel sections
-            if (count > oldCount) {
-                for (let newRoomIndex = oldCount; newRoomIndex < count; newRoomIndex++) {
-                    hotelQuoteSections.forEach(sectionId => {
-                        addRowsForNewRoom(newRoomIndex, sectionId);
-                    });
-                }
-            }
-            
-            updateTotals();
-            updateEmailTemplate();
-            saveState();
-        }
-
-        function updateRoomsContainer() {
-            const count = parseInt(document.getElementById('rooms-count').textContent);
-            const container = document.getElementById('rooms-container');
-            container.innerHTML = '';
-            roomsData = []; // Reset data
-
-            for (let i = 0; i < count; i++) {
-                const roomDiv = document.createElement('div');
-                roomDiv.className = 'room-type';
-                roomDiv.id = `room-${i}`;
-                roomDiv.innerHTML = `
-                    <div class="room-header">
-                        <h4 class="room-number">Room ${i + 1}</h4>
-                    </div>
-                    <div class="people-selector">
-                        <div class="people-type">
-                            <h3>Adults</h3>
-                            <div class="counter">
-                                <button class="counter-btn" onclick="changeRoomOccupancy(${i}, 'adults', -1)">-</button>
-                                <span id="room-${i}-adults-count" class="counter-value">2</span>
-                                <button class="counter-btn" onclick="changeRoomOccupancy(${i}, 'adults', 1)">+</button>
-                            </div>
-                        </div>
-                        <div class="people-type">
-                            <h3>Children</h3>
-                            <div class="counter">
-                                <button class="counter-btn" onclick="changeRoomOccupancy(${i}, 'children', -1)">-</button>
-                                <span id="room-${i}-children-count" class="counter-value">0</span>
-                                <button class="counter-btn" onclick="changeRoomOccupancy(${i}, 'children', 1)">+</button>
-                            </div>
-                        </div>
-                        <div class="people-type">
-                            <h3>Infants</h3>
-                            <div class="counter">
-                                <button class="counter-btn" onclick="changeRoomOccupancy(${i}, 'infants', -1)">-</button>
-                                <span id="room-${i}-infants-count" class="counter-value">0</span>
-                                <button class="counter-btn" onclick="changeRoomOccupancy(${i}, 'infants', 1)">+</button>
-                            </div>
-                            <div class="age-label">Under 2 years old</div>
-                        </div>
-                    </div>
-                    <div id="room-${i}-child-ages" class="child-ages-container"></div>
-                `;
-                container.appendChild(roomDiv);
-                // Initialize room data
-                roomsData.push({
-                    adults: 2,
-                    children: 0,
-                    infants: 0,
-                    childAges: []
-                });
-                updateRoomChildAges(i);
-            }
-        }
-
-        function addRowsForNewRoom(roomIndex, sectionId) {
-            const comparison = document.getElementById(`${sectionId}-comparison`);
-            if (!comparison) return;
-
-            // Find existing base suppliers (without room index)
-            const existingBaseIds = new Set();
-            comparison.querySelectorAll('.supplier-table-row[data-room]').forEach(row => {
-                const baseId = row.id.replace(/-\d+$/, '');
-                existingBaseIds.add(baseId);
-            });
-
-            existingBaseIds.forEach(baseId => {
-                // Use the first room's row as template (room 0)
-                const templateRow = comparison.querySelector(`tr[id^="${baseId}-"][data-room="0"]`);
-                if (templateRow) {
-                    const newRow = templateRow.cloneNode(true);
-                    newRow.id = `${baseId}-${roomIndex}`;
-                    newRow.setAttribute('data-room', roomIndex);
-
-                    // Update supplier name for new room
-                    const supNameInput = newRow.querySelector('.supplier-name');
-                    if (supNameInput) {
-                        let currentValue = supNameInput.value;
-                        // Extract base name if it has room info
-                        const match = currentValue.match(/^(.*?) Room \d+ \([^)]*\)$/);
-                        const baseName = match ? match[1].trim() : currentValue;
-                        const roomData = roomsData[roomIndex] || { adults: 2, children: 0, infants: 0 };
-                        supNameInput.value = `${baseName} Room ${roomIndex + 1} (${roomData.adults}A${roomData.children > 0 ? ` ${roomData.children}C` : ''}${roomData.infants > 0 ? ` ${roomData.infants}I` : ''})`;
-                    }
-
-                    // Clear prices and selections for new row
-                    newRow.querySelector('.net-price').value = '';
-                    newRow.querySelector('.selling-price').value = '';
-                    newRow.querySelector('.commission-amount').value = '';
-                    newRow.querySelector('input[id$="-best"]').checked = false;
-                    newRow.querySelector('input[id$="-upgrade"]').checked = false;
-                    newRow.querySelector('input[id$="-include-email"]').checked = false;
-                    newRow.classList.remove('best-price');
-
-                    // Append to tbody
-                    const tbody = comparison.querySelector('tbody');
-                    if (tbody) {
-                        tbody.appendChild(newRow);
-                    }
-
-                    // Update price calculation
-                    updateSupplierPrice(newRow.id);
-                    initCancellationPickers(newRow);
-                    toggleCancellationFee(newRow.id);
-                }
-            });
-
-            // Re-sort and highlight per room
-            sortAndHighlightPerRoom(sectionId);
-        }
-
-        function changeRoomOccupancy(roomIndex, type, delta) {
-            const countElement = document.getElementById(`room-${roomIndex}-${type}-count`);
-            let count = parseInt(countElement.textContent);
-            count += delta;
-            if (count < 0) count = 0;
-            countElement.textContent = count;
-            // Update roomsData
-            roomsData[roomIndex][type] = count;
-            if (type === 'children') {
-                updateRoomChildAges(roomIndex);
-            }
-            // Update supplier names for this room in all sections
-            updateSupplierNamesForRoom(roomIndex);
-            updateTotals();
-            updateEmailTemplate();
-            saveState();
-        }
-
-        function updateSupplierNamesForRoom(roomIndex) {
-            const roomData = roomsData[roomIndex];
-            const roomSuffix = ` Room ${roomIndex + 1} (${roomData.adults}A${roomData.children > 0 ? ` ${roomData.children}C` : ''}${roomData.infants > 0 ? ` ${roomData.infants}I` : ''})`;
+function changeRoomCount(delta) {
+    const oldCount = parseInt(document.getElementById('rooms-count').textContent);
+    let count = oldCount + delta;
+    if (count < 1) count = 1; // Minimum 1 room
+    document.getElementById('rooms-count').textContent = count;
+    
+    // Handle removal of rooms if count decreased
+    if (count < oldCount) {
+        for (let removedRoomIndex = count; removedRoomIndex < oldCount; removedRoomIndex++) {
             hotelQuoteSections.forEach(sectionId => {
                 const comparison = document.getElementById(`${sectionId}-comparison`);
                 if (comparison) {
-                    comparison.querySelectorAll(`.supplier-table-row[data-room="${roomIndex}"] .supplier-name`).forEach(input => {
-                        let currentValue = input.value;
-                        const match = currentValue.match(/^(.*?) Room \d+ \([^)]*\)$/);
-                        const baseName = match ? match[1].trim() : currentValue.replace(roomSuffix, '');
-                        input.value = `${baseName}${roomSuffix}`;
+                    const rowsToRemove = comparison.querySelectorAll(`.supplier-table-row[data-room="${removedRoomIndex}"]`);
+                    rowsToRemove.forEach(row => {
+                        row.remove();
                     });
                 }
             });
-            updateEmailTemplate();
+            // Resort and highlight after removal
+            hotelQuoteSections.forEach(sectionId => {
+                sortAndHighlightPerRoom(sectionId);
+            });
         }
+        // Trim roomsData to new count
+        roomsData = roomsData.slice(0, count);
+    }
+    
+    // If count increased, add new room data and rows
+    if (count > oldCount) {
+        for (let newRoomIndex = oldCount; newRoomIndex < count; newRoomIndex++) {
+            // Add default room data (or copy from previous if desired: {...roomsData[oldCount - 1], childAges: []})
+            roomsData.push({
+                adults: 2,
+                children: 0,
+                infants: 0,
+                childAges: []
+            });
+            hotelQuoteSections.forEach(sectionId => {
+                addRowsForNewRoom(newRoomIndex, sectionId);
+            });
+        }
+    }
+    
+    updateRoomsContainer();
+    
+    updateTotals();
+    updateEmailTemplate();
+    saveState();
+}
+function updateRoomsContainer() {
+    const count = parseInt(document.getElementById('rooms-count').textContent);
+    const container = document.getElementById('rooms-container');
+    container.innerHTML = '';
 
-        function updateRoomChildAges(roomIndex) {
+    for (let i = 0; i < count; i++) {
+        const roomDiv = document.createElement('div');
+        roomDiv.className = 'room-type';
+        roomDiv.id = `room-${i}`;
+        const roomData = roomsData[i]; // Already set correctly
+        roomDiv.innerHTML = `
+            <div class="room-header">
+                <h4 class="room-number">Room ${i + 1}</h4>
+            </div>
+            <div class="people-selector">
+                <div class="people-type">
+                    <h3>Adults</h3>
+                    <div class="counter">
+                        <button class="counter-btn" onclick="changeRoomOccupancy(${i}, 'adults', -1)">-</button>
+                        <span id="room-${i}-adults-count" class="counter-value">${roomData.adults}</span>
+                        <button class="counter-btn" onclick="changeRoomOccupancy(${i}, 'adults', 1)">+</button>
+                    </div>
+                </div>
+                <div class="people-type">
+                    <h3>Children</h3>
+                    <div class="counter">
+                        <button class="counter-btn" onclick="changeRoomOccupancy(${i}, 'children', -1)">-</button>
+                        <span id="room-${i}-children-count" class="counter-value">${roomData.children}</span>
+                        <button class="counter-btn" onclick="changeRoomOccupancy(${i}, 'children', 1)">+</button>
+                    </div>
+                </div>
+                <div class="people-type">
+                    <h3>Infants</h3>
+                    <div class="counter">
+                        <button class="counter-btn" onclick="changeRoomOccupancy(${i}, 'infants', -1)">-</button>
+                        <span id="room-${i}-infants-count" class="counter-value">${roomData.infants}</span>
+                        <button class="counter-btn" onclick="changeRoomOccupancy(${i}, 'infants', 1)">+</button>
+                    </div>
+                    <div class="age-label">Under 2 years old</div>
+                </div>
+            </div>
+            <div id="room-${i}-child-ages" class="child-ages-container"></div>
+        `;
+        container.appendChild(roomDiv);
+        updateRoomChildAges(i);
+    }
+}
+function addRowsForNewRoom(roomIndex, sectionId, oldRoomsData = []) {
+    const comparison = document.getElementById(`${sectionId}-comparison`);
+    if (!comparison) return;
+
+    // Find existing base suppliers (without room index)
+    const existingBaseIds = new Set();
+    comparison.querySelectorAll('.supplier-table-row[data-room]').forEach(row => {
+        const baseId = row.id.replace(/-\d+$/, '');
+        existingBaseIds.add(baseId);
+    });
+
+    // Use previous room as template if available, else room 0
+    const templateRoomIndex = Math.max(0, roomIndex - 1);
+    const templateRowData = oldRoomsData[templateRoomIndex] || {};
+
+    existingBaseIds.forEach(baseId => {
+        // Find template row from previous room (or room 0)
+        let templateRow = comparison.querySelector(`tr[id^="${baseId}-"][data-room="${templateRoomIndex}"]`);
+        if (!templateRow) {
+            templateRow = comparison.querySelector(`tr[id^="${baseId}-"][data-room="0"]`);
+        }
+        if (templateRow) {
+            const newRow = templateRow.cloneNode(true);
+            newRow.id = `${baseId}-${roomIndex}`;
+            newRow.setAttribute('data-room', roomIndex);
+
+            // Set clean supplier name for new room
+            const supNameInput = newRow.querySelector('.supplier-name');
+            if (supNameInput) {
+                supNameInput.value = `Room ${roomIndex + 1}`;
+            }
+
+            // Copy non-price options from template (preserve last state: room-type, board-basis, cancellation, etc.)
+            // Clear only prices and toggles
+            newRow.querySelector('.net-price').value = '';
+            newRow.querySelector('.selling-price').value = '';
+            newRow.querySelector('.commission-amount').value = '';
+            newRow.querySelector('input[id$="-best"]').checked = false;
+            newRow.querySelector('input[id$="-upgrade"]').checked = false;
+            newRow.querySelector('input[id$="-include-email"]').checked = true;
+            newRow.classList.remove('best-price');
+
+            // Preserve/clear other fields as needed (e.g., keep room-type, board-basis from template)
+            // Cancellation policy/defaults stay from clone
+
+            // Append to tbody
+            const tbody = comparison.querySelector('tbody');
+            if (tbody) {
+                tbody.appendChild(newRow);
+            }
+
+            // Update price calculation
+            updateSupplierPrice(newRow.id);
+            initCancellationPickers(newRow);
+            toggleCancellationFee(newRow.id);
+        }
+    });
+
+    // Re-sort and highlight per room
+    sortAndHighlightPerRoom(sectionId);
+}
+function sortAndHighlightPerRoom(sectionId) {
+    const comparison = document.getElementById(`${sectionId}-comparison`);
+    if (!comparison) return;
+    
+    const table = comparison.querySelector('table');
+    if (!table) return;
+    
+    const tbody = table.querySelector('tbody');
+    if (!tbody) return;
+    
+    // Group rows by room index
+    const roomGroups = {};
+    tbody.querySelectorAll('.supplier-table-row').forEach(row => {
+        const roomIndex = row.getAttribute('data-room');
+        if (!roomGroups[roomIndex]) {
+            roomGroups[roomIndex] = [];
+        }
+        roomGroups[roomIndex].push(row);
+    });
+    
+    // Sort each room group by net price (lowest first)
+    Object.keys(roomGroups).forEach(roomIndex => {
+        roomGroups[roomIndex].sort((a, b) => {
+            const priceA = parseFloat(a.querySelector('.net-price').value) || Infinity;
+            const priceB = parseFloat(b.querySelector('.net-price').value) || Infinity;
+            return priceA - priceB;
+        });
+    });
+    
+    // Clear tbody and re-append sorted rows in room order
+    tbody.innerHTML = '';
+    Object.keys(roomGroups)
+        .sort((a, b) => parseInt(a) - parseInt(b))  // Sort rooms numerically
+        .forEach(roomIndex => {
+            roomGroups[roomIndex].forEach(row => {
+                tbody.appendChild(row);
+            });
+        });
+    
+    // Highlight the best (lowest price) row per room
+    Object.keys(roomGroups).forEach(roomIndex => {
+        const rows = roomGroups[roomIndex];
+        if (rows.length > 0) {
+            // Remove previous highlights in this group
+            rows.forEach(row => row.classList.remove('best-price'));
+            
+            const bestRow = rows[0];  // Lowest price after sort
+            bestRow.classList.add('best-price');
+            
+            // Sync the "best" checkbox
+            rows.forEach(row => {
+                const checkbox = row.querySelector('input[id$="-best"]');
+                if (checkbox) checkbox.checked = false;
+            });
+            const bestCheckbox = bestRow.querySelector('input[id$="-best"]');
+            if (bestCheckbox) bestCheckbox.checked = true;
+        }
+    });
+    
+    // Trigger any dependent updates (e.g., totals)
+    updateQuoteTotals(sectionId);
+}
+function changeRoomOccupancy(roomIndex, type, delta) {
+    const countElement = document.getElementById(`room-${roomIndex}-${type}-count`);
+    let count = parseInt(countElement.textContent);
+    count += delta;
+    if (count < 0) count = 0;
+    countElement.textContent = count;
+    // Update roomsData
+    roomsData[roomIndex][type] = count;
+    if (type === 'children') {
+        updateRoomChildAges(roomIndex);
+    }
+    // No longer update supplier names - keep them clean
+    updateTotals();
+    updateEmailTemplate();
+    saveState();
+}
+      function updateSupplierNamesForRoom(roomIndex) {
+    // Removed: No longer auto-append room suffix to supplier names
+    // Supplier names stay as user-entered (clean)
+    updateEmailTemplate();
+}
+function updateRoomChildAges(roomIndex) {
             const count = parseInt(document.getElementById(`room-${roomIndex}-children-count`).textContent);
             const container = document.getElementById(`room-${roomIndex}-child-ages`);
             container.innerHTML = '';
@@ -3364,18 +3439,30 @@
             updateEmailTemplate();
         }
 
-        function toggleSection(sectionId) {
-            const section = document.getElementById(sectionId);
-            
-            if (section.classList.contains('expanded')) {
-                section.classList.remove('expanded');
-                section.classList.add('collapsed');
-            } else {
-                section.classList.remove('collapsed');
-                section.classList.add('expanded');
-            }
-            saveState();
-        }
+function toggleSection(sectionId) {
+    console.log('Toggle clicked for section:', sectionId);  // Logs if click fires
+    const section = document.getElementById(sectionId);
+    
+    if (!section) {
+        console.log('ERROR: Section element not found for ID:', sectionId);
+        return;
+    }
+    
+    console.log('Current classes on section:', section.className);  // Shows initial state
+    
+    if (section.classList.contains('expanded')) {
+        section.classList.remove('expanded');
+        section.classList.add('collapsed');
+        console.log('Switched to collapsed');
+    } else {
+        section.classList.remove('collapsed');
+        section.classList.add('expanded');
+        console.log('Switched to expanded');
+    }
+    
+    console.log('New classes on section:', section.className);  // Confirms change
+    saveState();
+}
 
         function selectDeliveryOption(element, option) {
             document.querySelectorAll('.delivery-option').forEach(el => {
@@ -3537,153 +3624,92 @@
         }
 
         function addHotelQuoteSection(data = {}) {
-            const container = document.getElementById('hotel-quotes-container');
-            const number = data.number || getNextQuoteNumber();
-            usedQuoteNumbers.add(number);
-            const sectionId = 'hotel-quote-' + number;
-            const card = document.createElement('div');
-            card.className = 'card expanded hotel-quote-section';
-            card.id = sectionId;
-            const includeChecked = data.include !== undefined ? data.include : true;
-            let html = '';
-            if (number === 1) {
-                html = `
-                    <h2 class="section-title">Hotel Quote ${number}</h2>
-                    <div class="section-content">
-                        <div class="hotel-quote-header">
-                            <label class="checkbox-group">
-                                <input type="checkbox" class="quote-include" ${includeChecked ? 'checked' : ''} onchange="toggleQuoteInclude('${sectionId}'); updateTotals(); updateEmailTemplate(); saveState();"> Include in Quote
-                            </label>
-                            <button class="btn btn-danger btn-sm" onclick="removeHotelQuoteSection('${sectionId}', ${number})"><i class="fas fa-trash"></i> Remove</button>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Check-in & Check-out Dates</label>
-                                <input type="text" class="form-control hotel-checkin" placeholder="Select dates" value="${data.checkin || ''}">
-                            </div>
-                            <div class="form-group">
-                                <label>Nights</label>
-                                <input type="number" class="form-control hotel-nights" placeholder="Nights" readonly value="${data.nights || ''}">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="${sectionId}-hotel-name">Hotel Name</label>
-                            <input type="text" id="${sectionId}-hotel-name" class="form-control" placeholder="Hotel name" value="${data.hotelName || ''}" onchange="updateEmailTemplate(); saveState();">
-                        </div>
-                        <h4>Supplier Comparison</h4>
-                        <div id="${sectionId}-comparison" class="supplier-comparison">
-                        </div>
-                        <div class="comparison-controls">
-                            <button class="btn" onclick="addHotelSupplier('${sectionId}')"><i class="fas fa-plus"></i> Add Supplier</button>
-                        </div>
-                        <div class="section-totals">
-                            <h3>Hotel Totals</h3>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Excludes Currency</label>
-                                    <input type="text" id="${sectionId}-excludes-currency" class="form-control" placeholder="e.g., EUR" value="${data.excludesCurrency || ''}" onchange="updateEmailTemplate(); saveState();">
-                                </div>
-                                <div class="form-group">
-                                    <label>Excludes Amount</label>
-                                    <input type="number" id="${sectionId}-excludes-amount" class="form-control" placeholder="e.g., 15" step="0.01" value="${data.excludesAmount || ''}" onchange="updateEmailTemplate(); saveState();">
-                                </div>
-                            </div>
-                            <div class="totals-row">
-                                <span class="totals-label">Total Net:</span>
-                                <span id="${sectionId}-total-net" class="totals-value">£0.00</span>
-                            </div>
-                            <div class="totals-row">
-                                <span class="totals-label">Total Selling - Exact:</span>
-                                <span id="${sectionId}-total-selling-exact" class="totals-value">£0.00</span>
-                            </div>
-                            <div class="totals-row">
-                                <span class="totals-label">Total Selling - Rounded:</span>
-                                <span id="${sectionId}-total-selling-rounded" class="totals-value">£0.00</span>
-                            </div>
-                        </div>
+    const container = document.getElementById('hotel-quotes-container');
+    const number = data.number || getNextQuoteNumber();
+    usedQuoteNumbers.add(number);
+    const sectionId = 'hotel-quote-' + number;
+    const card = document.createElement('div');
+    card.className = 'card expanded hotel-quote-section';
+    card.id = sectionId;
+    const includeChecked = data.include !== undefined ? data.include : true;
+    const html = `
+        <div class="section-toggle" onclick="toggleSection('${sectionId}')">
+            <h2 class="section-title">Hotel Quote ${number}</h2>
+            <i class="fas fa-chevron-down"></i>
+        </div>
+        <div class="section-content">
+            <div class="hotel-quote-header">
+                <label class="checkbox-group">
+                    <input type="checkbox" class="quote-include" ${includeChecked ? 'checked' : ''} onchange="toggleQuoteInclude('${sectionId}'); updateTotals(); updateEmailTemplate(); saveState();"> Include in Quote
+                </label>
+                <button class="btn btn-danger btn-sm" onclick="removeHotelQuoteSection('${sectionId}', ${number})"><i class="fas fa-trash"></i> Remove</button>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Check-in & Check-out Dates</label>
+                    <input type="text" class="form-control hotel-checkin" placeholder="Select dates" value="${data.checkin || ''}">
+                </div>
+                <div class="form-group">
+                    <label>Nights</label>
+                    <input type="number" class="form-control hotel-nights" placeholder="Nights" readonly value="${data.nights || ''}">
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="${sectionId}-hotel-name">Hotel Name</label>
+                <input type="text" id="${sectionId}-hotel-name" class="form-control" placeholder="Hotel name" value="${data.hotelName || ''}" onchange="updateEmailTemplate(); saveState();">
+            </div>
+            <h4>Supplier Comparison</h4>
+            <div id="${sectionId}-comparison" class="supplier-comparison">
+            </div>
+            <div class="comparison-controls">
+                <button class="btn" onclick="addHotelSupplier('${sectionId}')"><i class="fas fa-plus"></i> Add Supplier</button>
+            </div>
+            <div class="section-totals">
+                <h3>Hotel Totals</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Excludes Currency</label>
+                        <input type="text" id="${sectionId}-excludes-currency" class="form-control" placeholder="e.g., EUR" value="${data.excludesCurrency || ''}" onchange="updateEmailTemplate(); saveState();">
                     </div>
-                `;
-            } else {
-                html = `
-                    <div class="section-toggle" onclick="toggleSection('${sectionId}')">
-                        <h2 class="section-title">Hotel Quote ${number}</h2>
-                        <i class="fas fa-chevron-down"></i>
+                    <div class="form-group">
+                        <label>Excludes Amount</label>
+                        <input type="number" id="${sectionId}-excludes-amount" class="form-control" placeholder="e.g., 15" step="0.01" value="${data.excludesAmount || ''}" onchange="updateEmailTemplate(); saveState();">
                     </div>
-                    <div class="section-content">
-                        <div class="hotel-quote-header">
-                            <label class="checkbox-group">
-                                <input type="checkbox" class="quote-include" ${includeChecked ? 'checked' : ''} onchange="toggleQuoteInclude('${sectionId}'); updateTotals(); updateEmailTemplate(); saveState();"> Include in Quote
-                            </label>
-                            <button class="btn btn-danger btn-sm" onclick="removeHotelQuoteSection('${sectionId}', ${number})"><i class="fas fa-trash"></i> Remove</button>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Check-in & Check-out Dates</label>
-                                <input type="text" class="form-control hotel-checkin" placeholder="Select dates" value="${data.checkin || ''}">
-                            </div>
-                            <div class="form-group">
-                                <label>Nights</label>
-                                <input type="number" class="form-control hotel-nights" placeholder="Nights" readonly value="${data.nights || ''}">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label for="${sectionId}-hotel-name">Hotel Name</label>
-                            <input type="text" id="${sectionId}-hotel-name" class="form-control" placeholder="Hotel name" value="${data.hotelName || ''}" onchange="updateEmailTemplate(); saveState();">
-                        </div>
-                        <h4>Supplier Comparison</h4>
-                        <div id="${sectionId}-comparison" class="supplier-comparison">
-                        </div>
-                        <div class="comparison-controls">
-                            <button class="btn" onclick="addHotelSupplier('${sectionId}')"><i class="fas fa-plus"></i> Add Supplier</button>
-                        </div>
-                        <div class="section-totals">
-                            <h3>Hotel Totals</h3>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Excludes Currency</label>
-                                    <input type="text" id="${sectionId}-excludes-currency" class="form-control" placeholder="e.g., EUR" value="${data.excludesCurrency || ''}" onchange="updateEmailTemplate(); saveState();">
-                                </div>
-                                <div class="form-group">
-                                    <label>Excludes Amount</label>
-                                    <input type="number" id="${sectionId}-excludes-amount" class="form-control" placeholder="e.g., 15" step="0.01" value="${data.excludesAmount || ''}" onchange="updateEmailTemplate(); saveState();">
-                                </div>
-                            </div>
-                            <div class="totals-row">
-                                <span class="totals-label">Total Net:</span>
-                                <span id="${sectionId}-total-net" class="totals-value">£0.00</span>
-                            </div>
-                            <div class="totals-row">
-                                <span class="totals-label">Total Selling - Exact:</span>
-                                <span id="${sectionId}-total-selling-exact" class="totals-value">£0.00</span>
-                            </div>
-                            <div class="totals-row">
-                                <span class="totals-label">Total Selling - Rounded:</span>
-                                <span id="${sectionId}-total-selling-rounded" class="totals-value">£0.00</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-            card.innerHTML = html;
-            container.appendChild(card);
-            hotelQuoteSections.push(sectionId);
-            hotelQuoteCounter = Math.max(hotelQuoteCounter, number);
-            initQuoteDates(sectionId, data.checkin);
-            // Add initial supplier to this section
-            if (data.suppliers && data.suppliers.length > 0) {
-                data.suppliers.forEach(supData => addHotelSupplier(sectionId, supData));
-            } else {
-                addHotelSupplier(sectionId);
-            }
-            initCancellationPickers(card);
-            sortAndHighlightPerRoom(sectionId);
-            updateQuoteTotals(sectionId);
-            calculateBalanceDueDateForSection(sectionId);
-            updateTotals();
-            updateEmailTemplate();
-            saveState();
-        }
-
+                </div>
+                <div class="totals-row">
+                    <span class="totals-label">Total Net:</span>
+                    <span id="${sectionId}-total-net" class="totals-value">£0.00</span>
+                </div>
+                <div class="totals-row">
+                    <span class="totals-label">Total Selling - Exact:</span>
+                    <span id="${sectionId}-total-selling-exact" class="totals-value">£0.00</span>
+                </div>
+                <div class="totals-row">
+                    <span class="totals-label">Total Selling - Rounded:</span>
+                    <span id="${sectionId}-total-selling-rounded" class="totals-value">£0.00</span>
+                </div>
+            </div>
+        </div>
+    `;
+    card.innerHTML = html;
+    container.appendChild(card);
+    hotelQuoteSections.push(sectionId);
+    hotelQuoteCounter = Math.max(hotelQuoteCounter, number);
+    initQuoteDates(sectionId, data.checkin);
+    // Add initial supplier to this section
+    if (data.suppliers && data.suppliers.length > 0) {
+        data.suppliers.forEach(supData => addHotelSupplier(sectionId, supData));
+    } else {
+        addHotelSupplier(sectionId);
+    }
+    initCancellationPickers(card);
+    sortAndHighlightPerRoom(sectionId);
+    updateQuoteTotals(sectionId);
+    calculateBalanceDueDateForSection(sectionId);
+    updateTotals();
+    updateEmailTemplate();
+    saveState();
+}
         function initQuoteDates(sectionId, initialValue = '') {
             const checkinInput = document.querySelector(`#${sectionId} .hotel-checkin`);
             if (checkinInput && !checkinInput._flatpickr) {
@@ -3735,148 +3761,98 @@
             saveState();
         }
 
-        function addHotelSupplier(sectionId, data = {}) {
-            const numRooms = parseInt(document.getElementById('rooms-count').textContent);
-            const comparison = document.getElementById(`${sectionId}-comparison`);
-            let table = comparison.querySelector('table');
-            if (!table) {
-                table = document.createElement('table');
-                createTableHeader('hotel', table);
-                comparison.appendChild(table);
-            }
-            const tbody = table.querySelector('tbody') || document.createElement('tbody');
-            if (!table.querySelector('tbody')) table.appendChild(tbody);
+       function addHotelSupplier(sectionId, data = {}) {
+    const numRooms = parseInt(document.getElementById('rooms-count').textContent);
+    const comparison = document.getElementById(`${sectionId}-comparison`);
+    let table = comparison.querySelector('table');
+    if (!table) {
+        table = document.createElement('table');
+        createTableHeader('hotel', table);
+        comparison.appendChild(table);
+    }
+    const tbody = table.querySelector('tbody') || document.createElement('tbody');
+    if (!table.querySelector('tbody')) table.appendChild(tbody);
 
-            // Add one row per room
-            for (let roomIndex = 0; roomIndex < numRooms; roomIndex++) {
-                const roomData = roomsData[roomIndex] || { adults: 2, children: 0, infants: 0 };
-                const supId = data.id ? data.id.replace(/-\d+$/, `-${roomIndex}`) : `${sectionId}-supplier-${Date.now()}-${roomIndex}`;
-                const tr = document.createElement('tr');
-                tr.id = supId;
-                tr.classList.add('supplier-table-row');
-                tr.setAttribute('data-room', roomIndex);
-                const roomSuffix = ` Room ${roomIndex + 1} (${roomData.adults}A${roomData.children > 0 ? ` ${roomData.children}C` : ''}${roomData.infants > 0 ? ` ${roomData.infants}I` : ''})`;
-                tr.innerHTML = `
-                    <td>
-                        <input type="text" class="form-control supplier-name" placeholder="Supplier Name${roomSuffix}" value="${(data.supplierName || '') + roomSuffix}" onchange="updateEmailTemplate(); saveState();">
-                    </td>
-                    <td><input type="number" class="form-control net-price" step="0.01" placeholder="0.00" value="${(data.netPrice || 0).toFixed(2)}" onchange="updateSupplierPrice('${supId}'); saveState();"></td>
-                    <td><input type="text" class="form-control commission-rate" placeholder="Use global" value="${data.commissionRate || ''}" onchange="updateSupplierPrice('${supId}'); saveState();"></td>
-                    <td><input type="text" class="form-control selling-price" readonly placeholder="0.00" value="${(data.sellingPrice || 0).toFixed(2)}"></td>
-                    <td><input type="text" class="form-control commission-amount" readonly placeholder="0.00" value="${(data.commissionAmount || 0).toFixed(2)}"></td>
-                    <td><input type="text" class="form-control room-type" list="roomTypes" placeholder="Room Type" value="${data.roomType || ''}" onchange="updateEmailTemplate(); saveState();"></td>
-                    <td><input type="number" class="form-control rooms" min="1" value="1" readonly></td>
-                    <td><select class="form-control board-basis" onchange="updateEmailTemplate(); saveState();">
-                        <option ${data.boardBasis === 'Room Only' ? 'selected' : ''}>Room Only</option>
-                        <option ${data.boardBasis === 'Bed & Breakfast' ? 'selected' : ''}>Bed & Breakfast</option>
-                        <option ${data.boardBasis === 'Half Board' ? 'selected' : ''}>Half Board</option>
-                        <option ${data.boardBasis === 'Full Board' ? 'selected' : ''}>Full Board</option>
-                        <option ${data.boardBasis === 'All Inclusive' ? 'selected' : ''}>All Inclusive</option>
-                    </select></td>
-                    <td>
-                        <select class="form-control cancellation-policy" onchange="toggleCancellationFee('${supId}'); calculateBalanceDueDateForSection('${sectionId}'); sortAndHighlightPerRoom('${sectionId}'); updateEmailTemplate(); saveState();">
-                            <option value="">-- Select Policy --</option>
-                            <option value="non-refundable" ${data.cancellationPolicy === 'non-refundable' ? 'selected' : ''}>Non-Refundable</option>
-                            <option value="refundable" ${data.cancellationPolicy === 'refundable' ? 'selected' : ''}>Refundable</option>
-                            <option value="refundable-with-fee" ${data.cancellationPolicy === 'refundable-with-fee' ? 'selected' : ''}>Refundable with Fee</option>
-                        </select>
-                        <div class="cancellation-deadline-group" style="display:none;">
-                            <input type="text" class="form-control cancellation-deadline" placeholder="Select cancellation deadline" value="${data.cancellationDeadline || ''}" onchange="calculateBalanceDueDateForSection('${sectionId}'); sortAndHighlightPerRoom('${sectionId}'); updateEmailTemplate(); saveState();">
-                        </div>
-                        <div class="cancellation-fee-group" style="display:none;">
-                            <input type="number" class="form-control cancellation-fee" step="0.01" placeholder="0.00" value="${(data.cancellationFee || 0).toFixed(2)}" onchange="sortAndHighlightPerRoom('${sectionId}'); updateEmailTemplate(); saveState();">
-                        </div>
-                    </td>
-                    <td><input type="checkbox" id="${supId}-best" ${data.best ? 'checked' : ''} onchange="toggleBestPrice('${supId}', '${sectionId}'); calculateBalanceDueDateForSection('${sectionId}'); updateEmailTemplate();"></td>
-                    <td class="upgrade-cell">
-                        <input type="checkbox" id="${supId}-upgrade" ${data.upgrade ? 'checked' : ''} onchange="toggleUpgrade('${supId}'); updateEmailTemplate(); saveState();">
-                        <div class="upgrade-modes" style="display: ${data.upgrade ? 'block' : 'none'};">
-                            <label><input type="checkbox" id="${supId}-upgrade-auto" ${data.upgradeAuto ? 'checked' : ''} onchange="handleUpgradeMode('${supId}', 'auto'); updateEmailTemplate(); saveState();"> Auto-upgrade from base</label>
-                            <label><input type="checkbox" id="${supId}-upgrade-manual" ${data.upgradeManual ? 'checked' : ''} onchange="handleUpgradeMode('${supId}', 'manual'); updateEmailTemplate(); saveState();"> Manual upgrade</label>
-                        </div>
-                        <div id="${supId}-auto-section" style="display: ${data.upgrade && data.upgradeAuto ? 'block' : 'none'}; margin-top: 5px;">
-                            <small>Upgrade amount: <span id="${supId}-auto-amount" class="auto-upgrade-amount">£0.00</span></small>
-                        </div>
-                        <div id="${supId}-manual-section" style="display: ${data.upgrade && data.upgradeManual ? 'block' : 'none'}; margin-top: 5px;">
-                            <input type="text" class="form-control upgrade-desc" placeholder="Upgrade description" value="${data.upgradeDesc || ''}" style="margin-bottom: 5px;" onchange="updateEmailTemplate(); saveState();">
-                            <input type="number" class="form-control upgrade-amount" step="0.01" placeholder="0.00" value="${(data.upgradeAmount || 0).toFixed(2)}" onchange="updateEmailTemplate(); saveState();">
-                        </div>
-                    </td>
-                    <td><input type="checkbox" id="${supId}-include-email" ${data.includeEmail ? 'checked' : ''} onchange="toggleIncludeEmail('${supId}', '${sectionId}'); updateEmailTemplate();"></td>
-                    <td>
-                        <button class="btn btn-danger btn-sm" onclick="removeSupplier('${supId}')"><i class="fas fa-trash"></i></button>
-                    </td>
-                `;
-                tbody.appendChild(tr);
-                updateSupplierPrice(supId);
-                initCancellationPickers(tr);
-                toggleCancellationFee(supId);
-                if (data.best) toggleBestPrice(supId, sectionId);
-                if (data.upgrade) toggleUpgrade(supId);
-                if (data.upgradeAuto) {
-                    document.getElementById(supId + '-upgrade-auto').checked = true;
-                    handleUpgradeMode(supId, 'auto');
-                }
-                if (data.upgradeManual) {
-                    document.getElementById(supId + '-upgrade-manual').checked = true;
-                    handleUpgradeMode(supId, 'manual');
-                }
-            }
-            sortAndHighlightPerRoom(sectionId);
-            updateQuoteTotals(sectionId);
+    // Add one row per room
+    for (let roomIndex = 0; roomIndex < numRooms; roomIndex++) {
+        const roomData = roomsData[roomIndex] || { adults: 2, children: 0, infants: 0 };
+        const supId = data.id ? data.id.replace(/-\d+$/, `-${roomIndex}`) : `${sectionId}-supplier-${Date.now()}-${roomIndex}`;
+        const tr = document.createElement('tr');
+        tr.id = supId;
+        tr.classList.add('supplier-table-row');
+        tr.setAttribute('data-room', roomIndex);
+        const roomSuffix = ` Room ${roomIndex + 1}`;
+        const defaultSupplierName = data.supplierName || `Room ${roomIndex + 1}`;
+        const includeEmailChecked = data.includeEmail !== undefined ? data.includeEmail : true;
+        tr.innerHTML = `
+            <td>
+                <input type="text" class="form-control supplier-name" placeholder="Supplier Name${roomSuffix}" value="${defaultSupplierName}" onchange="updateEmailTemplate(); saveState();">
+            </td>
+            <td><input type="number" class="form-control net-price" step="0.01" placeholder="0.00" value="${(data.netPrice || 0).toFixed(2)}" onchange="updateSupplierPrice('${supId}'); saveState();"></td>
+            <td><input type="text" class="form-control commission-rate" placeholder="Use global" value="${data.commissionRate || ''}" onchange="updateSupplierPrice('${supId}'); saveState();"></td>
+            <td><input type="text" class="form-control selling-price" readonly placeholder="0.00" value="${(data.sellingPrice || 0).toFixed(2)}"></td>
+            <td><input type="text" class="form-control commission-amount" readonly placeholder="0.00" value="${(data.commissionAmount || 0).toFixed(2)}"></td>
+            <td><input type="text" class="form-control room-type" list="roomTypes" placeholder="Room Type" value="${data.roomType || ''}" onchange="updateEmailTemplate(); saveState();"></td>
+            <td><input type="number" class="form-control rooms" min="1" value="1" readonly></td>
+            <td><select class="form-control board-basis" onchange="updateEmailTemplate(); saveState();">
+                <option ${data.boardBasis === 'Room Only' ? 'selected' : ''}>Room Only</option>
+                <option ${data.boardBasis === 'Bed & Breakfast' ? 'selected' : ''}>Bed & Breakfast</option>
+                <option ${data.boardBasis === 'Half Board' ? 'selected' : ''}>Half Board</option>
+                <option ${data.boardBasis === 'Full Board' ? 'selected' : ''}>Full Board</option>
+                <option ${data.boardBasis === 'All Inclusive' ? 'selected' : ''}>All Inclusive</option>
+            </select></td>
+            <td>
+                <select class="form-control cancellation-policy" onchange="toggleCancellationFee('${supId}'); calculateBalanceDueDateForSection('${sectionId}'); sortAndHighlightPerRoom('${sectionId}'); updateEmailTemplate(); saveState();">
+                    <option value="">-- Select Policy --</option>
+                    <option value="non-refundable" ${data.cancellationPolicy === 'non-refundable' ? 'selected' : ''}>Non-Refundable</option>
+                    <option value="refundable" ${data.cancellationPolicy === 'refundable' ? 'selected' : ''}>Refundable</option>
+                    <option value="refundable-with-fee" ${data.cancellationPolicy === 'refundable-with-fee' ? 'selected' : ''}>Refundable with Fee</option>
+                </select>
+                <div class="cancellation-deadline-group" style="display:none;">
+                    <input type="text" class="form-control cancellation-deadline" placeholder="Select cancellation deadline" value="${data.cancellationDeadline || ''}" onchange="calculateBalanceDueDateForSection('${sectionId}'); sortAndHighlightPerRoom('${sectionId}'); updateEmailTemplate(); saveState();">
+                </div>
+                <div class="cancellation-fee-group" style="display:none;">
+                    <input type="number" class="form-control cancellation-fee" step="0.01" placeholder="0.00" value="${(data.cancellationFee || 0).toFixed(2)}" onchange="sortAndHighlightPerRoom('${sectionId}'); updateEmailTemplate(); saveState();">
+                </div>
+            </td>
+            <td><input type="checkbox" id="${supId}-best" ${data.best ? 'checked' : ''} onchange="toggleBestPrice('${supId}', '${sectionId}'); calculateBalanceDueDateForSection('${sectionId}'); updateEmailTemplate();"></td>
+            <td class="upgrade-cell">
+                <input type="checkbox" id="${supId}-upgrade" ${data.upgrade ? 'checked' : ''} onchange="toggleUpgrade('${supId}'); updateEmailTemplate(); saveState();">
+                <div class="upgrade-modes" style="display: ${data.upgrade ? 'block' : 'none'};">
+                    <label><input type="checkbox" id="${supId}-upgrade-auto" ${data.upgradeAuto ? 'checked' : ''} onchange="handleUpgradeMode('${supId}', 'auto'); updateEmailTemplate(); saveState();"> Auto-upgrade from base</label>
+                    <label><input type="checkbox" id="${supId}-upgrade-manual" ${data.upgradeManual ? 'checked' : ''} onchange="handleUpgradeMode('${supId}', 'manual'); updateEmailTemplate(); saveState();"> Manual upgrade</label>
+                </div>
+                <div id="${supId}-auto-section" style="display: ${data.upgrade && data.upgradeAuto ? 'block' : 'none'}; margin-top: 5px;">
+                    <small>Upgrade amount: <span id="${supId}-auto-amount" class="auto-upgrade-amount">£0.00</span></small>
+                </div>
+                <div id="${supId}-manual-section" style="display: ${data.upgrade && data.upgradeManual ? 'block' : 'none'}; margin-top: 5px;">
+                    <input type="text" class="form-control upgrade-desc" placeholder="Upgrade description" value="${data.upgradeDesc || ''}" style="margin-bottom: 5px;" onchange="updateEmailTemplate(); saveState();">
+                    <input type="number" class="form-control upgrade-amount" step="0.01" placeholder="0.00" value="${(data.upgradeAmount || 0).toFixed(2)}" onchange="updateEmailTemplate(); saveState();">
+                </div>
+            </td>
+            <td><input type="checkbox" id="${supId}-include-email" ${includeEmailChecked ? 'checked' : ''} onchange="toggleIncludeEmail('${supId}', '${sectionId}'); updateEmailTemplate();"></td>
+            <td>
+                <button class="btn btn-danger btn-sm" onclick="removeSupplier('${supId}')"><i class="fas fa-trash"></i></button>
+            </td>
+        `;
+        tbody.appendChild(tr);
+        updateSupplierPrice(supId);
+        initCancellationPickers(tr);
+        toggleCancellationFee(supId);
+        if (data.best) toggleBestPrice(supId, sectionId);
+        if (data.upgrade) toggleUpgrade(supId);
+        if (data.upgradeAuto) {
+            document.getElementById(supId + '-upgrade-auto').checked = true;
+            handleUpgradeMode(supId, 'auto');
         }
-
-        function sortAndHighlightPerRoom(sectionId) {
-            const comparison = document.getElementById(`${sectionId}-comparison`);
-            if (!comparison) return;
-            const table = comparison.querySelector('table');
-            if (!table) return;
-            const tbody = table.querySelector('tbody');
-            if (!tbody) return;
-
-            // Group rows by room
-            const groups = {};
-            comparison.querySelectorAll('.supplier-table-row[data-room]').forEach(row => {
-                const room = row.getAttribute('data-room');
-                if (!groups[room]) groups[room] = [];
-                groups[room].push(row);
-            });
-
-            // For each room group, uncheck bests, filter complete, sort, pick lowest as best
-            Object.keys(groups).forEach(room => {
-                const roomRows = groups[room];
-
-                // Uncheck all best in this group
-                roomRows.forEach(row => {
-                    const cb = row.querySelector('input[id$="-best"]');
-                    if (cb) cb.checked = false;
-                    row.classList.remove('best-price');
-                });
-
-                // Filter complete rows
-                const completeRows = roomRows.filter(isPolicyComplete);
-                if (completeRows.length === 0) return;
-
-                completeRows.sort((a, b) => {
-                    const priceA = parseFloat(a.querySelector('.selling-price').value) || Infinity;
-                    const priceB = parseFloat(b.querySelector('.selling-price').value) || Infinity;
-                    return priceA - priceB;
-                });
-
-                // Set lowest as best
-                const bestRow = completeRows[0];
-                const bestCb = bestRow.querySelector('input[id$="-best"]');
-                if (bestCb) bestCb.checked = true;
-                bestRow.classList.add('best-price');
-
-                const includeEmailCb = bestRow.querySelector('input[id$="-include-email"]');
-                if (includeEmailCb) includeEmailCb.checked = true;
-            });
-
-            calculateBalanceDueDateForSection(sectionId);
-            updateQuoteTotals(sectionId);
-            updateEmailTemplate();
+        if (data.upgradeManual) {
+            document.getElementById(supId + '-upgrade-manual').checked = true;
+            handleUpgradeMode(supId, 'manual');
         }
+    }
+    sortAndHighlightPerRoom(sectionId);
+    updateQuoteTotals(sectionId);
+}
 
         function toggleBestPrice(id, sectionId) {
             const checkbox = document.getElementById(`${id}-best`);
@@ -4578,523 +4554,641 @@
             });
         }
 
-        function updateEmailTemplate() {
-            if (isEditing) return;
-            const bookingType = document.getElementById('booking-type').value;
-            const customerName = document.getElementById('customer-name').value || '[Customer Name]';
-            const destination = document.getElementById('destination').value || '[Destination]';
-            let agentName = document.getElementById('agent-name').value;
-            if (agentName === 'custom') {
-                agentName = document.getElementById('custom-agent-name').value || '[Agent Name]';
-            }
-            const agentEmail = document.getElementById('agent-email').value;
-            const agentPhone = document.getElementById('agent-phone').value;
-            const quoteReference = document.getElementById('quote-reference').value || '[quote_reference]';
+function updateEmailTemplate() {
+    if (isEditing) return;
+    const bookingType = document.getElementById('booking-type').value;
+    const customerName = document.getElementById('customer-name').value || '[Customer Name]';
+    const destination = document.getElementById('destination').value || '[Destination]';
+    let agentName = document.getElementById('agent-name').value;
+    if (agentName === 'custom') {
+        agentName = document.getElementById('custom-agent-name').value || '[Agent Name]';
+    }
+    const agentEmail = document.getElementById('agent-email').value;
+    const agentPhone = document.getElementById('agent-phone').value;
+    const quoteReference = document.getElementById('quote-reference').value || '[quote_reference]';
+    
+    const depositAmount = '25';
+    
+    const travelers = getTotalTravelers();
+    const adults = travelers.adults;
+    const children = travelers.children;
+    const childAges = getChildAgesList();
+    
+    // Find first checked hotel quote for excludes and balance
+    let firstCheckedSectionId = null;
+    hotelQuoteSections.forEach(sectionId => {
+        const checkbox = document.querySelector(`#${sectionId} .quote-include`);
+        if (checkbox && checkbox.checked && !firstCheckedSectionId) {
+            firstCheckedSectionId = sectionId;
+        }
+    });
+    const excludesCurrency = firstCheckedSectionId ? document.getElementById(`${firstCheckedSectionId}-excludes-currency`).value : '';
+    const excludesAmount = firstCheckedSectionId ? document.getElementById(`${firstCheckedSectionId}-excludes-amount`).value : '';
+    const excludesNote = excludesCurrency && excludesAmount ? `Climate Resilience Tax ${excludesCurrency} ${excludesAmount} per room, per night, pay locally` : '';
+    const balanceDueInput = firstCheckedSectionId ? document.getElementById(firstCheckedSectionId).getAttribute('data-balance-due') || '' : '';
+    
+    let balanceDueDate;
+    if (balanceDueInput === 'Pay Now') {
+        balanceDueDate = 'Pay Now';
+    } else if (balanceDueInput) {
+        balanceDueDate = formatDate(balanceDueInput);
+    } else {
+        balanceDueDate = '[balance_due_date]';
+    }
+    
+    const flightDatesInput = document.getElementById('flight-dates').value;
+    let departDate = '', returnDate = '';
+    if (flightDatesInput) {
+        const dates = flightDatesInput.split(' to ');
+        departDate = dates[0] ? formatDate(dates[0]) : '';
+        returnDate = dates[1] ? formatDate(dates[1]) : '';
+    }
+    
+    // Collect checked hotel quotes
+    let checkedHotelQuotes = [];
+    let hotelUpgrades = []; // Collect upgrades separately
+    const numRooms = parseInt(document.getElementById('rooms-count').textContent);
+    if (bookingType === 'hotel' || bookingType === 'package') {
+        hotelQuoteSections.forEach(sectionId => {
+            const checkbox = document.querySelector(`#${sectionId} .quote-include`);
+            if (!checkbox || !checkbox.checked) return;
             
-            const depositAmount = '25';
+            const section = document.getElementById(sectionId);
+            const hotelNameInput = document.getElementById(`${sectionId}-hotel-name`);
+            const hotelName = hotelNameInput ? hotelNameInput.value.trim() : '';
+            const checkinInput = section.querySelector('.hotel-checkin');
+            const nightsInput = section.querySelector('.hotel-nights');
+            const checkin = checkinInput ? checkinInput.value : '';
+            const nights = nightsInput ? nightsInput.value : '0';
             
-            const travelers = getTotalTravelers();
-            const adults = travelers.adults;
-            const children = travelers.children;
-            const childAges = getChildAgesList();
-            
-            // Find first checked hotel quote for excludes and balance
-            let firstCheckedSectionId = null;
-            hotelQuoteSections.forEach(sectionId => {
-                const checkbox = document.querySelector(`#${sectionId} .quote-include`);
-                if (checkbox && checkbox.checked && !firstCheckedSectionId) {
-                    firstCheckedSectionId = sectionId;
-                }
-            });
-            const excludesCurrency = firstCheckedSectionId ? document.getElementById(`${firstCheckedSectionId}-excludes-currency`).value : '';
-            const excludesAmount = firstCheckedSectionId ? document.getElementById(`${firstCheckedSectionId}-excludes-amount`).value : '';
-            const excludesNote = excludesCurrency && excludesAmount ? `Climate Resilience Tax ${excludesCurrency} ${excludesAmount} per room, per night, pay locally` : '';
-            const balanceDueInput = firstCheckedSectionId ? document.getElementById(firstCheckedSectionId).getAttribute('data-balance-due') || '' : '';
-            
-            let balanceDueDate;
-            if (balanceDueInput === 'Pay Now') {
-                balanceDueDate = 'Pay Now';
-            } else if (balanceDueInput) {
-                balanceDueDate = formatDate(balanceDueInput);
-            } else {
-                balanceDueDate = '[balance_due_date]';
-            }
-            
-            const flightDatesInput = document.getElementById('flight-dates').value;
-            let departDate = '', returnDate = '';
-            if (flightDatesInput) {
-                const dates = flightDatesInput.split(' to ');
-                departDate = dates[0] ? formatDate(dates[0]) : '';
-                returnDate = dates[1] ? formatDate(dates[1]) : '';
-            }
-            
-            // Collect checked hotel quotes
-            let checkedHotelQuotes = [];
-            let hotelUpgrades = []; // Collect upgrades separately
-            if (bookingType === 'hotel' || bookingType === 'package') {
-                hotelQuoteSections.forEach(sectionId => {
-                    const checkbox = document.querySelector(`#${sectionId} .quote-include`);
-                    if (!checkbox || !checkbox.checked) return;
-                    
-                    const section = document.getElementById(sectionId);
-                    const hotelNameInput = document.getElementById(`${sectionId}-hotel-name`);
-                    const hotelName = hotelNameInput ? hotelNameInput.value.trim() : '';
-                    const checkinInput = section.querySelector('.hotel-checkin');
-                    const nightsInput = section.querySelector('.hotel-nights');
-                    const checkin = checkinInput ? checkinInput.value : '';
-                    const nights = nightsInput ? nightsInput.value : '0';
-                    
-                    let startDate = '', endDate = '';
-                    if (checkin) {
-                        const dates = checkin.split(' to ');
-                        startDate = dates[0] ? formatDate(dates[0]) : '';
-                        endDate = dates[1] ? formatDate(dates[1]) : '';
-                    }
-                    
-                    const comparison = document.getElementById(`${sectionId}-comparison`);
-                    let hotelOptions = '';
-                    let hotelOptionsCount = 0;
-                    let baseSellingPrice = Infinity; // For auto-upgrade calculation
-                    let includedRows = []; // Non-upgrade included rows
-                    let upgradeRows = []; // Upgrade rows
-                    if (comparison) {
-                        comparison.querySelectorAll('.supplier-table-row').forEach(item => {
-                            const includeInEmail = item.querySelector('input[id$="-include-email"]');
-                            const upgradeCheckbox = item.querySelector('input[id$="-upgrade"]');
-                            const isUpgrade = upgradeCheckbox && upgradeCheckbox.checked;
-                            const includeEmailChecked = includeInEmail && includeInEmail.checked;
-                            const shouldInclude = includeEmailChecked || isUpgrade; // Include if either
-
-                            if (shouldInclude) {
-                                const roomTypeInput = item.querySelector('.room-type');
-                                const roomsInput = item.querySelector('.rooms');
-                                const boardBasisInput = item.querySelector('.board-basis');
-                                const cancelPolicySelect = item.querySelector('.cancellation-policy');
-                                const cancelFeeInput = item.querySelector('.cancellation-fee');
-                                const deadlineInput = item.querySelector('.cancellation-deadline');
-                                const upgradeDescInput = item.querySelector('.upgrade-desc');
-                                const upgradeAmountInput = item.querySelector('.upgrade-amount');
-                                
-                                const roomType = roomTypeInput ? roomTypeInput.value : '[Room Type]';
-                                const rooms = parseInt(roomsInput ? roomsInput.value : '1') || 1;
-                                const boardBasis = boardBasisInput ? boardBasisInput.value : '[Board Basis]';
-                                const upgradeDesc = upgradeDescInput ? upgradeDescInput.value : '';
-                                let upgradeAmount = parseFloat(upgradeAmountInput ? upgradeAmountInput.value : '0') || 0;
-                                
-                                const cancelPolicy = cancelPolicySelect ? cancelPolicySelect.value : '';
-                                const cancelFee = parseFloat(cancelFeeInput ? cancelFeeInput.value || '0.00' : '0.00') || 0;
-                                const deadline = deadlineInput ? deadlineInput.value || '' : '';
-                                const cancelText = getCancellationText(cancelPolicy, cancelFee, deadline);
-                                
-                                const sellingPrice = parseFloat(item.querySelector('.selling-price').value) || 0;
-
-                                if (!isUpgrade && includeEmailChecked) {
-                                    // Base option
-                                    includedRows.push({ sellingPrice, roomType, rooms, boardBasis, cancelText });
-                                    if (sellingPrice < baseSellingPrice) {
-                                        baseSellingPrice = sellingPrice;
-                                    }
-                                    hotelOptionsCount++;
-                                    let optionText = '';
-                                    if (hotelName) {
-                                        optionText += `${hotelName.toUpperCase()}\n`;
-                                    }
-                                    
-                                    optionText += `${boldWrap(roomType + ' (' + rooms + ' room' + (rooms > 1 ? 's' : '') + ')')} on ${boldWrap(boardBasis)} Basis\n`;
-                                    
-                                    if (cancelText) {
-                                        optionText += `${boldWrap(cancelText)}\n`;
-                                    }
-                                    
-                                    if (hotelOptionsCount === 1) {
-                                        hotelOptions += optionText;
-                                    } else {
-                                        hotelOptions += `\n${boldWrap('OPTION ' + hotelOptionsCount)}\n${optionText}`;
-                                    }
-                                }
-
-                                if (isUpgrade) {
-                                    // Upgrade row
-                                    if (upgradeDesc && upgradeAmount === 0) {
-                                        // If desc filled but amount 0, use manual
-                                        upgradeAmount = 0;
-                                    } else if (!upgradeDesc && baseSellingPrice < Infinity) {
-                                        // No desc, auto calculate diff
-                                        upgradeAmount = Math.round(sellingPrice - baseSellingPrice);
-                                        upgradeAmountInput.value = upgradeAmount.toFixed(2); // Update UI
-                                    }
-                                    upgradeRows.push({ upgradeDesc, upgradeAmount, roomType, rooms, boardBasis, sellingPrice });
-                                }
-                            }
-                        });
-
-                        // Do not add upgrades to hotelOptions here
-                    }
-
-                    checkedHotelQuotes.push({
-                        hotelName,
-                        startDate,
-                        endDate,
-                        nights,
-                        options: hotelOptions,
-                        upgrades: upgradeRows
-                    });
-
-                    // Collect global hotel upgrades
-                    upgradeRows.forEach(upgrade => {
-                        let upgradeText = upgrade.upgradeDesc || `${upgrade.roomType} (${upgrade.rooms} room${upgrade.rooms > 1 ? 's' : ''}), ${upgrade.boardBasis}`;
-                        hotelUpgrades.push(`Upgrade to ${boldWrap(upgradeText)} add ${boldWrap('£' + Math.round(upgrade.upgradeAmount).toFixed(0))}`);
-                    });
-                });
+            let startDate = '', endDate = '';
+            if (checkin) {
+                const dates = checkin.split(' to ');
+                startDate = dates[0] ? formatDate(dates[0]) : '';
+                endDate = dates[1] ? formatDate(dates[1]) : '';
             }
             
-            let flightOptions = '';
-            let flightUpgrades = []; // Collect flight upgrades separately
-            let outboundFlights = [];
-            let returnFlights = [];
-            let flightOptionsCount = 0;
-            let flightBaseSellingPrice = Infinity;
-            let flightIncludedRows = [];
-            let flightUpgradeRows = [];
-            if (bookingType === 'flight' || bookingType === 'package') {
-                const flightItems = document.querySelectorAll('#flight-comparison .supplier-table-row');
-                flightItems.forEach(item => {
+            const comparison = document.getElementById(`${sectionId}-comparison`);
+            let roomOptions = new Array(numRooms).fill('');
+            let baseSellingPrice = Infinity; // For auto-upgrade calculation
+            let upgradeRows = []; // Upgrade rows
+            if (comparison) {
+                comparison.querySelectorAll('.supplier-table-row').forEach(item => {
                     const includeInEmail = item.querySelector('input[id$="-include-email"]');
                     const upgradeCheckbox = item.querySelector('input[id$="-upgrade"]');
-                    const returnFlightCheckbox = item.querySelector('input[id$="-return-flight"]');
-                    const returnFlight = returnFlightCheckbox ? returnFlightCheckbox.checked : false;
                     const isUpgrade = upgradeCheckbox && upgradeCheckbox.checked;
                     const includeEmailChecked = includeInEmail && includeInEmail.checked;
-                    const shouldInclude = includeEmailChecked || isUpgrade;
+                    const shouldInclude = includeEmailChecked || isUpgrade; // Include if either
 
                     if (shouldInclude) {
-                        const airlineInput = item.querySelector('.airline');
-                        const depAirportInput = item.querySelector('.departure-airport');
-                        const arrAirportInput = item.querySelector('.arrival-airport');
-                        const outboundDepTimeInput = item.querySelector('.outbound-departure-time');
-                        const outboundArrTimeInput = item.querySelector('.outbound-arrival-time');
+                        const roomTypeInput = item.querySelector('.room-type');
+                        const roomsInput = item.querySelector('.rooms');
+                        const boardBasisInput = item.querySelector('.board-basis');
+                        const cancelPolicySelect = item.querySelector('.cancellation-policy');
+                        const cancelFeeInput = item.querySelector('.cancellation-fee');
+                        const deadlineInput = item.querySelector('.cancellation-deadline');
                         const upgradeDescInput = item.querySelector('.upgrade-desc');
                         const upgradeAmountInput = item.querySelector('.upgrade-amount');
-                        const baggageSelect = item.querySelector('.baggage-allowance');
-                        const baggageNumberInput = item.querySelector('.baggage-number');
+                        const supplierNameInput = item.querySelector('.supplier-name');
                         
-                        const airline = airlineInput ? airlineInput.value || '[Airline]' : '[Airline]';
-                        const depAirport = depAirportInput ? depAirportInput.value || '[DEP]' : '[DEP]';
-                        const arrAirport = arrAirportInput ? arrAirportInput.value || '[ARR]' : '[ARR]';
-                        const outboundDepTime = outboundDepTimeInput ? outboundDepTimeInput.value : '';
-                        const outboundArrTime = outboundArrTimeInput ? outboundArrTimeInput.value : '';
+                        const roomType = roomTypeInput ? roomTypeInput.value || '[Room Type]' : '[Room Type]';
+                        const rooms = parseInt(roomsInput ? roomsInput.value : '1') || 1;
+                        const boardBasis = boardBasisInput ? boardBasisInput.value || '[Board Basis]' : '[Board Basis]';
                         const upgradeDesc = upgradeDescInput ? upgradeDescInput.value : '';
                         let upgradeAmount = parseFloat(upgradeAmountInput ? upgradeAmountInput.value : '0') || 0;
-                        const baggage = baggageSelect ? baggageSelect.value : '';
-                        const baggageNumber = parseInt(baggageNumberInput ? baggageNumberInput.value : '1') || 1;
+                        let supplierName = supplierNameInput ? supplierNameInput.value.trim() : '';
+                        
+                        // Strip any appended room/occupancy from supplier name for clean display
+                        const cleanSupplierName = supplierName.replace(/ Room \d+ \([^)]*\)$/, '').trim();
+                        
+                        const cancelPolicy = cancelPolicySelect ? cancelPolicySelect.value : '';
+                        const cancelFee = parseFloat(cancelFeeInput ? cancelFeeInput.value || '0.00' : '0.00') || 0;
+                        const deadline = deadlineInput ? deadlineInput.value || '' : '';
+                        const cancelText = getCancellationText(cancelPolicy, cancelFee, deadline);
                         
                         const sellingPrice = parseFloat(item.querySelector('.selling-price').value) || 0;
+                        const roomIndex = parseInt(item.getAttribute('data-room') || '0');
 
-                        const flightData = {
-                            airline,
-                            depAirport,
-                            arrAirport,
-                            outboundDepTime,
-                            outboundArrTime,
-                            baggage,
-                            baggageNumber,
-                            upgradeDesc,
-                            upgradeAmount,
-                            isUpgrade,
-                            sellingPrice,
-                            returnFlight
-                        };
-                        
+                        if (!isUpgrade && includeEmailChecked) {
+                            // Base option
+                            if (sellingPrice < baseSellingPrice) {
+                                baseSellingPrice = sellingPrice;
+                            }
+                            let detailText = '';
+                            // Only add clean supplier name if not default "Room X"
+                            if (cleanSupplierName && cleanSupplierName !== `Room ${roomIndex + 1}`) {
+                                detailText += `${boldWrap(cleanSupplierName)}\n`;
+                            }
+                            detailText += `${boldWrap(roomType + ' (' + rooms + ' room' + (rooms > 1 ? 's' : '') + ')')} on ${boldWrap(boardBasis)} Basis\n`;
+                            if (cancelText) {
+                                detailText += `${boldWrap(cancelText)}\n`;
+                            }
+                            roomOptions[roomIndex] += detailText;
+                        }
+
                         if (isUpgrade) {
+                            // Upgrade row
                             if (upgradeDesc && upgradeAmount === 0) {
+                                // If desc filled but amount 0, use manual
                                 upgradeAmount = 0;
-                            } else if (!upgradeDesc && flightBaseSellingPrice < Infinity) {
-                                upgradeAmount = Math.round(sellingPrice - flightBaseSellingPrice);
-                                upgradeAmountInput.value = upgradeAmount.toFixed(2);
+                            } else if (!upgradeDesc && baseSellingPrice < Infinity) {
+                                // No desc, auto calculate diff
+                                upgradeAmount = Math.round(sellingPrice - baseSellingPrice);
+                                upgradeAmountInput.value = upgradeAmount.toFixed(2); // Update UI
                             }
-                            flightUpgradeRows.push(flightData);
-                        } else if (includeEmailChecked) {
-                            flightIncludedRows.push(flightData);
-                            if (sellingPrice < flightBaseSellingPrice) {
-                                flightBaseSellingPrice = sellingPrice;
+                            let upgradeText = upgradeDesc || `${roomType} (${rooms} room${rooms > 1 ? 's' : ''}), ${boardBasis}`;
+                            if (cleanSupplierName && cleanSupplierName !== `Room ${roomIndex + 1}`) {
+                                upgradeText = cleanSupplierName + ' - ' + upgradeText;
                             }
-                            if (returnFlight) {
-                                returnFlights.push(flightData);
-                            } else {
-                                outboundFlights.push(flightData);
-                            }
-                            flightOptionsCount++;
-                            if (flightOptionsCount > 1) {
-                                flightOptions += `\n${boldWrap('OPTION ' + flightOptionsCount)}\n`;
-                            }
-                            const flightType = returnFlight ? 'RETURN FLIGHT' : 'ONE WAY FLIGHT';
-                            flightOptions += `${boldWrap(flightData.airline.toUpperCase() + ' ' + flightType)}\n`;
-                            const date = returnFlight ? returnDate : departDate;
-                            flightOptions += `${date} ${flightData.depAirport.toUpperCase()} - ${flightData.arrAirport.toUpperCase()}`;
-                            if (flightData.outboundDepTime) {
-                                flightOptions += ` DEP ${flightData.outboundDepTime.replace(':', '')}`;
-                            }
-                            if (flightData.outboundArrTime) {
-                                flightOptions += ` ARR ${flightData.outboundArrTime.replace(':', '')}`;
-                            }
-                            flightOptions += `\n`;
-                            if (flightData.baggage) {
-                                flightOptions += `${boldWrap('Baggage: ' + flightData.baggageNumber + ' x ' + flightData.baggage)}\n`;
-                            }
+                            upgradeRows.push({ upgradeDesc: upgradeText, upgradeAmount, roomType, rooms, boardBasis, sellingPrice });
                         }
                     }
                 });
-
-                // Do not add flight upgrades to flightOptions here
-                flightUpgradeRows.forEach(upgrade => {
-                    let upgradeText = upgrade.upgradeDesc || `${upgrade.airline} ${upgrade.depAirport} to ${upgrade.arrAirport}${upgrade.baggage ? ', ' + upgrade.baggageNumber + ' x ' + upgrade.baggage : ''}`;
-                    flightUpgrades.push(`Upgrade to ${boldWrap(upgradeText)} add ${boldWrap('£' + Math.round(upgrade.upgradeAmount).toFixed(0))}`);
-                });
             }
-            
-            const pricePerRoom = document.getElementById('price-per-room').checked;
-            const priceSuffix = pricePerRoom ? 'per room' : '';
 
-            // Collect user optional extras (always, for all types)
-            let optionalExtrasText = '';
-            const numRooms = parseInt(document.getElementById('rooms-count').textContent);
-            document.querySelectorAll('#optional-extras-list .optional-extra-item').forEach(item => {
-                const checkbox = item.querySelector('input[type="checkbox"]');
-                if (checkbox && checkbox.checked) {
-                    const nameInput = item.querySelector('input[type="text"]');
-                    const costInput = item.querySelector('input[type="number"]');
-                    const name = nameInput ? nameInput.value : '';
-                    const cost = parseFloat(costInput ? costInput.value : '0') || 0;
-                    if (name && cost > 0) {
-                        optionalExtrasText += `${boldWrap(name)} ${boldWrap('£' + Math.round(cost * numRooms).toFixed(0))}${pricePerRoom ? ' per room' : ''}\n`;
-                    }
-                }
+            checkedHotelQuotes.push({
+                hotelName,
+                startDate,
+                endDate,
+                nights,
+                roomOptions: roomOptions,
+                upgrades: upgradeRows
             });
 
-            // Append upgrades to optionalExtrasText
-            hotelUpgrades.forEach(upgrade => {
-                optionalExtrasText += upgrade + (pricePerRoom ? ' per room' : '') + '\n';
+            // Collect global hotel upgrades
+            upgradeRows.forEach(upgrade => {
+                let upgradeText = upgrade.upgradeDesc || `${upgrade.roomType} (${upgrade.rooms} room${upgrade.rooms > 1 ? 's' : ''}), ${boardBasis}`;
+                hotelUpgrades.push(`Upgrade to ${boldWrap(upgradeText)} add ${boldWrap('£' + Math.round(upgrade.upgradeAmount).toFixed(0))}`);
             });
-            flightUpgrades.forEach(upgrade => {
-                optionalExtrasText += upgrade + (pricePerRoom ? ' per room' : '') + '\n';
-            });
-            
-            const flightSellingRounded = parseFloat(document.getElementById('flight-total-selling-rounded').textContent.replace('£', ''));
-            const totalSellingRounded = parseFloat(document.getElementById('total-selling-rounded').textContent.replace('£', ''));
-            
-            let templateParts = [];
-            
-            let websiteUrl = 'bradleytravelstore.com';
-            if (agentName !== 'custom') {
-                const details = agentDetails[agentName];
-                if (details && details.website) {
-                    websiteUrl = details.website;
-                }
-            }
-            
-            let travelerText = `${adults} Adult${adults > 1 ? 's' : ''}`;
-            if (children > 0) {
-                const agesList = childAges.join(', ');
-                travelerText += ` & ${children} Child${children > 1 ? 'ren' : ''}${agesList.length > 0 ? ', ' + agesList : ''}`;
-            }
-            if (travelers.infants > 0) {
-                travelerText += ` & ${travelers.infants} Infant${travelers.infants > 1 ? 's' : ''}`;
-            }
-            
-            if (bookingType === 'hotel') {
-                templateParts.push(`Hi ${customerName},`);
-                templateParts.push('');
-                templateParts.push(`We can offer for ${boldWrap(travelerText)}`);
-                templateParts.push('');
-                if (checkedHotelQuotes.length > 1) {
-                    checkedHotelQuotes.forEach((quote, index) => {
-                        templateParts.push(`${boldWrap('OPTION ' + (index + 1))}`);
-                        templateParts.push('');
-                        if (quote.hotelName) {
-                            templateParts.push(`${quote.hotelName.toUpperCase()}\n`);
-                        }
-                        for (let roomIndex = 0; roomIndex < roomsData.length; roomIndex++) {
-                            const room = roomsData[roomIndex];
-                            templateParts.push(`Room ${roomIndex + 1}: ${room.adults}A${room.children > 0 ? ` ${room.children}C` : ''}${room.infants > 0 ? ` ${room.infants}I` : ''}`);
-                        }
-                        templateParts.push(`${quote.startDate} - ${quote.endDate} - ${quote.nights} Night${quote.nights > 1 ? 's' : ''}`);
-                        templateParts.push('');
-                        templateParts.push(quote.options);
-                    });
-                } else if (checkedHotelQuotes.length === 1) {
-                    const quote = checkedHotelQuotes[0];
-                    if (quote.hotelName) {
-                        templateParts.push(`${quote.hotelName.toUpperCase()}\n`);
+        });
+    }
+    
+    let flightOptions = '';
+    let flightUpgrades = []; // Collect flight upgrades separately
+    let outboundFlights = [];
+    let returnFlights = [];
+    let flightOptionsCount = 0;
+    let flightBaseSellingPrice = Infinity;
+    let flightIncludedRows = [];
+    let flightUpgradeRows = [];
+    if (bookingType === 'flight' || bookingType === 'package') {
+        const flightItems = document.querySelectorAll('#flight-comparison .supplier-table-row');
+        flightItems.forEach(item => {
+            const includeInEmail = item.querySelector('input[id$="-include-email"]');
+            const upgradeCheckbox = item.querySelector('input[id$="-upgrade"]');
+            const returnFlightCheckbox = item.querySelector('input[id$="-return-flight"]');
+            const returnFlight = returnFlightCheckbox ? returnFlightCheckbox.checked : false;
+            const isUpgrade = upgradeCheckbox && upgradeCheckbox.checked;
+            const includeEmailChecked = includeInEmail && includeEmailChecked;
+            const shouldInclude = includeEmailChecked || isUpgrade;
+
+            if (shouldInclude) {
+                const airlineInput = item.querySelector('.airline');
+                const depAirportInput = item.querySelector('.departure-airport');
+                const arrAirportInput = item.querySelector('.arrival-airport');
+                const outboundDepTimeInput = item.querySelector('.outbound-departure-time');
+                const outboundArrTimeInput = item.querySelector('.outbound-arrival-time');
+                const upgradeDescInput = item.querySelector('.upgrade-desc');
+                const upgradeAmountInput = item.querySelector('.upgrade-amount');
+                const baggageSelect = item.querySelector('.baggage-allowance');
+                const baggageNumberInput = item.querySelector('.baggage-number');
+                
+                const airline = airlineInput ? airlineInput.value || '[Airline]' : '[Airline]';
+                const depAirport = depAirportInput ? depAirportInput.value || '[DEP]' : '[DEP]';
+                const arrAirport = arrAirportInput ? arrAirportInput.value || '[ARR]' : '[ARR]';
+                const outboundDepTime = outboundDepTimeInput ? outboundDepTimeInput.value : '';
+                const outboundArrTime = outboundArrTimeInput ? outboundArrTimeInput.value : '';
+                const upgradeDesc = upgradeDescInput ? upgradeDescInput.value : '';
+                let upgradeAmount = parseFloat(upgradeAmountInput ? upgradeAmountInput.value : '0') || 0;
+                const baggage = baggageSelect ? baggageSelect.value : '';
+                const baggageNumber = parseInt(baggageNumberInput ? baggageNumberInput.value : '1') || 1;
+                
+                const sellingPrice = parseFloat(item.querySelector('.selling-price').value) || 0;
+
+                const flightData = {
+                    airline,
+                    depAirport,
+                    arrAirport,
+                    outboundDepTime,
+                    outboundArrTime,
+                    baggage,
+                    baggageNumber,
+                    upgradeDesc,
+                    upgradeAmount,
+                    isUpgrade,
+                    sellingPrice,
+                    returnFlight
+                };
+                
+                if (isUpgrade) {
+                    if (upgradeDesc && upgradeAmount === 0) {
+                        upgradeAmount = 0;
+                    } else if (!upgradeDesc && flightBaseSellingPrice < Infinity) {
+                        upgradeAmount = Math.round(sellingPrice - flightBaseSellingPrice);
+                        upgradeAmountInput.value = upgradeAmount.toFixed(2);
                     }
-                    for (let roomIndex = 0; roomIndex < roomsData.length; roomIndex++) {
-                        const room = roomsData[roomIndex];
-                        templateParts.push(`Room ${roomIndex + 1}: ${room.adults}A${room.children > 0 ? ` ${room.children}C` : ''}${room.infants > 0 ? ` ${room.infants}I` : ''}`);
+                    flightUpgradeRows.push(flightData);
+                } else if (includeEmailChecked) {
+                    flightIncludedRows.push(flightData);
+                    if (sellingPrice < flightBaseSellingPrice) {
+                        flightBaseSellingPrice = sellingPrice;
                     }
-                    templateParts.push(`${quote.startDate} - ${quote.endDate} - ${quote.nights} Night${quote.nights > 1 ? 's' : ''}`);
-                    templateParts.push('');
-                    templateParts.push(quote.options);
-                }
-                templateParts.push(`${boldWrap('Total Cost')} ${boldWrap('£' + Math.round(totalSellingRounded).toFixed(0))} ${priceSuffix}`);
-                if (excludesNote) {
-                    templateParts.push(`Excludes ${excludesNote}\n`);
-                }
-                if (optionalExtrasText) {
-                    templateParts.push('');
-                    templateParts.push(`${boldWrap('Optional Extras:')}`);
-                    templateParts.push(optionalExtrasText);
-                }
-                if (isHotelRefundable()) {
-                    templateParts.push(`${boldWrap('Deposit')} ${boldWrap('£25 pp')}`);
-                }
-                if (balanceDueDate !== '[balance_due_date]' && balanceDueDate !== '' && balanceDueDate !== 'Pay Now') {
-                    templateParts.push(`${boldWrap('Balance due by')} ${balanceDueDate}`);
-                }
-                templateParts.push('');
-                templateParts.push(`${boldWrap('Includes 5GB eSim Promo')}`);
-                templateParts.push('');
-                templateParts.push('Prices are live and subject to change prior to confirmation.');
-                templateParts.push('');
-                templateParts.push(`Kind regards`);
-                templateParts.push(boldWrap(agentName));
-                templateParts.push('');
-                templateParts.push('Bradley Travelstore');
-                templateParts.push(`T: ${boldWrap(agentPhone)}`);
-                templateParts.push(`E: ${boldWrap(agentEmail)}`);
-                templateParts.push(`W: ${boldWrap(websiteUrl)}`);
-                templateParts.push('');
-                templateParts.push('We are fully ATOL bonded for your peace of mind.');
-                templateParts.push('');
-                templateParts.push(`Your Quote Reference #${boldWrap(quoteReference)}`);
-            } else if (bookingType === 'flight') {
-                templateParts.push(`Hi ${customerName},`);
-                templateParts.push('');
-                templateParts.push(`We can offer for ${boldWrap(travelerText)}.`);
-                templateParts.push('');
-                templateParts.push(flightOptions);
-                templateParts.push(`${boldWrap('Total Cost')} ${boldWrap('£' + Math.round(flightSellingRounded).toFixed(0))} ${priceSuffix}`);
-                if (excludesNote) {
-                    templateParts.push(`Excludes ${excludesNote}\n`);
-                }
-                if (optionalExtrasText) {
-                    templateParts.push('');
-                    templateParts.push(`${boldWrap('Optional Extras:')}`);
-                    templateParts.push(optionalExtrasText);
-                }
-                templateParts.push(`${boldWrap('Deposit')} ${boldWrap('£25 pp')}`);
-                if (balanceDueDate !== '[balance_due_date]' && balanceDueDate !== '' && balanceDueDate !== 'Pay Now') {
-                    templateParts.push(`${boldWrap('Balance due by')} ${balanceDueDate}`);
-                }
-                templateParts.push('');
-                templateParts.push(`${boldWrap('Our Flight Includes')}`);
-                templateParts.push('');
-                templateParts.push(`${boldWrap('Free 5GB eSim Promo included')}`);
-                templateParts.push(`${boldWrap('Flights and airport taxes')}`);
-                templateParts.push(`${boldWrap('2 x Small Hand Baggage allowance')}`);
-                templateParts.push(`${boldWrap('Fully ATOL bonded')}`);
-                templateParts.push('');
-                templateParts.push('Prices are live and subject to change prior to confirmation.');
-                templateParts.push('');
-                templateParts.push(`Kind regards`);
-                templateParts.push(boldWrap(agentName));
-                templateParts.push('');
-                templateParts.push('Bradley Travelstore');
-                templateParts.push(`T: ${boldWrap(agentPhone)}`);
-                templateParts.push(`E: ${boldWrap(agentEmail)}`);
-                templateParts.push(`W: ${boldWrap(websiteUrl)}`);
-                templateParts.push('');
-                templateParts.push('We are fully ATOL bonded for your peace of mind.');
-                templateParts.push('');
-                templateParts.push(`Your Quote Reference #${boldWrap(quoteReference)}`);
-            } else {
-                templateParts.push(`Hi ${customerName},`);
-                templateParts.push('');
-                templateParts.push(`We can offer for ${boldWrap(travelerText)}.`);
-                templateParts.push('');
-                templateParts.push(flightOptions);
-                if (checkedHotelQuotes.length > 1) {
-                    checkedHotelQuotes.forEach((quote, index) => {
-                        templateParts.push(`${boldWrap('OPTION ' + (index + 1))}`);
-                        templateParts.push('');
-                        if (quote.hotelName) {
-                            templateParts.push(`${quote.hotelName.toUpperCase()}\n`);
-                        }
-                        for (let roomIndex = 0; roomIndex < roomsData.length; roomIndex++) {
-                            const room = roomsData[roomIndex];
-                            templateParts.push(`Room ${roomIndex + 1}: ${room.adults}A${room.children > 0 ? ` ${room.children}C` : ''}${room.infants > 0 ? ` ${room.infants}I` : ''}`);
-                        }
-                        templateParts.push(`${quote.startDate} - ${quote.endDate} - ${quote.nights} Night${quote.nights > 1 ? 's' : ''}`);
-                        templateParts.push('');
-                        templateParts.push(quote.options);
-                    });
-                } else if (checkedHotelQuotes.length === 1) {
-                    const quote = checkedHotelQuotes[0];
-                    if (quote.hotelName) {
-                        templateParts.push(`${quote.hotelName.toUpperCase()}\n`);
+                    if (returnFlight) {
+                        returnFlights.push(flightData);
+                    } else {
+                        outboundFlights.push(flightData);
                     }
-                    for (let roomIndex = 0; roomIndex < roomsData.length; roomIndex++) {
-                        const room = roomsData[roomIndex];
-                        templateParts.push(`Room ${roomIndex + 1}: ${room.adults}A${room.children > 0 ? ` ${room.children}C` : ''}${room.infants > 0 ? ` ${room.infants}I` : ''}`);
+                    flightOptionsCount++;
+                    if (flightOptionsCount > 1) {
+                        flightOptions += `\n${boldWrap('OPTION ' + flightOptionsCount)}\n`;
                     }
-                    templateParts.push(`${quote.startDate} - ${quote.endDate} - ${quote.nights} Night${quote.nights > 1 ? 's' : ''}`);
-                    templateParts.push('');
-                    templateParts.push(quote.options);
+                    const flightType = returnFlight ? 'RETURN FLIGHT' : 'ONE WAY FLIGHT';
+                    flightOptions += `${boldWrap(flightData.airline.toUpperCase() + ' ' + flightType)}\n`;
+                    const date = returnFlight ? returnDate : departDate;
+                    flightOptions += `${date} ${flightData.depAirport.toUpperCase()} - ${flightData.arrAirport.toUpperCase()}`;
+                    if (flightData.outboundDepTime) {
+                        flightOptions += ` DEP ${flightData.outboundDepTime.replace(':', '')}`;
+                    }
+                    if (flightData.outboundArrTime) {
+                        flightOptions += ` ARR ${flightData.outboundArrTime.replace(':', '')}`;
+                    }
+                    flightOptions += `\n`;
+                    if (flightData.baggage) {
+                        flightOptions += `${boldWrap('Baggage: ' + flightData.baggageNumber + ' x ' + flightData.baggage)}\n`;
+                    }
                 }
-                templateParts.push(`${boldWrap('Total Package Cost')} ${boldWrap('£' + Math.round(totalSellingRounded).toFixed(0))} ${priceSuffix}`);
-                if (excludesNote) {
-                    templateParts.push(`Excludes ${excludesNote}\n`);
-                }
-                if (optionalExtrasText) {
-                    templateParts.push('');
-                    templateParts.push(`${boldWrap('Optional Extras:')}`);
-                    templateParts.push(optionalExtrasText);
-                }
-                if (isHotelRefundable()) {
-                    templateParts.push('');
-                    templateParts.push(`${boldWrap('Deposit')} ${boldWrap('£25 pp')}`);
-                }
-                if (balanceDueDate !== '[balance_due_date]' && balanceDueDate !== '' && balanceDueDate !== 'Pay Now') {
-                    templateParts.push(`${boldWrap('Balance due by')} ${balanceDueDate}`);
-                }
-                templateParts.push('');
-                templateParts.push(`${boldWrap('Our Package Includes')}`);
-                templateParts.push('');
-                templateParts.push(`${boldWrap('Free 5GB eSim Promo included')}`);
-                templateParts.push(`${boldWrap('Return flights and airport taxes')}`);
-                templateParts.push(`${boldWrap('2 x Small Hand Baggage allowance')}`);
-                if (checkedHotelQuotes.length > 0) {
-                    const quote = checkedHotelQuotes[0];
-                    templateParts.push(`${quote.nights} Nights accommodation`);
-                }
-                templateParts.push(`${boldWrap('Fully ATOL bonded holiday')}`);
-                templateParts.push('');
-                templateParts.push('Prices are live and subject to change prior to confirmation.');
-                templateParts.push('');
-                templateParts.push(`Kind regards`);
-                templateParts.push(boldWrap(agentName));
-                templateParts.push('');
-                templateParts.push('Bradley Travelstore');
-                templateParts.push(`T: ${boldWrap(agentPhone)}`);
-                templateParts.push(`E: ${boldWrap(agentEmail)}`);
-                templateParts.push(`W: ${boldWrap(websiteUrl)}`);
-                templateParts.push('');
-                templateParts.push('We are fully ATOL bonded for your peace of mind.');
-                templateParts.push('');
-                templateParts.push(`Your Quote Reference #${boldWrap(quoteReference)}`);
             }
-            
-            const template = templateParts.join('\n');
-            
-            const output = document.getElementById('email-template');
-            if (currentDeliveryOption === 'whatsapp') {
-                output.textContent = template;
-            } else {
-                const htmlTemplate = template.replace(/\n/g, '<br>').replace(/ {2}/g, '&nbsp; ');
-                output.innerHTML = htmlTemplate;
+        });
+
+        // Do not add flight upgrades to flightOptions here
+        flightUpgradeRows.forEach(upgrade => {
+            let upgradeText = upgrade.upgradeDesc || `${upgrade.airline} ${upgrade.depAirport} to ${upgrade.arrAirport}${upgrade.baggage ? ', ' + upgrade.baggageNumber + ' x ' + upgrade.baggage : ''}`;
+            flightUpgrades.push(`Upgrade to ${boldWrap(upgradeText)} add ${boldWrap('£' + Math.round(upgrade.upgradeAmount).toFixed(0))}`);
+        });
+    }
+    
+    const pricePerRoom = document.getElementById('price-per-room').checked;
+    const priceSuffix = pricePerRoom ? 'per room' : '';
+
+    // Collect user optional extras (always, for all types)
+    let optionalExtrasText = '';
+    document.querySelectorAll('#optional-extras-list .optional-extra-item').forEach(item => {
+        const checkbox = item.querySelector('input[type="checkbox"]');
+        if (checkbox && checkbox.checked) {
+            const nameInput = item.querySelector('input[type="text"]');
+            const costInput = item.querySelector('input[type="number"]');
+            const name = nameInput ? nameInput.value : '';
+            const cost = parseFloat(costInput ? costInput.value : '0') || 0;
+            if (name && cost > 0) {
+                optionalExtrasText += `${boldWrap(name)} ${boldWrap('£' + Math.round(cost * numRooms).toFixed(0))}${pricePerRoom ? ' per room' : ''}\n`;
             }
-            saveState();
         }
+    });
 
-        function copyToClipboard() {
+    // Append upgrades to optionalExtrasText
+    hotelUpgrades.forEach(upgrade => {
+        optionalExtrasText += upgrade + (pricePerRoom ? ' per room' : '') + '\n';
+    });
+    flightUpgrades.forEach(upgrade => {
+        optionalExtrasText += upgrade + (pricePerRoom ? ' per room' : '') + '\n';
+    });
+    
+    const flightSellingRounded = parseFloat(document.getElementById('flight-total-selling-rounded').textContent.replace('£', ''));
+    const totalSellingRounded = parseFloat(document.getElementById('total-selling-rounded').textContent.replace('£', ''));
+    
+    let templateParts = [];
+    
+    let websiteUrl = 'bradleytravelstore.com';
+    if (agentName !== 'custom') {
+        const details = agentDetails[agentName];
+        if (details && details.website) {
+            websiteUrl = details.website;
+        }
+    }
+    
+    let travelerText = `${adults} Adult${adults > 1 ? 's' : ''}`;
+    if (children > 0) {
+        const agesList = childAges.join(', ');
+        travelerText += ` & ${children} Child${children > 1 ? 'ren' : ''}${agesList.length > 0 ? ', ' + agesList : ''}`;
+    }
+    if (travelers.infants > 0) {
+        travelerText += ` & ${travelers.infants} Infant${travelers.infants > 1 ? 's' : ''}`;
+    }
+    
+    if (bookingType === 'hotel') {
+        templateParts.push(`Hi ${customerName},`);
+        templateParts.push('');
+        templateParts.push(`We can offer for ${boldWrap(travelerText)}`);
+        templateParts.push('');
+        if (checkedHotelQuotes.length > 1) {
+            checkedHotelQuotes.forEach((quote, index) => {
+                templateParts.push(`${boldWrap('OPTION ' + (index + 1))}`);
+                templateParts.push('');
+                if (quote.hotelName) {
+                    templateParts.push(`${quote.hotelName.toUpperCase()}\n`);
+                }
+                templateParts.push(`${quote.startDate} - ${quote.endDate} - ${quote.nights} Night${quote.nights > 1 ? 's' : ''}`);
+                templateParts.push('');
+                if (numRooms > 1) {
+                    for (let roomIndex = 0; roomIndex < numRooms; roomIndex++) {
+                        const room = roomsData[roomIndex] || { adults: 0, children: 0, infants: 0 };
+                        let occupancyText = `${room.adults} Adult${room.adults !== 1 ? 's' : ''}`;
+                        if (room.children > 0) {
+                            const roomChildAges = childAges.slice(0, room.children); // Approximate; adjust if per-room ages stored
+                            const agesList = roomChildAges.join(', ');
+                            occupancyText += `, ${room.children} Child${room.children !== 1 ? 'ren' : ''}${agesList ? ` (ages ${agesList})` : ''}`;
+                        }
+                        if (room.infants > 0) {
+                            occupancyText += `, ${room.infants} Infant${room.infants !== 1 ? 's' : ''}`;
+                        }
+                        templateParts.push(`${boldWrap(`Room ${roomIndex + 1}`)}\n`);
+                        templateParts.push(`${occupancyText}\n`);
+                        if (quote.roomOptions[roomIndex].trim()) {
+                            templateParts.push(quote.roomOptions[roomIndex]);
+                        }
+                        templateParts.push('');
+                    }
+                } else if (quote.roomOptions[0].trim()) {
+                    const room = roomsData[0] || { adults: 0, children: 0, infants: 0 };
+                    let occupancyText = `${room.adults} Adult${room.adults !== 1 ? 's' : ''}`;
+                    if (room.children > 0) {
+                        const roomChildAges = childAges.slice(0, room.children); // Approximate; adjust if per-room ages stored
+                        const agesList = roomChildAges.join(', ');
+                        occupancyText += `, ${room.children} Child${room.children !== 1 ? 'ren' : ''}${agesList ? ` (ages ${agesList})` : ''}`;
+                    }
+                    if (room.infants > 0) {
+                        occupancyText += `, ${room.infants} Infant${room.infants !== 1 ? 's' : ''}`;
+                    }
+                    templateParts.push(occupancyText);
+                    templateParts.push('');
+                    templateParts.push(quote.roomOptions[0]);
+                    templateParts.push('');
+                }
+            });
+        } else if (checkedHotelQuotes.length === 1) {
+            const quote = checkedHotelQuotes[0];
+            if (quote.hotelName) {
+                templateParts.push(`${quote.hotelName.toUpperCase()}\n`);
+            }
+            templateParts.push(`${quote.startDate} - ${quote.endDate} - ${quote.nights} Night${quote.nights > 1 ? 's' : ''}`);
+            templateParts.push('');
+            if (numRooms > 1) {
+                for (let roomIndex = 0; roomIndex < numRooms; roomIndex++) {
+                    const room = roomsData[roomIndex] || { adults: 0, children: 0, infants: 0 };
+                    let occupancyText = `${room.adults} Adult${room.adults !== 1 ? 's' : ''}`;
+                    if (room.children > 0) {
+                        const roomChildAges = childAges.slice(0, room.children); // Approximate; adjust if per-room ages stored
+                        const agesList = roomChildAges.join(', ');
+                        occupancyText += `, ${room.children} Child${room.children !== 1 ? 'ren' : ''}${agesList ? ` (ages ${agesList})` : ''}`;
+                    }
+                    if (room.infants > 0) {
+                        occupancyText += `, ${room.infants} Infant${room.infants !== 1 ? 's' : ''}`;
+                    }
+                    templateParts.push(`${boldWrap(`Room ${roomIndex + 1}`)}\n`);
+                    templateParts.push(`${occupancyText}\n`);
+                    if (quote.roomOptions[roomIndex].trim()) {
+                        templateParts.push(quote.roomOptions[roomIndex]);
+                    }
+                    templateParts.push('');
+                }
+            } else if (quote.roomOptions[0].trim()) {
+                const room = roomsData[0] || { adults: 0, children: 0, infants: 0 };
+                let occupancyText = `${room.adults} Adult${room.adults !== 1 ? 's' : ''}`;
+                if (room.children > 0) {
+                    const roomChildAges = childAges.slice(0, room.children); // Approximate; adjust if per-room ages stored
+                    const agesList = roomChildAges.join(', ');
+                    occupancyText += `, ${room.children} Child${room.children !== 1 ? 'ren' : ''}${agesList ? ` (ages ${agesList})` : ''}`;
+                }
+                if (room.infants > 0) {
+                    occupancyText += `, ${room.infants} Infant${room.infants !== 1 ? 's' : ''}`;
+                }
+                templateParts.push(occupancyText);
+                templateParts.push('');
+                templateParts.push(quote.roomOptions[0]);
+                templateParts.push('');
+            }
+        }
+        templateParts.push(`${boldWrap('Total Cost')} ${boldWrap('£' + Math.round(totalSellingRounded).toFixed(0))} ${priceSuffix}`);
+        if (excludesNote) {
+            templateParts.push(`Excludes ${excludesNote}\n`);
+        }
+        if (optionalExtrasText) {
+            templateParts.push('');
+            templateParts.push(`${boldWrap('Optional Extras:')}`);
+            templateParts.push(optionalExtrasText);
+        }
+        if (isHotelRefundable()) {
+            templateParts.push(`${boldWrap('Deposit')} ${boldWrap('£25 pp')}`);
+        }
+        if (balanceDueDate !== '[balance_due_date]' && balanceDueDate !== '' && balanceDueDate !== 'Pay Now') {
+            templateParts.push(`${boldWrap('Balance due by')} ${balanceDueDate}`);
+        }
+        templateParts.push('');
+        templateParts.push(`${boldWrap('Includes 5GB eSim Promo')}`);
+        templateParts.push('');
+        templateParts.push('Prices are live and subject to change prior to confirmation.');
+        templateParts.push('');
+        templateParts.push(`Kind regards`);
+        templateParts.push(boldWrap(agentName));
+        templateParts.push('');
+        templateParts.push('Bradley Travelstore');
+        templateParts.push(`T: ${boldWrap(agentPhone)}`);
+        templateParts.push(`E: ${boldWrap(agentEmail)}`);
+        templateParts.push(`W: ${boldWrap(websiteUrl)}`);
+        templateParts.push('');
+        templateParts.push('We are fully ATOL bonded for your peace of mind.');
+        templateParts.push('');
+        templateParts.push(`Your Quote Reference #${boldWrap(quoteReference)}`);
+    } else if (bookingType === 'flight') {
+        templateParts.push(`Hi ${customerName},`);
+        templateParts.push('');
+        templateParts.push(`We can offer for ${boldWrap(travelerText)}.`);
+        templateParts.push('');
+        templateParts.push(flightOptions);
+        templateParts.push(`${boldWrap('Total Cost')} ${boldWrap('£' + Math.round(flightSellingRounded).toFixed(0))} ${priceSuffix}`);
+        if (excludesNote) {
+            templateParts.push(`Excludes ${excludesNote}\n`);
+        }
+        if (optionalExtrasText) {
+            templateParts.push('');
+            templateParts.push(`${boldWrap('Optional Extras:')}`);
+            templateParts.push(optionalExtrasText);
+        }
+        templateParts.push(`${boldWrap('Deposit')} ${boldWrap('£25 pp')}`);
+        if (balanceDueDate !== '[balance_due_date]' && balanceDueDate !== '' && balanceDueDate !== 'Pay Now') {
+            templateParts.push(`${boldWrap('Balance due by')} ${balanceDueDate}`);
+        }
+        templateParts.push('');
+        templateParts.push(`${boldWrap('Our Flight Includes')}`);
+        templateParts.push('');
+        templateParts.push(`${boldWrap('Free 5GB eSim Promo included')}`);
+        templateParts.push(`${boldWrap('Flights and airport taxes')}`);
+        templateParts.push(`${boldWrap('2 x Small Hand Baggage allowance')}`);
+        templateParts.push(`${boldWrap('Fully ATOL bonded')}`);
+        templateParts.push('');
+        templateParts.push('Prices are live and subject to change prior to confirmation.');
+        templateParts.push('');
+        templateParts.push(`Kind regards`);
+        templateParts.push(boldWrap(agentName));
+        templateParts.push('');
+        templateParts.push('Bradley Travelstore');
+        templateParts.push(`T: ${boldWrap(agentPhone)}`);
+        templateParts.push(`E: ${boldWrap(agentEmail)}`);
+        templateParts.push(`W: ${boldWrap(websiteUrl)}`);
+        templateParts.push('');
+        templateParts.push('We are fully ATOL bonded for your peace of mind.');
+        templateParts.push('');
+        templateParts.push(`Your Quote Reference #${boldWrap(quoteReference)}`);
+    } else {
+        templateParts.push(`Hi ${customerName},`);
+        templateParts.push('');
+        templateParts.push(`We can offer for ${boldWrap(travelerText)}.`);
+        templateParts.push('');
+        templateParts.push(flightOptions);
+        if (checkedHotelQuotes.length > 1) {
+            checkedHotelQuotes.forEach((quote, index) => {
+                templateParts.push(`${boldWrap('OPTION ' + (index + 1))}`);
+                templateParts.push('');
+                if (quote.hotelName) {
+                    templateParts.push(`${quote.hotelName.toUpperCase()}\n`);
+                }
+                templateParts.push(`${quote.startDate} - ${quote.endDate} - ${quote.nights} Night${quote.nights > 1 ? 's' : ''}`);
+                templateParts.push('');
+                if (numRooms > 1) {
+                    for (let roomIndex = 0; roomIndex < numRooms; roomIndex++) {
+                        const room = roomsData[roomIndex] || { adults: 0, children: 0, infants: 0 };
+                        let occupancyText = `${room.adults} Adult${room.adults !== 1 ? 's' : ''}`;
+                        if (room.children > 0) {
+                            const roomChildAges = childAges.slice(0, room.children); // Approximate; adjust if per-room ages stored
+                            const agesList = roomChildAges.join(', ');
+                            occupancyText += `, ${room.children} Child${room.children !== 1 ? 'ren' : ''}${agesList ? ` (ages ${agesList})` : ''}`;
+                        }
+                        if (room.infants > 0) {
+                            occupancyText += `, ${room.infants} Infant${room.infants !== 1 ? 's' : ''}`;
+                        }
+                        templateParts.push(`${boldWrap(`Room ${roomIndex + 1}`)}\n`);
+                        templateParts.push(`${occupancyText}\n`);
+                        if (quote.roomOptions[roomIndex].trim()) {
+                            templateParts.push(quote.roomOptions[roomIndex]);
+                        }
+                        templateParts.push('');
+                    }
+                } else if (quote.roomOptions[0].trim()) {
+                    const room = roomsData[0] || { adults: 0, children: 0, infants: 0 };
+                    let occupancyText = `${room.adults} Adult${room.adults !== 1 ? 's' : ''}`;
+                    if (room.children > 0) {
+                        const roomChildAges = childAges.slice(0, room.children); // Approximate; adjust if per-room ages stored
+                        const agesList = roomChildAges.join(', ');
+                        occupancyText += `, ${room.children} Child${room.children !== 1 ? 'ren' : ''}${agesList ? ` (ages ${agesList})` : ''}`;
+                    }
+                    if (room.infants > 0) {
+                        occupancyText += `, ${room.infants} Infant${room.infants !== 1 ? 's' : ''}`;
+                    }
+                    templateParts.push(occupancyText);
+                    templateParts.push('');
+                    templateParts.push(quote.roomOptions[0]);
+                    templateParts.push('');
+                }
+            });
+        } else if (checkedHotelQuotes.length === 1) {
+            const quote = checkedHotelQuotes[0];
+            if (quote.hotelName) {
+                templateParts.push(`${quote.hotelName.toUpperCase()}\n`);
+            }
+            templateParts.push(`${quote.startDate} - ${quote.endDate} - ${quote.nights} Night${quote.nights > 1 ? 's' : ''}`);
+            templateParts.push('');
+            if (numRooms > 1) {
+                for (let roomIndex = 0; roomIndex < numRooms; roomIndex++) {
+                    const room = roomsData[roomIndex] || { adults: 0, children: 0, infants: 0 };
+                    let occupancyText = `${room.adults} Adult${room.adults !== 1 ? 's' : ''}`;
+                    if (room.children > 0) {
+                        const roomChildAges = childAges.slice(0, room.children); // Approximate; adjust if per-room ages stored
+                        const agesList = roomChildAges.join(', ');
+                        occupancyText += `, ${room.children} Child${room.children !== 1 ? 'ren' : ''}${agesList ? ` (ages ${agesList})` : ''}`;
+                    }
+                    if (room.infants > 0) {
+                        occupancyText += `, ${room.infants} Infant${room.infants !== 1 ? 's' : ''}`;
+                    }
+                    templateParts.push(`${boldWrap(`Room ${roomIndex + 1}`)}\n`);
+                    templateParts.push(`${occupancyText}\n`);
+                    if (quote.roomOptions[roomIndex].trim()) {
+                        templateParts.push(quote.roomOptions[roomIndex]);
+                    }
+                    templateParts.push('');
+                }
+            } else if (quote.roomOptions[0].trim()) {
+                const room = roomsData[0] || { adults: 0, children: 0, infants: 0 };
+                let occupancyText = `${room.adults} Adult${room.adults !== 1 ? 's' : ''}`;
+                if (room.children > 0) {
+                    const roomChildAges = childAges.slice(0, room.children); // Approximate; adjust if per-room ages stored
+                    const agesList = roomChildAges.join(', ');
+                    occupancyText += `, ${room.children} Child${room.children !== 1 ? 'ren' : ''}${agesList ? ` (ages ${agesList})` : ''}`;
+                }
+                if (room.infants > 0) {
+                    occupancyText += `, ${room.infants} Infant${room.infants !== 1 ? 's' : ''}`;
+                }
+                templateParts.push(occupancyText);
+                templateParts.push('');
+                templateParts.push(quote.roomOptions[0]);
+                templateParts.push('');
+            }
+        }
+        templateParts.push(`${boldWrap('Total Package Cost')} ${boldWrap('£' + Math.round(totalSellingRounded).toFixed(0))} ${priceSuffix}`);
+        if (excludesNote) {
+            templateParts.push(`Excludes ${excludesNote}\n`);
+        }
+        if (optionalExtrasText) {
+            templateParts.push('');
+            templateParts.push(`${boldWrap('Optional Extras:')}`);
+            templateParts.push(optionalExtrasText);
+        }
+        if (isHotelRefundable()) {
+            templateParts.push('');
+            templateParts.push(`${boldWrap('Deposit')} ${boldWrap('£25 pp')}`);
+        }
+        if (balanceDueDate !== '[balance_due_date]' && balanceDueDate !== '' && balanceDueDate !== 'Pay Now') {
+            templateParts.push(`${boldWrap('Balance due by')} ${balanceDueDate}`);
+        }
+        templateParts.push('');
+        templateParts.push(`${boldWrap('Our Package Includes')}`);
+        templateParts.push('');
+        templateParts.push(`${boldWrap('Free 5GB eSim Promo included')}`);
+        templateParts.push(`${boldWrap('Return flights and airport taxes')}`);
+        templateParts.push(`${boldWrap('2 x Small Hand Baggage allowance')}`);
+        if (checkedHotelQuotes.length > 0) {
+            const quote = checkedHotelQuotes[0];
+            templateParts.push(`${quote.nights} Nights accommodation`);
+        }
+        templateParts.push(`${boldWrap('Fully ATOL bonded holiday')}`);
+        templateParts.push('');
+        templateParts.push('Prices are live and subject to change prior to confirmation.');
+        templateParts.push('');
+        templateParts.push(`Kind regards`);
+        templateParts.push(boldWrap(agentName));
+        templateParts.push('');
+        templateParts.push('Bradley Travelstore');
+        templateParts.push(`T: ${boldWrap(agentPhone)}`);
+        templateParts.push(`E: ${boldWrap(agentEmail)}`);
+        templateParts.push(`W: ${boldWrap(websiteUrl)}`);
+        templateParts.push('');
+        templateParts.push('We are fully ATOL bonded for your peace of mind.');
+        templateParts.push('');
+        templateParts.push(`Your Quote Reference #${boldWrap(quoteReference)}`);
+    }
+    
+    const template = templateParts.join('\n');
+    
+    const output = document.getElementById('email-template');
+    if (currentDeliveryOption === 'whatsapp') {
+        output.textContent = template;
+    } else {
+        const htmlTemplate = template.replace(/\n/g, '<br>').replace(/ {2}/g, '&nbsp; ');
+        output.innerHTML = htmlTemplate;
+    }
+    saveState();
+}
+
+function copyToClipboard() {
             const output = document.getElementById('email-template');
             let textToCopy;
             if (currentDeliveryOption === 'whatsapp') {
