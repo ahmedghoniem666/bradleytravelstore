@@ -361,8 +361,8 @@
         }
         
         .best-price {
-            background-color: #ecfdf5 !important;
-            font-weight: 600;
+            background-color: #d1fae5 !important;
+            border: 3px solid #059669 !important;
         }
         
         .action-buttons {
@@ -890,21 +890,8 @@
         }
         
         .supplier-table-row.best-price {
-            background-color: #ecfdf5 !important;
-            border-color: var(--success);
-        }
-        
-        .supplier-table-row.best-price::after {
-            content: "Best Price";
-            position: absolute;
-            top: 5px;
-            right: 5px;
-            background: var(--success);
-            color: white;
-            padding: 2px 6px;
-            border-radius: 4px;
-            font-size: 0.7rem;
-            font-weight: bold;
+            background-color: #d1fae5 !important;
+            border: 3px solid #059669 !important;
         }
         
         .supplier-summary-row {
@@ -1192,10 +1179,6 @@
                     <div class="form-group">
                         <label for="customer-name">Customer Name *</label>
                         <input type="text" id="customer-name" class="form-control" placeholder="Customer name" onchange="validateCustomerInfo(); updateEmailTemplate(); saveState();">
-                    </div>
-                    <div class="form-group">
-                        <label for="destination">Destination *</label>
-                        <input type="text" id="destination" class="form-control" placeholder="Destination" onchange="validateCustomerInfo(); updateEmailTemplate(); saveState();">
                     </div>
                 </div>
 
@@ -3231,16 +3214,33 @@ function sortAndHighlightComparison(compId) {
     const tbody = table.querySelector('tbody');
     if (!tbody) return;
     const rows = Array.from(tbody.querySelectorAll('.supplier-table-row'));
-    rows.sort((a, b) => {
-        const priceA = parseFloat(a.querySelector('.selling-price').value) || Infinity;
-        const priceB = parseFloat(b.querySelector('.selling-price').value) || Infinity;
-        return priceA - priceB;
+    
+    // Find the best row
+    const bestRow = rows.find(row => {
+        const checkbox = row.querySelector('input[id$="-best"]');
+        return checkbox && checkbox.checked;
     });
+    
+    // Remove best row if found
+    if (bestRow) {
+        rows.splice(rows.indexOf(bestRow), 1);
+    }
+    
+    // Reorder: best first, then original order of others
+    const reorderedRows = [];
+    if (bestRow) {
+        reorderedRows.push(bestRow);
+    }
+    reorderedRows.push(...rows);
+    
+    // Clear and re-append
     tbody.innerHTML = '';
-    rows.forEach(row => {
+    reorderedRows.forEach(row => {
         tbody.appendChild(row);
     });
-    rows.forEach(row => {
+    
+    // Highlight best
+    reorderedRows.forEach(row => {
         row.classList.remove('best-price');
         const checkbox = row.querySelector('input[id$="-best"]');
         if (checkbox && checkbox.checked) {
@@ -3595,6 +3595,7 @@ function toggleSection(sectionId) {
     card.className = 'card expanded hotel-quote-section';
     card.id = sectionId;
     const includeChecked = data.include !== undefined ? data.include : true;
+    const dest = data.destination || '';
     const html = `
         <div class="section-toggle" onclick="toggleSection('${sectionId}')">
             <h2 class="section-title">Hotel Quote ${number}</h2>
@@ -3617,23 +3618,29 @@ function toggleSection(sectionId) {
                     <input type="number" class="form-control hotel-nights" placeholder="Nights" readonly value="${data.nights || ''}">
                 </div>
             </div>
-            <div class="form-group">
-                <label for="${sectionId}-hotel-name">Hotel Name</label>
-                <input type="text" id="${sectionId}-hotel-name" class="form-control" placeholder="Hotel name" value="${data.hotelName || ''}" onchange="updateEmailTemplate(); saveState();">
+            <div class="form-row">
+                <div class="form-group" style="flex: 2;">
+                    <label for="${sectionId}-hotel-name">Hotel Name</label>
+                    <input type="text" id="${sectionId}-hotel-name" class="form-control" placeholder="Hotel name" value="${data.hotelName || ''}" onchange="updateEmailTemplate(); saveState();">
+                </div>
+                <div class="form-group" style="flex: 1;">
+                    <label>Destination</label>
+                    <input type="text" id="${sectionId}-destination" class="form-control" placeholder="Destination" value="${dest}" onchange="updateEmailTemplate(); saveState();">
+                </div>
             </div>
             <h4>Supplier Comparisons</h4>
             <div id="${sectionId}-rooms-container">
                 <!-- Dynamic room comparisons -->
             </div>
             <div class="section-totals">
-                <h3>Hotel Totals</h3>
+                <h3>Local taxes payable locally</h3>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Excludes Currency</label>
+                        <label>Currency</label>
                         <input type="text" id="${sectionId}-excludes-currency" class="form-control" placeholder="e.g., EUR" value="${data.excludesCurrency || ''}" onchange="updateEmailTemplate(); saveState();">
                     </div>
                     <div class="form-group">
-                        <label>Excludes Amount</label>
+                        <label>Amount Per Night</label>
                         <input type="number" id="${sectionId}-excludes-amount" class="form-control" placeholder="e.g., 15" step="0.01" value="${data.excludesAmount || ''}" onchange="updateEmailTemplate(); saveState();">
                     </div>
                 </div>
@@ -3686,6 +3693,14 @@ function toggleSection(sectionId) {
     updateEmailTemplate();
     saveState();
 }
+
+        function updateAllHotelDestinations() {
+            const dest = document.getElementById('destination').value || '';
+            hotelQuoteSections.forEach(id => {
+                const span = document.getElementById(`${id}-destination`);
+                if (span) span.textContent = dest;
+            });
+        }
 
         function initQuoteDates(sectionId, initialValue = '') {
             const checkinInput = document.querySelector(`#${sectionId} .hotel-checkin`);
@@ -3788,7 +3803,13 @@ function toggleSection(sectionId) {
                 <input type="number" class="form-control cancellation-fee" step="0.01" placeholder="0.00" value="${(data.cancellationFee || 0).toFixed(2)}" onchange="sortAndHighlightComparison('${compId}'); updateEmailTemplate(); saveState();">
             </div>
         </td>
-        <td><input type="checkbox" id="${supId}-best" ${data.best ? 'checked' : ''} onchange="toggleBestPrice('${supId}'); calculateBalanceDueDateForSection('${sectionId}'); updateEmailTemplate();"></td>
+        <td style="text-align: center;">
+            <div>
+                <input type="checkbox" id="${supId}-best" ${data.best ? 'checked' : ''} onchange="toggleBestPrice('${supId}'); calculateBalanceDueDateForSection('${sectionId}'); updateEmailTemplate();">
+                <br>
+                <span class="best-price-badge" style="display: none; color: var(--success); font-size: 0.7rem; font-weight: bold;">Best Price</span>
+            </div>
+        </td>
         <td class="upgrade-cell">
             <input type="checkbox" id="${supId}-upgrade" ${data.upgrade ? 'checked' : ''} onchange="toggleUpgrade('${supId}'); updateEmailTemplate(); saveState();">
             <div class="upgrade-modes" style="display: ${data.upgrade ? 'block' : 'none'};">
@@ -3822,12 +3843,6 @@ function toggleSection(sectionId) {
         document.getElementById(supId + '-upgrade-manual').checked = true;
         handleUpgradeMode(supId, 'manual');
     }
-    // Ensure one include if none
-    let currentSelected = comparison.querySelector('input[id$="-include-email"]:checked');
-    if (!currentSelected) {
-        const newInc = tr.querySelector('input[id$="-include-email"]');
-        if (newInc) newInc.checked = true;
-    }
     sortAndHighlightComparison(compId);
     updateQuoteTotals(sectionId);
 }
@@ -3835,6 +3850,7 @@ function toggleSection(sectionId) {
         function toggleBestPrice(id) {
             const checkbox = document.getElementById(`${id}-best`);
             const row = document.getElementById(id);
+            const badge = row.querySelector('.best-price-badge');
             if (!row) return;
             const comparison = row.closest('.supplier-comparison');
             if (!comparison) return;
@@ -3849,6 +3865,7 @@ function toggleSection(sectionId) {
             if (checkbox.checked) {
                 if (!isPolicyComplete(row)) {
                     checkbox.checked = false;
+                    if (badge) badge.style.display = 'none';
                     alert('Please select cancellation terms first.');
                     return;
                 }
@@ -3864,14 +3881,18 @@ function toggleSection(sectionId) {
                         if (otherCb && otherCb.checked) {
                             otherCb.checked = false;
                             r.classList.remove('best-price');
+                            const otherBadge = r.querySelector('.best-price-badge');
+                            if (otherBadge) otherBadge.style.display = 'none';
                         }
                     }
                 });
                 row.classList.add('best-price');
+                if (badge) badge.style.display = 'block';
             } else {
                 row.classList.remove('best-price');
                 const includeEmailCb = row.querySelector('input[id$="-include-email"]');
                 if (includeEmailCb) includeEmailCb.checked = false;
+                if (badge) badge.style.display = 'none';
             }
             const section = row.closest('.hotel-quote-section');
             if (section) {
@@ -3962,7 +3983,13 @@ function toggleSection(sectionId) {
                         <input type="number" class="form-control cancellation-fee" step="0.01" placeholder="0.00" value="${(data.cancellationFee || 0).toFixed(2)}" onchange="sortAndHighlightFlightOptions(); updateEmailTemplate(); saveState();">
                     </div>
                 </td>
-                <td><input type="checkbox" id="${id}-best" ${data.best ? 'checked' : ''} onchange="toggleBestPrice('${id}'); updateEmailTemplate();"></td>
+                <td style="text-align: center;">
+                    <div>
+                        <input type="checkbox" id="${id}-best" ${data.best ? 'checked' : ''} onchange="toggleBestPrice('${id}'); updateEmailTemplate();">
+                        <br>
+                        <span class="best-price-badge" style="display: none; color: var(--success); font-size: 0.7rem; font-weight: bold;">Best Price</span>
+                    </div>
+                </td>
                 <td class="upgrade-cell">
                     <input type="checkbox" id="${id}-upgrade" ${data.upgrade ? 'checked' : ''} onchange="toggleUpgrade('${id}'); updateEmailTemplate(); saveState();">
                     <div class="upgrade-modes" style="display: ${data.upgrade ? 'block' : 'none'};">
@@ -4351,20 +4378,32 @@ function toggleSection(sectionId) {
 
             const rows = Array.from(tbody.querySelectorAll('.supplier-table-row'));
             
-            rows.sort((a, b) => {
-                const priceA = parseFloat(a.querySelector('.selling-price').value) || Infinity;
-                const priceB = parseFloat(b.querySelector('.selling-price').value) || Infinity;
-                return priceA - priceB;
+            // Find the best row
+            const bestRow = rows.find(row => {
+                const checkbox = row.querySelector('input[id$="-best"]');
+                return checkbox && checkbox.checked;
             });
-
-            // Clear tbody and re-append sorted rows
+            
+            // Remove best row if found
+            if (bestRow) {
+                rows.splice(rows.indexOf(bestRow), 1);
+            }
+            
+            // Reorder: best first, then original order of others
+            const reorderedRows = [];
+            if (bestRow) {
+                reorderedRows.push(bestRow);
+            }
+            reorderedRows.push(...rows);
+            
+            // Clear and re-append
             tbody.innerHTML = '';
-            rows.forEach(row => {
+            reorderedRows.forEach(row => {
                 tbody.appendChild(row);
             });
-
-            // Highlight existing best rows
-            rows.forEach(row => {
+            
+            // Highlight best
+            reorderedRows.forEach(row => {
                 row.classList.remove('best-price');
                 const checkbox = row.querySelector('input[id$="-best"]');
                 if (checkbox && checkbox.checked) {
@@ -4615,7 +4654,6 @@ function updateEmailTemplate() {
     if (isEditing) return;
     const bookingType = document.getElementById('booking-type').value;
     const customerName = document.getElementById('customer-name').value || '[Customer Name]';
-    const destination = document.getElementById('destination').value || '[Destination]';
     let agentName = document.getElementById('agent-name').value;
     if (agentName === 'custom') {
         agentName = document.getElementById('custom-agent-name').value || '[Agent Name]';
@@ -4641,7 +4679,7 @@ function updateEmailTemplate() {
     });
     const excludesCurrency = firstCheckedSectionId ? document.getElementById(`${firstCheckedSectionId}-excludes-currency`).value : '';
     const excludesAmount = firstCheckedSectionId ? document.getElementById(`${firstCheckedSectionId}-excludes-amount`).value : '';
-    const excludesNote = excludesCurrency && excludesAmount ? `Climate Resilience Tax ${excludesCurrency} ${excludesAmount} per room, per night, pay locally` : '';
+    const excludesNote = excludesCurrency && excludesAmount ? `Local taxes ${excludesCurrency} ${excludesAmount} per night, payable locally` : '';
     const balanceDueInput = firstCheckedSectionId ? document.getElementById(firstCheckedSectionId).getAttribute('data-balance-due') || '' : '';
     
     let balanceDueDate;
@@ -4672,7 +4710,9 @@ function updateEmailTemplate() {
             
             const section = document.getElementById(sectionId);
             const hotelNameInput = document.getElementById(`${sectionId}-hotel-name`);
+            const destinationInput = document.getElementById(`${sectionId}-destination`);
             const hotelName = hotelNameInput ? hotelNameInput.value.trim() : '';
+            const destination = destinationInput ? destinationInput.value.trim() : '';
             const checkinInput = section.querySelector('.hotel-checkin');
             const nightsInput = section.querySelector('.hotel-nights');
             const checkin = checkinInput ? checkinInput.value : '';
@@ -4731,7 +4771,7 @@ function updateEmailTemplate() {
                             baseSellingPrice = sellingPrice;
                         }
                         let detailText = '';
-                        detailText += `${roomType} (${rooms} room${rooms > 1 ? 's' : ''}) on ${boldWrap(boardBasis)}\n`;
+                        detailText += `1x ${roomType} on ${boldWrap(boardBasis)}\n`;
                         roomOptions[roomIndex] += detailText;
                         if (cancelText) {
                             cancelTexts[roomIndex] = cancelText;
@@ -4748,7 +4788,7 @@ function updateEmailTemplate() {
                             upgradeAmount = Math.round(sellingPrice - baseSellingPrice);
                             upgradeAmountInput.value = upgradeAmount.toFixed(2); // Update UI
                         }
-                        let upgradeText = upgradeDesc || `${roomType} (${rooms} room${rooms > 1 ? 's' : ''}), ${boardBasis}`;
+                        let upgradeText = upgradeDesc || `1x ${roomType}, ${boardBasis}`;
                         upgradeRows.push({ upgradeDesc: upgradeText, upgradeAmount, roomType, rooms, boardBasis, sellingPrice });
                     }
                 }
@@ -4756,6 +4796,7 @@ function updateEmailTemplate() {
 
             checkedHotelQuotes.push({
                 hotelName,
+                destination,
                 startDate,
                 endDate,
                 nights,
@@ -4766,7 +4807,7 @@ function updateEmailTemplate() {
 
             // Collect global hotel upgrades
             upgradeRows.forEach(upgrade => {
-                let upgradeText = upgrade.upgradeDesc || `${upgrade.roomType} (${upgrade.rooms} room${upgrade.rooms > 1 ? 's' : ''}), ${boardBasis}`;
+                let upgradeText = upgrade.upgradeDesc || `1x ${upgrade.roomType}, ${boardBasis}`;
                 hotelUpgrades.push(`Upgrade to ${boldWrap(upgradeText)} add ${boldWrap('£' + Math.round(upgrade.upgradeAmount).toFixed(0))}`);
             });
         });
@@ -4925,7 +4966,7 @@ function updateEmailTemplate() {
     }
     
     if (bookingType === 'hotel') {
-        templateParts.push(`Hi ${customerName},`);
+        templateParts.push(`Dear ${customerName},`);
         templateParts.push('');
         templateParts.push(`We can offer for ${travelerText}`);
         templateParts.push('');
@@ -4934,7 +4975,7 @@ function updateEmailTemplate() {
                 templateParts.push(`${boldWrap('OPTION ' + (index + 1))}`);
                 templateParts.push('');
                 if (quote.hotelName) {
-                    templateParts.push(`${boldWrap(quote.hotelName.toUpperCase())}\n`);
+                    templateParts.push(`${boldWrap(quote.hotelName.toUpperCase() + ', ' + quote.destination.toUpperCase())}\n`);
                 }
                 if (quote.roomOptions[0].trim()) {
                     templateParts.push(quote.roomOptions[0].trim());
@@ -4967,7 +5008,7 @@ function updateEmailTemplate() {
         } else if (checkedHotelQuotes.length === 1) {
             const quote = checkedHotelQuotes[0];
             if (quote.hotelName) {
-                templateParts.push(`${boldWrap(quote.hotelName.toUpperCase())}\n`);
+                templateParts.push(`${boldWrap(quote.hotelName.toUpperCase() + ', ' + quote.destination.toUpperCase())}\n`);
             }
             if (quote.roomOptions[0].trim()) {
                 templateParts.push(quote.roomOptions[0].trim());
@@ -5013,7 +5054,7 @@ function updateEmailTemplate() {
         templateParts.push('');
         templateParts.push(`Your Quote Reference #${boldWrap(quoteReference)}`);
     } else if (bookingType === 'flight') {
-        templateParts.push(`Hi ${customerName},`);
+        templateParts.push(`Dear ${customerName},`);
         templateParts.push('');
         templateParts.push(`We can offer for ${travelerText}.`);
         templateParts.push('');
@@ -5053,7 +5094,7 @@ function updateEmailTemplate() {
         templateParts.push('');
         templateParts.push(`Your Quote Reference #${boldWrap(quoteReference)}`);
     } else {
-        templateParts.push(`Hi ${customerName},`);
+        templateParts.push(`Dear ${customerName},`);
         templateParts.push('');
         templateParts.push(`We can offer for ${travelerText}.`);
         templateParts.push('');
@@ -5063,7 +5104,7 @@ function updateEmailTemplate() {
                 templateParts.push(`${boldWrap('OPTION ' + (index + 1))}`);
                 templateParts.push('');
                 if (quote.hotelName) {
-                    templateParts.push(`${boldWrap(quote.hotelName.toUpperCase())}\n`);
+                    templateParts.push(`${boldWrap(quote.hotelName.toUpperCase() + ', ' + quote.destination.toUpperCase())}\n`);
                 }
                 if (quote.roomOptions[0].trim()) {
                     templateParts.push(quote.roomOptions[0].trim());
@@ -5097,7 +5138,7 @@ function updateEmailTemplate() {
         } else if (checkedHotelQuotes.length === 1) {
             const quote = checkedHotelQuotes[0];
             if (quote.hotelName) {
-                templateParts.push(`${boldWrap(quote.hotelName.toUpperCase())}\n`);
+                templateParts.push(`${boldWrap(quote.hotelName.toUpperCase() + ', ' + quote.destination.toUpperCase())}\n`);
             }
             if (quote.roomOptions[0].trim()) {
                 templateParts.push(quote.roomOptions[0].trim());
@@ -5290,6 +5331,7 @@ function copyToClipboard() {
                 data.roomType = item.querySelector('.room-type').value;
                 data.rooms = parseInt(item.querySelector('.rooms').value) || 1;
                 data.boardBasis = item.querySelector('.board-basis').value;
+                data.destination = document.getElementById(item.closest('.hotel-quote-section').id + '-destination').value;
             } else {
                 data.airline = item.querySelector('.airline').value;
                 data.departureAirport = item.querySelector('.departure-airport').value;
@@ -5309,7 +5351,6 @@ function copyToClipboard() {
             const state = {
                 customer: {
                     name: document.getElementById('customer-name').value,
-                    destination: document.getElementById('destination').value,
                     roomsData: roomsData
                 },
                 hotel: {
@@ -5318,6 +5359,7 @@ function copyToClipboard() {
                         const checkbox = document.querySelector(`#${sectionId} .quote-include`);
                         const include = checkbox ? checkbox.checked : true;
                         const hotelName = document.getElementById(`${sectionId}-hotel-name`).value;
+                        const destination = document.getElementById(`${sectionId}-destination`).value;
                         const checkinInput = document.querySelector(`#${sectionId} .hotel-checkin`);
                         const nightsInput = document.querySelector(`#${sectionId} .hotel-nights`);
                         const checkin = checkinInput ? checkinInput.value : '';
@@ -5329,7 +5371,7 @@ function copyToClipboard() {
                         document.querySelectorAll(`#${sectionId} .supplier-table-row`).forEach(item => {
                             suppliers.push(collectSupplierData(item, 'hotel'));
                         });
-                        return { id: sectionId, number, include, hotelName, checkin, nights, excludesCurrency, excludesAmount, balanceDue, suppliers };
+                        return { id: sectionId, number, include, hotelName, destination, checkin, nights, excludesCurrency, excludesAmount, balanceDue, suppliers };
                     })
                 },
                 flight: {
@@ -5384,7 +5426,6 @@ function copyToClipboard() {
 
             if (state) {
                 document.getElementById('customer-name').value = state.customer.name || '';
-                document.getElementById('destination').value = state.customer.destination || '';
 
                 if (state.customer.roomsData) {
                     roomsData = state.customer.roomsData;
@@ -5506,9 +5547,8 @@ function copyToClipboard() {
 
         function validateCustomerInfo() {
             const customerName = document.getElementById('customer-name').value.trim();
-            const destination = document.getElementById('destination').value.trim();
             
-            return customerName !== '' && destination !== '';
+            return customerName !== '';
         }
     </script>
 </body>
