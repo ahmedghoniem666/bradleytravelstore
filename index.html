@@ -3078,6 +3078,8 @@ function updateEmailTemplate() {
     let checkedHotelQuotes = [];
     let hotelUpgrades = []; // Collect upgrades separately
     const numRooms = parseInt(document.getElementById('rooms-count').textContent);
+    const pricePerRoom = document.getElementById('price-per-room').checked;
+    const priceSuffix = pricePerRoom ? ' per room' : '';
     if (bookingType === 'hotel' || bookingType === 'package') {
         hotelQuoteSections.forEach(sectionId => {
             const checkbox = document.querySelector(`#${sectionId} .quote-include`);
@@ -3100,10 +3102,9 @@ function updateEmailTemplate() {
                 endDate = dates[1] ? formatDate(dates[1]) : '';
             }
             
-            let roomOptions = new Array(numRooms).fill('');
-            let baseSellingPrice = Infinity; // For auto-upgrade calculation
+            let includedSuppliers = [];
             let upgradeRows = []; // Upgrade rows
-            let cancelTexts = new Array(numRooms).fill(''); // Per room cancellation
+            
             section.querySelectorAll('.supplier-table-row').forEach(item => {
                 const includeInEmail = item.querySelector('input[id$="-include-email"]');
                 const upgradeCheckbox = item.querySelector('input[id$="-upgrade"]');
@@ -3142,19 +3143,21 @@ function updateEmailTemplate() {
 
                     if (!isUpgrade && includeEmailChecked) {
                         // Base option
-                        if (sellingPrice < baseSellingPrice) {
-                            baseSellingPrice = sellingPrice;
-                        }
-                        let detailText = '';
-                        detailText += `${rooms}x ${roomType} on ${boldWrap(boardBasis)}\n`;
-                        roomOptions[roomIndex] += detailText;
-                        if (cancelText) {
-                            cancelTexts[roomIndex] = cancelText;
-                        }
+                        let detailText = `${rooms}x ${roomType} on ${boardBasis}\n`;
+                        const optionPrice = Math.round(sellingPrice * rooms);
+                        includedSuppliers.push({
+                            detailText,
+                            price: optionPrice,
+                            cancelText,
+                            roomIndex,
+                            supplierName: cleanSupplierName
+                        });
                     }
 
                     if (isUpgrade) {
                         // Upgrade row
+                        let baseSellingPrice = Infinity;
+                        // ... (keep existing logic for upgrade amount calculation)
                         if (upgradeDesc && upgradeAmount === 0) {
                             // If desc filled but amount 0, use manual
                             upgradeAmount = 0;
@@ -3175,8 +3178,7 @@ function updateEmailTemplate() {
                 startDate,
                 endDate,
                 nights,
-                roomOptions: roomOptions,
-                cancelTexts: cancelTexts,
+                includedSuppliers,
                 upgrades: upgradeRows
             });
 
@@ -3204,7 +3206,7 @@ function updateEmailTemplate() {
             const returnFlightCheckbox = item.querySelector('input[id$="-return-flight"]');
             const returnFlight = returnFlightCheckbox ? returnFlightCheckbox.checked : false;
             const isUpgrade = upgradeCheckbox && upgradeCheckbox.checked;
-            const includeEmailChecked = includeInEmail && includeInEmail.checked;
+            const includeEmailChecked = includeInEmail && includeEmail.checked;
             const shouldInclude = includeEmailChecked || isUpgrade;
 
             if (shouldInclude) {
@@ -3281,6 +3283,8 @@ function updateEmailTemplate() {
                     if (flightData.baggage) {
                         flightOptions += `${boldWrap('Baggage: ' + flightData.baggageNumber + ' x ' + flightData.baggage)}\n`;
                     }
+                    const optionPrice = Math.round(flightData.sellingPrice);
+                    flightOptions += `${boldWrap('Price: £' + optionPrice.toFixed(0) + priceSuffix)}\n\n`;
                 }
             }
         });
@@ -3292,9 +3296,6 @@ function updateEmailTemplate() {
         });
     }
     
-    const pricePerRoom = document.getElementById('price-per-room').checked;
-    const priceSuffix = pricePerRoom ? 'per room' : '';
-
     // Collect user optional extras (always, for all types)
     let optionalExtrasText = '';
     document.querySelectorAll('#optional-extras-list .optional-extra-item').forEach(item => {
@@ -3317,9 +3318,6 @@ function updateEmailTemplate() {
     flightUpgrades.forEach(upgrade => {
         optionalExtrasText += upgrade + (pricePerRoom ? ' per room' : '') + '\n';
     });
-    
-    const flightSellingRounded = parseFloat(document.getElementById('flight-total-selling-rounded').textContent.replace('£', ''));
-    const totalSellingRounded = parseFloat(document.getElementById('total-selling-rounded').textContent.replace('£', ''));
     
     let templateParts = [];
     
@@ -3350,69 +3348,63 @@ function updateEmailTemplate() {
                 templateParts.push(`${boldWrap('OPTION ' + (index + 1))}`);
                 templateParts.push('');
                 if (quote.hotelName) {
-                    templateParts.push(`${boldWrap(quote.hotelName.toUpperCase() + ', ' + quote.destination.toUpperCase())}\n`);
-                }
-                if (quote.roomOptions[0].trim()) {
-                    templateParts.push(quote.roomOptions[0].trim());
+                    templateParts.push(`${boldWrap(quote.hotelName.toUpperCase() + ', ' + quote.destination.toUpperCase())}`);
                 }
                 templateParts.push(`${quote.startDate} - ${quote.endDate} - ${quote.nights} Night${quote.nights > 1 ? 's' : ''}`);
                 templateParts.push('');
-                templateParts.push(`${boldWrap('Total Cost')} ${boldWrap('£' + (totalSellingRounded > 0 ? Math.round(totalSellingRounded).toFixed(0) : '[Price]'))} ${priceSuffix}`);
-                if (quote.cancelTexts && quote.cancelTexts.some(text => text)) {
-                    const allCancelTexts = quote.cancelTexts.filter(text => text).join(' ');
-                    if (allCancelTexts) {
-                        templateParts.push(`${boldWrap(allCancelTexts)}`);
-                    }
+                if (quote.includedSuppliers.length > 0) {
+                    quote.includedSuppliers.forEach((sup, idx) => {
+                        templateParts.push(`${boldWrap(`Room Option ${idx + 1}`)}`);
+                        templateParts.push(sup.detailText);
+                        const priceLine = `${boldWrap('£' + sup.price.toFixed(0))}${priceSuffix}`;
+                        templateParts.push(`${boldWrap('Price:')} ${boldWrap(priceLine)}`);
+                        if (sup.cancelText) {
+                            templateParts.push(`${boldWrap(sup.cancelText)}`);
+                        }
+                        templateParts.push('');
+                    });
                 }
                 if (excludesNote) {
                     templateParts.push(`Excludes ${excludesNote}\n`);
-                }
-                if (optionalExtrasText) {
-                    templateParts.push('');
-                    templateParts.push(`${boldWrap('Optional Extras:')}`);
-                    templateParts.push(optionalExtrasText);
-                }
-                if (isHotelRefundable()) {
-                    templateParts.push(`${boldWrap('Deposit')} ${boldWrap('£25 pp')}`);
-                }
-                if (balanceDueDate !== '[balance_due_date]' && balanceDueDate !== '' && balanceDueDate !== 'Pay Now') {
-                    templateParts.push(`${boldWrap('Balance due by')} ${balanceDueDate}`);
                 }
                 templateParts.push('');
             });
         } else if (checkedHotelQuotes.length === 1) {
             const quote = checkedHotelQuotes[0];
             if (quote.hotelName) {
-                templateParts.push(`${boldWrap(quote.hotelName.toUpperCase() + ', ' + quote.destination.toUpperCase())}\n`);
-            }
-            if (quote.roomOptions[0].trim()) {
-                templateParts.push(quote.roomOptions[0].trim());
+                templateParts.push(`${boldWrap(quote.hotelName.toUpperCase() + ', ' + quote.destination.toUpperCase())}`);
             }
             templateParts.push(`${quote.startDate} - ${quote.endDate} - ${quote.nights} Night${quote.nights > 1 ? 's' : ''}`);
             templateParts.push('');
-            templateParts.push(`${boldWrap('Total Cost')} ${boldWrap('£' + (totalSellingRounded > 0 ? Math.round(totalSellingRounded).toFixed(0) : '[Price]'))} ${priceSuffix}`);
-            if (quote.cancelTexts && quote.cancelTexts.some(text => text)) {
-                const allCancelTexts = quote.cancelTexts.filter(text => text).join(' ');
-                if (allCancelTexts) {
-                    templateParts.push(`${boldWrap(allCancelTexts)}`);
-                }
+            if (quote.includedSuppliers.length > 0) {
+                quote.includedSuppliers.forEach((sup, idx) => {
+                    templateParts.push(`${boldWrap(`Room Option ${idx + 1}`)}`);
+                    templateParts.push(sup.detailText);
+                    const priceLine = `${boldWrap('£' + sup.price.toFixed(0))}${priceSuffix}`;
+                    templateParts.push(`${boldWrap('Price:')} ${boldWrap(priceLine)}`);
+                    if (sup.cancelText) {
+                        templateParts.push(`${boldWrap(sup.cancelText)}`);
+                    }
+                    templateParts.push('');
+                });
             }
             if (excludesNote) {
                 templateParts.push(`Excludes ${excludesNote}\n`);
             }
-            if (optionalExtrasText) {
-                templateParts.push('');
-                templateParts.push(`${boldWrap('Optional Extras:')}`);
-                templateParts.push(optionalExtrasText);
-            }
-            if (isHotelRefundable()) {
-                templateParts.push(`${boldWrap('Deposit')} ${boldWrap('£25 pp')}`);
-            }
-            if (balanceDueDate !== '[balance_due_date]' && balanceDueDate !== '' && balanceDueDate !== 'Pay Now') {
-                templateParts.push(`${boldWrap('Balance due by')} ${balanceDueDate}`);
-            }
             templateParts.push('');
         }
+        if (optionalExtrasText) {
+            templateParts.push(`${boldWrap('Optional Extras:')}`);
+            templateParts.push(optionalExtrasText);
+            templateParts.push('');
+        }
+        if (isHotelRefundable()) {
+            templateParts.push(`${boldWrap('Deposit')} ${boldWrap('£25 pp')}`);
+        }
+        if (balanceDueDate !== '[balance_due_date]' && balanceDueDate !== '' && balanceDueDate !== 'Pay Now') {
+            templateParts.push(`${boldWrap('Balance due by')} ${balanceDueDate}`);
+        }
+        templateParts.push('');
         templateParts.push(`${boldWrap('Includes 5GB eSim Promo')}`);
         templateParts.push('');
         templateParts.push('Prices are live and subject to change prior to confirmation.');
@@ -3434,10 +3426,6 @@ function updateEmailTemplate() {
         templateParts.push(`We can offer for ${travelerText}.`);
         templateParts.push('');
         templateParts.push(flightOptions);
-        templateParts.push(`${boldWrap('Total Cost')} ${boldWrap('£' + (flightSellingRounded > 0 ? Math.round(flightSellingRounded).toFixed(0) : '[Price]'))} ${priceSuffix}`);
-        if (excludesNote) {
-            templateParts.push(`Excludes ${excludesNote}\n`);
-        }
         if (optionalExtrasText) {
             templateParts.push('');
             templateParts.push(`${boldWrap('Optional Extras:')}`);
@@ -3479,71 +3467,63 @@ function updateEmailTemplate() {
                 templateParts.push(`${boldWrap('OPTION ' + (index + 1))}`);
                 templateParts.push('');
                 if (quote.hotelName) {
-                    templateParts.push(`${boldWrap(quote.hotelName.toUpperCase() + ', ' + quote.destination.toUpperCase())}\n`);
-                }
-                if (quote.roomOptions[0].trim()) {
-                    templateParts.push(quote.roomOptions[0].trim());
+                    templateParts.push(`${boldWrap(quote.hotelName.toUpperCase() + ', ' + quote.destination.toUpperCase())}`);
                 }
                 templateParts.push(`${quote.startDate} - ${quote.endDate} - ${quote.nights} Night${quote.nights > 1 ? 's' : ''}`);
                 templateParts.push('');
-                templateParts.push(`${boldWrap('Total Package Cost')} ${boldWrap('£' + (totalSellingRounded > 0 ? Math.round(totalSellingRounded).toFixed(0) : '[Price]'))} ${priceSuffix}`);
-                if (quote.cancelTexts && quote.cancelTexts.some(text => text)) {
-                    const allCancelTexts = quote.cancelTexts.filter(text => text).join(' ');
-                    if (allCancelTexts) {
-                        templateParts.push(`${boldWrap(allCancelTexts)}`);
-                    }
+                if (quote.includedSuppliers.length > 0) {
+                    quote.includedSuppliers.forEach((sup, idx) => {
+                        templateParts.push(`${boldWrap(`Room Option ${idx + 1}`)}`);
+                        templateParts.push(sup.detailText);
+                        const priceLine = `${boldWrap('£' + sup.price.toFixed(0))}${priceSuffix}`;
+                        templateParts.push(`${boldWrap('Price:')} ${boldWrap(priceLine)}`);
+                        if (sup.cancelText) {
+                            templateParts.push(`${boldWrap(sup.cancelText)}`);
+                        }
+                        templateParts.push('');
+                    });
                 }
                 if (excludesNote) {
                     templateParts.push(`Excludes ${excludesNote}\n`);
-                }
-                if (optionalExtrasText) {
-                    templateParts.push('');
-                    templateParts.push(`${boldWrap('Optional Extras:')}`);
-                    templateParts.push(optionalExtrasText);
-                }
-                if (isHotelRefundable()) {
-                    templateParts.push('');
-                    templateParts.push(`${boldWrap('Deposit')} ${boldWrap('£25 pp')}`);
-                }
-                if (balanceDueDate !== '[balance_due_date]' && balanceDueDate !== '' && balanceDueDate !== 'Pay Now') {
-                    templateParts.push(`${boldWrap('Balance due by')} ${balanceDueDate}`);
                 }
                 templateParts.push('');
             });
         } else if (checkedHotelQuotes.length === 1) {
             const quote = checkedHotelQuotes[0];
             if (quote.hotelName) {
-                templateParts.push(`${boldWrap(quote.hotelName.toUpperCase() + ', ' + quote.destination.toUpperCase())}\n`);
-            }
-            if (quote.roomOptions[0].trim()) {
-                templateParts.push(quote.roomOptions[0].trim());
+                templateParts.push(`${boldWrap(quote.hotelName.toUpperCase() + ', ' + quote.destination.toUpperCase())}`);
             }
             templateParts.push(`${quote.startDate} - ${quote.endDate} - ${quote.nights} Night${quote.nights > 1 ? 's' : ''}`);
             templateParts.push('');
-            templateParts.push(`${boldWrap('Total Package Cost')} ${boldWrap('£' + (totalSellingRounded > 0 ? Math.round(totalSellingRounded).toFixed(0) : '[Price]'))} ${priceSuffix}`);
-            if (quote.cancelTexts && quote.cancelTexts.some(text => text)) {
-                const allCancelTexts = quote.cancelTexts.filter(text => text).join(' ');
-                if (allCancelTexts) {
-                    templateParts.push(`${boldWrap(allCancelTexts)}`);
-                }
+            if (quote.includedSuppliers.length > 0) {
+                quote.includedSuppliers.forEach((sup, idx) => {
+                    templateParts.push(`${boldWrap(`Room Option ${idx + 1}`)}`);
+                    templateParts.push(sup.detailText);
+                    const priceLine = `${boldWrap('£' + sup.price.toFixed(0))}${priceSuffix}`;
+                    templateParts.push(`${boldWrap('Price:')} ${boldWrap(priceLine)}`);
+                    if (sup.cancelText) {
+                        templateParts.push(`${boldWrap(sup.cancelText)}`);
+                    }
+                    templateParts.push('');
+                });
             }
             if (excludesNote) {
                 templateParts.push(`Excludes ${excludesNote}\n`);
             }
-            if (optionalExtrasText) {
-                templateParts.push('');
-                templateParts.push(`${boldWrap('Optional Extras:')}`);
-                templateParts.push(optionalExtrasText);
-            }
-            if (isHotelRefundable()) {
-                templateParts.push('');
-                templateParts.push(`${boldWrap('Deposit')} ${boldWrap('£25 pp')}`);
-            }
-            if (balanceDueDate !== '[balance_due_date]' && balanceDueDate !== '' && balanceDueDate !== 'Pay Now') {
-                templateParts.push(`${boldWrap('Balance due by')} ${balanceDueDate}`);
-            }
             templateParts.push('');
         }
+        if (optionalExtrasText) {
+            templateParts.push(`${boldWrap('Optional Extras:')}`);
+            templateParts.push(optionalExtrasText);
+            templateParts.push('');
+        }
+        if (isHotelRefundable()) {
+            templateParts.push(`${boldWrap('Deposit')} ${boldWrap('£25 pp')}`);
+        }
+        if (balanceDueDate !== '[balance_due_date]' && balanceDueDate !== '' && balanceDueDate !== 'Pay Now') {
+            templateParts.push(`${boldWrap('Balance due by')} ${balanceDueDate}`);
+        }
+        templateParts.push('');
         templateParts.push(`${boldWrap('Includes 5GB eSim Promo')}`);
         templateParts.push('');
         templateParts.push(`${boldWrap('Our Package Includes')}`);
