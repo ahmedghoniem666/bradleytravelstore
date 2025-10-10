@@ -2155,7 +2155,7 @@ function toggleSection(sectionId) {
         <td><input type="text" class="form-control selling-price" readonly placeholder="0.00" value=""></td>
         <td><input type="text" class="form-control commission-amount" readonly placeholder="0.00" value=""></td>
         <td><input type="text" class="form-control room-type" list="roomTypes" placeholder="Room Type" value="${data.roomType || ''}" onchange="updateEmailTemplate(); saveState();"></td>
-        <td><input type="number" class="form-control rooms" min="1" value="1" readonly></td>
+        <td><input type="number" class="form-control rooms" min="1" value="${data.rooms || 1}" onchange="updateTotals(); updateEmailTemplate(); saveState();"></td>
         <td><select class="form-control board-basis" onchange="updateEmailTemplate(); saveState();">
             <option ${data.boardBasis === 'Room Only' ? 'selected' : ''}>Room Only</option>
             <option ${data.boardBasis === 'Bed & Breakfast' ? 'selected' : ''}>Bed & Breakfast</option>
@@ -2864,15 +2864,16 @@ function toggleSection(sectionId) {
                 const netPrice = parseFloat(item.querySelector('.net-price').value) || 0;
                 const sellingPrice = parseFloat(item.querySelector('.selling-price').value) || 0;
                 const upgradeAmount = parseFloat(item.querySelector('.upgrade-amount').value) || 0;
+                const rooms = parseInt(item.querySelector('.rooms').value) || 1;
                 
                 if (!isUpgrade && includeEmail) {
-                    netTotal += netPrice;
-                    sellingExact += sellingPrice;
-                    sellingRounded += Math.ceil(sellingPrice);
+                    netTotal += netPrice * rooms;
+                    sellingExact += sellingPrice * rooms;
+                    sellingRounded += Math.ceil(sellingPrice * rooms);
                 }
                 
                 if (includeEmail || isUpgrade) {
-                    upgradeTotal += upgradeAmount;
+                    upgradeTotal += upgradeAmount * rooms;
                 }
             });
             
@@ -3145,7 +3146,7 @@ function updateEmailTemplate() {
                             baseSellingPrice = sellingPrice;
                         }
                         let detailText = '';
-                        detailText += `1x ${roomType} on ${boldWrap(boardBasis)}\n`;
+                        detailText += `${rooms}x ${roomType} on ${boldWrap(boardBasis)}\n`;
                         roomOptions[roomIndex] += detailText;
                         if (cancelText) {
                             cancelTexts[roomIndex] = cancelText;
@@ -3162,8 +3163,8 @@ function updateEmailTemplate() {
                             upgradeAmount = Math.round(sellingPrice - baseSellingPrice);
                             upgradeAmountInput.value = upgradeAmount.toFixed(2); // Update UI
                         }
-                        let upgradeText = upgradeDesc || `1x ${roomType}, ${boardBasis}`;
-                        upgradeRows.push({ upgradeDesc: upgradeText, upgradeAmount, roomType, rooms, boardBasis, sellingPrice });
+                        let upgradeText = upgradeDesc || `${rooms}x ${roomType}, ${boardBasis}`;
+                        upgradeRows.push({ upgradeDesc: upgradeText, upgradeAmount: upgradeAmount * rooms, roomType, rooms, boardBasis, sellingPrice });
                     }
                 }
             });
@@ -3181,7 +3182,7 @@ function updateEmailTemplate() {
 
             // Collect global hotel upgrades
             upgradeRows.forEach(upgrade => {
-                let upgradeText = upgrade.upgradeDesc || `1x ${upgrade.roomType}, ${boardBasis}`;
+                let upgradeText = upgrade.upgradeDesc || `${upgrade.rooms}x ${upgrade.roomType}, ${upgrade.boardBasis}`;
                 hotelUpgrades.push(`Upgrade to ${boldWrap(upgradeText)} add ${boldWrap('£' + Math.round(upgrade.upgradeAmount).toFixed(0))}`);
             });
         });
