@@ -1583,9 +1583,42 @@ function addRoomComparison(sectionId, roomIndex) {
         <div id="${sectionId}-room-${roomIndex}-comparison" class="supplier-comparison"></div>
         <div class="comparison-controls">
             <button class="btn" onclick="addHotelSupplier('${sectionId}', ${roomIndex})"><i class="fas fa-plus"></i> Add Supplier</button>
+            <button class="btn btn-secondary" onclick="copySupplierComparison('${sectionId}-room-${roomIndex}-comparison')">Copy Supplier Comparison</button>
         </div>
     `;
     roomsContainer.appendChild(roomDiv);
+}
+
+function copySupplierComparison(compId) {
+    const comparison = document.getElementById(compId);
+    if (!comparison) return;
+    const rows = comparison.querySelectorAll('.supplier-table-row');
+    let text = 'Supplier\tNet (£)\tSelling (£)\tComm Amt (£)\tRoom Type\tRooms\tBoard\tCancellation\tBest\tUpgrade\tInclude Email\n';
+    rows.forEach(row => {
+        const supplier = row.querySelector('.supplier-name').value || '';
+        const net = row.querySelector('.net-price').value || '0.00';
+        const selling = row.querySelector('.selling-price').value || '0.00';
+        const comm = row.querySelector('.commission-amount').value || '0.00';
+        const roomType = row.querySelector('.room-type').value || '';
+        const rooms = row.querySelector('.rooms').value || '1';
+        const board = row.querySelector('.board-basis').value || '';
+        const policy = row.querySelector('.cancellation-policy').value || '';
+        const best = row.querySelector('input[id$="-best"]').checked ? 'Yes' : 'No';
+        const upgrade = row.querySelector('input[id$="-upgrade"]').checked ? 'Yes' : 'No';
+        const include = row.querySelector('input[id$="-include-email"]').checked ? 'Yes' : 'No';
+        text += `${supplier}\t£${net}\t£${selling}\t£${comm}\t${roomType}\t${rooms}\t${board}\t${policy}\t${best}\t${upgrade}\t${include}\n`;
+    });
+    navigator.clipboard.writeText(text).then(() => {
+        alert('Supplier comparison copied to clipboard!');
+    }).catch(() => {
+        const textArea = document.createElement('textarea');
+        textArea.value = text;
+        document.body.appendChild(textArea);
+        textArea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textArea);
+        alert('Supplier comparison copied to clipboard!');
+    });
 }
 
 function sortAllRoomsInSection(sectionId) {
