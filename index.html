@@ -1542,22 +1542,7 @@ function ensureAllRoomsHaveSuppliers() {
             }
             const compId = `${sectionId}-room-${i}-comparison`;
             if (comp && !comp.querySelector('.supplier-table-row')) {
-                const sourceCompId = `${sectionId}-room-0-comparison`;
-                const sourceComp = document.getElementById(sourceCompId);
-                const hasSourceSuppliers = sourceComp && sourceComp.querySelector('.supplier-table-row');
-                if (i === 0 || !hasSourceSuppliers) {
-                    addHotelSupplier(sectionId, i, {});
-                } else {
-                    // copy from room 0
-                    const sourceRows = sourceComp.querySelectorAll('.supplier-table-row');
-                    sourceRows.forEach(sourceRow => {
-                        let data = collectSupplierData(sourceRow, 'hotel');
-                        data.roomIndex = i;
-                        data.rooms = 1;
-                        data.best = false;
-                        addHotelSupplier(sectionId, i, data);
-                    });
-                }
+                addHotelSupplier(sectionId, i, {});
                 autoSelectBestForComparison(compId);
             } else {
                 autoSelectBestForComparison(compId);
