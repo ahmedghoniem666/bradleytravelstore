@@ -1547,17 +1547,6 @@ function ensureAllRoomsHaveSuppliers() {
                 const hasSourceSuppliers = sourceComp && sourceComp.querySelector('.supplier-table-row');
                 if (i === 0 || !hasSourceSuppliers) {
                     addHotelSupplier(sectionId, i, {});
-                    const compTable = comp.querySelector('table');
-                    if (compTable) {
-                        const tr = compTable.querySelector('.supplier-table-row');
-                        if (tr) {
-                            const policySelect = tr.querySelector('.cancellation-policy');
-                            if (policySelect && policySelect.value === '') {
-                                policySelect.value = 'non-refundable';
-                                toggleCancellationFee(tr.id);
-                            }
-                        }
-                    }
                 } else {
                     // copy from room 0
                     const sourceRows = sourceComp.querySelectorAll('.supplier-table-row');
@@ -1594,18 +1583,6 @@ function autoSelectBestForComparison(compId) {
         if (bestCb && !bestCb.checked) {
             bestCb.checked = true;
             toggleBestPrice(bestRow.id);
-        }
-    } else if (rows.length === 1) {
-        const row = rows[0];
-        const policySelect = row.querySelector('.cancellation-policy');
-        if (policySelect.value === '') {
-            policySelect.value = 'non-refundable';
-            toggleCancellationFee(row.id);
-        }
-        const bestCb = row.querySelector('input[id$="-best"]');
-        if (bestCb && !bestCb.checked) {
-            bestCb.checked = true;
-            toggleBestPrice(row.id);
         }
     }
 }
