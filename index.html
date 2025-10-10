@@ -1540,12 +1540,74 @@ function ensureAllRoomsHaveSuppliers() {
                 addRoomComparison(sectionId, i);
                 comp = document.getElementById(`${sectionId}-room-${i}-comparison`);
             }
+            const compId = `${sectionId}-room-${i}-comparison`;
             if (comp && !comp.querySelector('.supplier-table-row')) {
-                addHotelSupplier(sectionId, i, {});
+                const sourceCompId = `${sectionId}-room-0-comparison`;
+                const sourceComp = document.getElementById(sourceCompId);
+                const hasSourceSuppliers = sourceComp && sourceComp.querySelector('.supplier-table-row');
+                if (i === 0 || !hasSourceSuppliers) {
+                    addHotelSupplier(sectionId, i, {});
+                    const compTable = comp.querySelector('table');
+                    if (compTable) {
+                        const tr = compTable.querySelector('.supplier-table-row');
+                        if (tr) {
+                            const policySelect = tr.querySelector('.cancellation-policy');
+                            if (policySelect && policySelect.value === '') {
+                                policySelect.value = 'non-refundable';
+                                toggleCancellationFee(tr.id);
+                            }
+                        }
+                    }
+                } else {
+                    // copy from room 0
+                    const sourceRows = sourceComp.querySelectorAll('.supplier-table-row');
+                    sourceRows.forEach(sourceRow => {
+                        let data = collectSupplierData(sourceRow, 'hotel');
+                        data.roomIndex = i;
+                        data.rooms = 1;
+                        data.best = false;
+                        addHotelSupplier(sectionId, i, data);
+                    });
+                }
+                autoSelectBestForComparison(compId);
+            } else {
+                autoSelectBestForComparison(compId);
             }
         }
         sortAllRoomsInSection(sectionId);
     });
+}
+
+function autoSelectBestForComparison(compId) {
+    const comparison = document.getElementById(compId);
+    if (!comparison) return;
+    const rows = comparison.querySelectorAll('.supplier-table-row');
+    if (rows.length === 0) return;
+    const completeRows = Array.from(rows).filter(row => isPolicyComplete(row)).map(row => ({
+        row,
+        price: parseFloat(row.querySelector('.selling-price').value) || Infinity
+    }));
+    if (completeRows.length > 0) {
+        completeRows.sort((a, b) => a.price - b.price);
+        const bestRow = completeRows[0].row;
+        const bestCb = bestRow.querySelector('input[id$="-best"]');
+        if (bestCb && !bestCb.checked) {
+            bestCb.checked = true;
+            toggleBestPrice(bestRow.id);
+        }
+    } else if (rows.length === 1) {
+        const row = rows[0];
+        const policySelect = row.querySelector('.cancellation-policy');
+        if (policySelect.value === '') {
+            policySelect.value = 'non-refundable';
+            toggleCancellationFee(row.id);
+        }
+        const bestCb = row.querySelector('input[id$="-best"]');
+        if (bestCb && !bestCb.checked) {
+            bestCb.checked = true;
+            toggleBestPrice(row.id);
+        }
+    }
 }
 
 function addRoomComparison(sectionId, roomIndex) {
@@ -2060,6 +2122,9 @@ function toggleSection(sectionId) {
         }
     }
     sortAllRoomsInSection(sectionId);
+    for (let i = 0; i < numRooms; i++) {
+        autoSelectBestForComparison(`${sectionId}-room-${i}-comparison`);
+    }
     initCancellationPickers(card);
     updateQuoteTotals(sectionId);
     calculateBalanceDueDateForSection(sectionId);
@@ -3206,7 +3271,7 @@ function updateEmailTemplate() {
             const returnFlightCheckbox = item.querySelector('input[id$="-return-flight"]');
             const returnFlight = returnFlightCheckbox ? returnFlightCheckbox.checked : false;
             const isUpgrade = upgradeCheckbox && upgradeCheckbox.checked;
-            const includeEmailChecked = includeInEmail && includeEmail.checked;
+            const includeEmailChecked = includeInEmail && includeInEmail.checked;
             const shouldInclude = includeEmailChecked || isUpgrade;
 
             if (shouldInclude) {
