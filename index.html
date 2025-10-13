@@ -1174,11 +1174,6 @@
                             <option value="package">Package (Flight + Hotel)</option>
                         </select>
                     </div>
-                    <div class="price-per-room-group" id="price-per-room-group" style="display: block;">
-                        <label>
-                            <input type="checkbox" id="price-per-room" onchange="updateEmailTemplate(); saveState();"> Price per Room
-                        </label>
-                    </div>
                 </div>
                 
                 <div class="form-row">
@@ -1343,6 +1338,12 @@
                         <i class="fab fa-facebook-messenger"></i>
                         <p>Messenger</p>
                     </div>
+                </div>
+                
+                <div class="price-per-room-group" id="price-per-room-group" style="display: block;">
+                    <label>
+                        <input type="checkbox" id="price-per-room" onchange="updateEmailTemplate(); saveState();"> Price per Room
+                    </label>
                 </div>
                 
                 <div class="form-row">
@@ -1814,18 +1815,15 @@ function updateRoomChildAges(roomIndex) {
             const hotelSection = document.getElementById('hotel');
             const flightSection = document.getElementById('flight');
             const optionalExtrasSection = document.getElementById('optional-extras');
-            const pricePerRoomGroup = document.getElementById('price-per-room-group');
 
             if (bookingType === 'hotel') {
                 hotelSection.style.display = 'block';
                 flightSection.style.display = 'none';
                 if (optionalExtrasSection) optionalExtrasSection.style.display = 'none';
-                if (pricePerRoomGroup) pricePerRoomGroup.style.display = 'block';
             } else { // package
                 hotelSection.style.display = 'block';
                 flightSection.style.display = 'block';
                 if (optionalExtrasSection) optionalExtrasSection.style.display = 'block';
-                if (pricePerRoomGroup) pricePerRoomGroup.style.display = 'block';
             }
             updateTotals();
             updateEmailTemplate();
