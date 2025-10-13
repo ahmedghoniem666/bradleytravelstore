@@ -863,6 +863,35 @@
             min-width: 70px;
             max-width: 120px;
         }
+
+        /* Adjustments for net price field */
+        .supplier-comparison table .net-price,
+        .flight-leg-row .net-price {
+            min-width: 85px !important;
+            max-width: 85px !important;
+            font-size: 0.8rem !important;
+        }
+
+        /* Adjustments for upgrade cell to ensure visibility and scrolling */
+        .upgrade-cell {
+            min-width: 220px !important;
+            width: 220px !important;
+            max-width: 220px !important;
+            white-space: normal !important;
+            vertical-align: top !important;
+        }
+
+        .upgrade-cell .form-control {
+            min-width: 100px !important;
+            max-width: none !important;
+        }
+
+        .upgrade-modes label {
+            display: block !important;
+            margin-bottom: 4px !important;
+            font-size: 0.75rem !important;
+            white-space: normal !important;
+        }
         
         .supplier-table-row.saved {
             background-color: #f0fdf4;
@@ -1081,6 +1110,24 @@
                 padding: 2px 3px;
                 font-size: 0.7rem;
             }
+
+            /* Mobile-specific adjustments for net price and upgrade */
+            .supplier-comparison table .net-price,
+            .flight-leg-row .net-price {
+                min-width: 75px !important;
+                max-width: 75px !important;
+                font-size: 0.75rem !important;
+            }
+
+            .upgrade-cell {
+                min-width: 180px !important;
+                width: 180px !important;
+                max-width: 180px !important;
+            }
+
+            .upgrade-cell .form-control {
+                min-width: 80px !important;
+            }
             
             .optional-extra-item {
                 flex-direction: column;
@@ -1109,6 +1156,18 @@
             .section-title {
                 font-size: 1.4rem;
             }
+
+            /* Extra small screen adjustments */
+            .supplier-comparison table .net-price,
+            .flight-leg-row .net-price {
+                min-width: 70px !important;
+                max-width: 70px !important;
+            }
+
+            .upgrade-cell {
+                min-width: 160px !important;
+                width: 160px !important;
+            }
         }
 
         .trip-type-selector {
@@ -1131,6 +1190,74 @@
 
         .flight-number-input {
             min-width: 80px;
+        }
+
+        /* New CSS for flight legs horizontal scrolling */
+        .flight-legs-comparison {
+            overflow-x: auto;
+        }
+
+        .flight-legs-comparison table th,
+        .flight-legs-comparison table td {
+            padding: 4px 6px;
+            border: 1px solid var(--border);
+            vertical-align: top;
+            white-space: nowrap;
+        }
+
+        .flight-legs-comparison table .form-control {
+            width: auto;
+            min-width: 50px;
+            max-width: 100px;
+            padding: 3px 5px;
+            font-size: 0.75rem;
+        }
+
+        /* Mobile adjustments for flight table */
+        @media (max-width: 768px) {
+            .flight-legs-comparison table {
+                font-size: 0.75rem;
+            }
+
+            .flight-legs-comparison table th,
+            .flight-legs-comparison table td {
+                padding: 3px 4px;
+            }
+
+            .flight-legs-comparison table .form-control {
+                min-width: 35px;
+                max-width: 70px;
+                padding: 2px 3px;
+                font-size: 0.7rem;
+            }
+
+            .flight-leg-row .net-price {
+                min-width: 75px !important;
+                max-width: 75px !important;
+                font-size: 0.75rem !important;
+            }
+
+            .flight-legs-comparison .upgrade-cell {
+                min-width: 180px !important;
+                width: 180px !important;
+                max-width: 180px !important;
+            }
+
+            .flight-legs-comparison .upgrade-cell .form-control {
+                min-width: 80px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .flight-leg-row .net-price {
+                min-width: 70px !important;
+                max-width: 70px !important;
+            }
+
+            .flight-legs-comparison .upgrade-cell {
+                min-width: 160px !important;
+                width: 160px !important;
+            }
         }
     </style>
 </head>
@@ -2377,7 +2504,7 @@ function toggleSection(sectionId) {
                         <input type="text" id="${sectionId}-supplier-name" class="form-control" placeholder="Supplier name" value="${data.supplierName || ''}" onchange="updateEmailTemplate(); saveState();">
                     </div>
                     <h4>Flight Legs</h4>
-                    <div id="${sectionId}-legs-container">
+                    <div id="${sectionId}-legs-container" class="flight-legs-comparison">
                         <!-- Dynamic legs table added here -->
                     </div>
                     <div class="comparison-controls">
