@@ -1166,6 +1166,21 @@
             </div>
             
             <div class="section-content">
+                <div class="booking-type-selector">
+                    <div class="form-group">
+                        <label for="booking-type">Booking Type</label>
+                        <select id="booking-type" class="form-control" onchange="toggleSectionsBasedOnBookingType(); saveState();">
+                            <option value="hotel">Hotel Only</option>
+                            <option value="package">Package (Flight + Hotel)</option>
+                        </select>
+                    </div>
+                    <div class="price-per-room-group" id="price-per-room-group" style="display: block;">
+                        <label>
+                            <input type="checkbox" id="price-per-room" onchange="updateEmailTemplate(); saveState();"> Price per Room
+                        </label>
+                    </div>
+                </div>
+                
                 <div class="form-row">
                     <div class="form-group">
                         <label for="customer-name">Customer Name *</label>
@@ -1314,20 +1329,6 @@
             </div>
             
             <div class="section-content">
-                <div class="booking-type-selector">
-                    <div class="form-group">
-                        <label for="booking-type">Booking Type</label>
-                        <select id="booking-type" class="form-control" onchange="toggleSectionsBasedOnBookingType(); saveState();">
-                            <option value="hotel">Hotel Only</option>
-                            <option value="package">Package (Flight + Hotel)</option>
-                        </select>
-                    </div>
-                    <div class="price-per-room-group" id="price-per-room-group" style="display: block;">
-                        <label>
-                            <input type="checkbox" id="price-per-room" onchange="updateEmailTemplate(); saveState();"> Price per Room
-                        </label>
-                    </div>
-                </div>
                 
                 <div class="delivery-options">
                     <div class="delivery-option selected" data-option="email" onclick="selectDeliveryOption(this, 'email')">
@@ -2820,9 +2821,14 @@ function toggleSection(sectionId) {
             const sectionId = section.id;
             if (sectionId && sectionId !== 'flight') {
                 sortAllRoomsInSection(sectionId);
+                const numRooms = roomsData.length;
+                for (let i = 0; i < numRooms; i++) {
+                    autoSelectBestForComparison(`${sectionId}-room-${i}-comparison`);
+                }
                 updateQuoteTotals(sectionId);
             } else {
                 sortAndHighlightFlightOptions();
+                autoSelectBestFlight();
             }
             updateTotals();
             updateEmailTemplate();
