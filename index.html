@@ -543,9 +543,10 @@
     min-width: 0; /* Allows shrinking if needed */
                 border: 1px solid var(--border);
             border-radius: var(--border-radius);
-            padding: 16px;
+            padding: 12px;
             margin-bottom: 12px;
             background: var(--light);
+            font-size: 0.85rem;
 }
 
         
@@ -553,13 +554,13 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
+            margin-bottom: 8px;
         }
         
         .room-number {
             font-weight: 600;
             color: var(--primary);
-            font-size: 1.1rem;
+            font-size: 0.95rem;
         }
         
         .room-remove {
@@ -567,32 +568,33 @@
             color: white;
             border: none;
             border-radius: 50%;
-            width: 28px;
-            height: 28px;
+            width: 24px;
+            height: 24px;
             cursor: pointer;
-            font-size: 0.8rem;
+            font-size: 0.7rem;
         }
         
         .people-selector {
             display: flex;
-            gap: 12px;
-            margin-bottom: 16px;
+            gap: 8px;
+            margin-bottom: 12px;
             flex-wrap: wrap;
         }
         
         .people-type {
             flex: 1;
             text-align: center;
-            padding: 16px;
-            background: var(--light);
+            padding: 12px;
+            background: var(--card-bg);
             border-radius: var(--border-radius);
-            min-width: 100px;
+            min-width: 80px;
+            font-size: 0.8rem;
         }
         
         .people-type h3 {
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             color: var(--primary);
-            font-size: 1rem;
+            font-size: 0.85rem;
             font-weight: 600;
         }
         
@@ -600,12 +602,12 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
         
         .counter-btn {
-            width: 32px;
-            height: 32px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             background: var(--secondary);
             color: white;
@@ -613,7 +615,7 @@
             cursor: pointer;
             font-weight: bold;
             transition: all 0.3s ease;
-            font-size: 1rem;
+            font-size: 0.9rem;
         }
         
         .counter-btn:hover {
@@ -621,9 +623,9 @@
         }
         
         .counter-value {
-            font-size: 1.2rem;
+            font-size: 1rem;
             font-weight: 700;
-            min-width: 32px;
+            min-width: 28px;
             text-align: center;
             color: var(--primary);
         }
@@ -642,15 +644,15 @@
         .child-ages-container {
             display: flex;
             flex-wrap: wrap;
-            gap: 8px;
-            margin-top: 8px;
+            gap: 6px;
+            margin-top: 6px;
             justify-content: center;
         }
         
         .child-age-input {
-            width: 80px;
-            padding: 8px;
-            font-size: 0.95rem;
+            width: 70px;
+            padding: 6px;
+            font-size: 0.85rem;
             border-radius: var(--border-radius);
         }
         
@@ -754,8 +756,8 @@
 
         
         .age-label {
-            font-size: 0.8rem;
-            margin-top: 6px;
+            font-size: 0.75rem;
+            margin-top: 4px;
             color: var(--muted-text);
             text-align: center;
         }
@@ -1086,12 +1088,12 @@
             }
             
             .room-type {
-                padding: 12px;
+                padding: 10px;
             }
 
             .people-selector {
                 flex-direction: column;
-                gap: 8px;
+                gap: 6px;
             }
 
             .room-comparison {
@@ -1107,6 +1109,28 @@
             .section-title {
                 font-size: 1.4rem;
             }
+        }
+
+        .trip-type-selector {
+            margin-bottom: 12px;
+        }
+
+        .trip-type-selector .form-group {
+            display: inline-block;
+            width: auto;
+            margin-right: 12px;
+        }
+
+        .baggage-group {
+            display: none;
+        }
+
+        .baggage-group.show {
+            display: block;
+        }
+
+        .flight-number-input {
+            min-width: 80px;
         }
     </style>
 </head>
@@ -1198,6 +1222,16 @@
                         <input type="text" id="flight-dates" class="form-control" placeholder="Select dates">
                     </div>
                 </div>
+
+                <div class="trip-type-selector">
+                    <div class="form-group">
+                        <label for="trip-type">Trip Type</label>
+                        <select id="trip-type" class="form-control" onchange="handleTripTypeChange(); saveState();">
+                            <option value="one-way">One Way</option>
+                            <option value="round-trip">Round Trip</option>
+                        </select>
+                    </div>
+                </div>
                 
                 <h3>Flight Options</h3>
                 <div id="flight-comparison" class="supplier-comparison">
@@ -1285,7 +1319,6 @@
                         <label for="booking-type">Booking Type</label>
                         <select id="booking-type" class="form-control" onchange="toggleSectionsBasedOnBookingType(); saveState();">
                             <option value="hotel">Hotel Only</option>
-                            <option value="flight">Flight Only</option>
                             <option value="package">Package (Flight + Hotel)</option>
                         </select>
                     </div>
@@ -1407,6 +1440,7 @@
         let usedQuoteNumbers = new Set();
         let hotelQuoteCounter = 0;
         let roomsData = [];
+        let currentTripType = 'one-way';
 
         const inputNormalizationMap = {
             "0.89": 0.11
@@ -1485,6 +1519,7 @@
             addOptionalExtra(); // Add one initial optional extra
             calculateAllBalanceDueDates();
             ensureAllRoomsHaveSuppliers();
+            handleTripTypeChange();
         });
 
         function initializeRooms() {
@@ -1583,42 +1618,9 @@ function addRoomComparison(sectionId, roomIndex) {
         <div id="${sectionId}-room-${roomIndex}-comparison" class="supplier-comparison"></div>
         <div class="comparison-controls">
             <button class="btn" onclick="addHotelSupplier('${sectionId}', ${roomIndex})"><i class="fas fa-plus"></i> Add Supplier</button>
-            <button class="btn btn-secondary" onclick="copySupplierComparison('${sectionId}-room-${roomIndex}-comparison')">Copy Supplier Comparison</button>
         </div>
     `;
     roomsContainer.appendChild(roomDiv);
-}
-
-function copySupplierComparison(compId) {
-    const comparison = document.getElementById(compId);
-    if (!comparison) return;
-    const rows = comparison.querySelectorAll('.supplier-table-row');
-    let text = 'Supplier\tNet (£)\tSelling (£)\tComm Amt (£)\tRoom Type\tRooms\tBoard\tCancellation\tBest\tUpgrade\tInclude Email\n';
-    rows.forEach(row => {
-        const supplier = row.querySelector('.supplier-name').value || '';
-        const net = row.querySelector('.net-price').value || '0.00';
-        const selling = row.querySelector('.selling-price').value || '0.00';
-        const comm = row.querySelector('.commission-amount').value || '0.00';
-        const roomType = row.querySelector('.room-type').value || '';
-        const rooms = row.querySelector('.rooms').value || '1';
-        const board = row.querySelector('.board-basis').value || '';
-        const policy = row.querySelector('.cancellation-policy').value || '';
-        const best = row.querySelector('input[id$="-best"]').checked ? 'Yes' : 'No';
-        const upgrade = row.querySelector('input[id$="-upgrade"]').checked ? 'Yes' : 'No';
-        const include = row.querySelector('input[id$="-include-email"]').checked ? 'Yes' : 'No';
-        text += `${supplier}\t£${net}\t£${selling}\t£${comm}\t${roomType}\t${rooms}\t${board}\t${policy}\t${best}\t${upgrade}\t${include}\n`;
-    });
-    navigator.clipboard.writeText(text).then(() => {
-        alert('Supplier comparison copied to clipboard!');
-    }).catch(() => {
-        const textArea = document.createElement('textarea');
-        textArea.value = text;
-        document.body.appendChild(textArea);
-        textArea.select();
-        document.execCommand('copy');
-        document.body.removeChild(textArea);
-        alert('Supplier comparison copied to clipboard!');
-    });
 }
 
 function sortAllRoomsInSection(sectionId) {
@@ -1818,11 +1820,6 @@ function updateRoomChildAges(roomIndex) {
                 flightSection.style.display = 'none';
                 if (optionalExtrasSection) optionalExtrasSection.style.display = 'none';
                 if (pricePerRoomGroup) pricePerRoomGroup.style.display = 'block';
-            } else if (bookingType === 'flight') {
-                hotelSection.style.display = 'none';
-                flightSection.style.display = 'block';
-                if (optionalExtrasSection) optionalExtrasSection.style.display = 'none';
-                if (pricePerRoomGroup) pricePerRoomGroup.style.display = 'none';
             } else { // package
                 hotelSection.style.display = 'block';
                 flightSection.style.display = 'block';
@@ -2141,7 +2138,7 @@ function toggleSection(sectionId) {
             if (checkinInput && !checkinInput._flatpickr) {
                 flatpickr(checkinInput, {
                     mode: "range",
-                    dateFormat: "Y-m-d",
+                    dateFormat: "d-M-y",
                     minDate: "today",
                     defaultDate: initialValue ? initialValue.split(' to ') : undefined,
                     onChange: function(selectedDates, dateStr, instance) {
@@ -2369,7 +2366,20 @@ function toggleSection(sectionId) {
             saveState();
         }
 
-        function addFlightTable(data = {}) {
+        function handleTripTypeChange() {
+            currentTripType = document.getElementById('trip-type').value;
+            // Rebuild flight table based on trip type
+            const comparison = document.getElementById('flight-comparison');
+            if (comparison) {
+                comparison.innerHTML = '';
+                // Re-add suppliers if needed, but for simplicity, clear and let user add new
+                addFlightOption();
+            }
+            updateEmailTemplate();
+            saveState();
+        }
+
+        function addFlightTable(data = {}, isReturn = false) {
             const comparison = document.getElementById('flight-comparison');
             let table = comparison.querySelector('table');
             if (!table) {
@@ -2379,26 +2389,34 @@ function toggleSection(sectionId) {
             }
             const tbody = table.querySelector('tbody') || document.createElement('tbody');
             if (!table.querySelector('tbody')) table.appendChild(tbody);
-            const id = data.id || 'flight-' + Date.now();
+            const id = data.id || (isReturn ? 'flight-return-' : 'flight-') + Date.now();
             const tr = document.createElement('tr');
             tr.id = id;
             tr.classList.add('supplier-table-row');
+            tr.setAttribute('data-return', isReturn);
             tr.innerHTML = `
                 <td><input type="text" class="form-control supplier-name" placeholder="Supplier Name" value="${data.supplierName || ''}" onchange="updateEmailTemplate(); saveState();"></td>
+                <td><input type="text" class="form-control flight-number" placeholder="Flight No." value="${data.flightNumber || ''}" onchange="updateEmailTemplate(); saveState();"></td>
                 <td><input type="text" class="form-control airline" placeholder="Airline (code or name)" value="${data.airline || ''}" oninput="displayAirline(this)" onchange="updateEmailTemplate(); saveState();"><div class="airport-display"></div></td>
                 <td><input type="text" class="form-control airport-input departure-airport" placeholder="Dep (IATA)" value="${data.departureAirport || ''}" oninput="displayAirport(this)" onchange="updateEmailTemplate(); saveState();"><div class="airport-display"></div></td>
                 <td><input type="text" class="form-control airport-input arrival-airport" placeholder="Arr (IATA)" value="${data.arrivalAirport || ''}" oninput="displayAirport(this)" onchange="updateEmailTemplate(); saveState();"><div class="airport-display"></div></td>
                 <td><input type="time" class="form-control outbound-departure-time" value="${data.outboundDepartureTime || ''}" onchange="updateEmailTemplate(); saveState();"></td>
                 <td><input type="time" class="form-control outbound-arrival-time" value="${data.outboundArrivalTime || ''}" onchange="updateEmailTemplate(); saveState();"></td>
-                <td><input type="number" class="form-control baggage-number" min="0" value="${data.baggageNumber || 1}" onchange="updateEmailTemplate(); saveState();"></td>
-                <td><select class="baggage-weight-select baggage-allowance" onchange="updateEmailTemplate(); saveState();">
-                    <option ${data.baggageAllowance === '10kg' ? 'selected' : ''}>10kg</option>
-                    <option ${data.baggageAllowance === '15kg' ? 'selected' : ''}>15kg</option>
-                    <option ${data.baggageAllowance === '20kg' ? 'selected' : ''}>20kg</option>
-                    <option ${data.baggageAllowance === '23kg' ? 'selected' : ''}>23kg</option>
-                    <option ${data.baggageAllowance === '25kg' ? 'selected' : ''}>25kg</option>
-                    <option ${data.baggageAllowance === '30kg' ? 'selected' : ''}>30kg</option>
-                </select></td>
+                <td>
+                    <input type="checkbox" class="baggage-include" onchange="toggleBaggage(this.closest('tr'));"> Include Baggage
+                    <div class="baggage-group">
+                        <input type="number" class="form-control baggage-number" min="0" value="${data.baggageNumber || 1}" onchange="updateEmailTemplate(); saveState();">
+                        <select class="baggage-weight-select baggage-allowance" onchange="updateEmailTemplate(); saveState();">
+                            <option ${data.baggageAllowance === '10kg' ? 'selected' : ''}>10kg</option>
+                            <option ${data.baggageAllowance === '15kg' ? 'selected' : ''}>15kg</option>
+                            <option ${data.baggageAllowance === '20kg' ? 'selected' : ''}>20kg</option>
+                            <option ${data.baggageAllowance === '23kg' ? 'selected' : ''}>23kg</option>
+                            <option ${data.baggageAllowance === '25kg' ? 'selected' : ''}>25kg</option>
+                            <option ${data.baggageAllowance === '30kg' ? 'selected' : ''}>30kg</option>
+                        </select>
+                        <input type="number" class="form-control baggage-price" step="0.01" placeholder="0.00 (if extra)" value="${data.baggagePrice || ''}" onchange="updateEmailTemplate(); saveState();">
+                    </div>
+                </td>
                 <td><input type="number" class="form-control net-price" step="0.01" placeholder="0.00" value="" onchange="updateSupplierPrice('${id}'); saveState();"></td>
                 <td><input type="text" class="form-control commission-rate" placeholder="Use global" value="${data.commissionRate || ''}" onchange="updateSupplierPrice('${id}'); saveState();"></td>
                 <td><input type="text" class="form-control selling-price" readonly placeholder="0.00" value=""></td>
@@ -2438,7 +2456,6 @@ function toggleSection(sectionId) {
                         <input type="number" class="form-control upgrade-amount" step="0.01" placeholder="0.00" value="${(data.upgradeAmount || 0).toFixed(2)}" onchange="updateEmailTemplate(); saveState();">
                     </div>
                 </td>
-                <td><input type="checkbox" id="${id}-return-flight" ${data.returnFlight ? 'checked' : ''} onchange="updateEmailTemplate(); saveState();"></td>
                 <td><input type="checkbox" id="${id}-include-email" ${data.includeEmail ? 'checked' : ''} onchange="toggleIncludeEmailFlight('${id}'); updateEmailTemplate();"></td>
                 <td>
                     <button class="btn btn-danger btn-sm" onclick="removeSupplier('${id}')"><i class="fas fa-trash"></i></button>
@@ -2458,13 +2475,10 @@ function toggleSection(sectionId) {
                 document.getElementById(id + '-upgrade-manual').checked = true;
                 handleUpgradeMode(id, 'manual');
             }
-            if (data.returnFlight) {
-                const checkbox = document.getElementById(`${id}-return-flight`);
-                if (checkbox) checkbox.checked = true;
-            }
             displayAirport(tr.querySelector('.departure-airport'));
             displayAirport(tr.querySelector('.arrival-airport'));
             displayAirline(tr.querySelector('.airline'));
+            toggleBaggage(tr);
             // Enforce only one Include for flights
             let currentSelected = null;
             const allRows = Array.from(tbody.querySelectorAll('.supplier-table-row'));
@@ -2483,6 +2497,16 @@ function toggleSection(sectionId) {
                 if (newInc) newInc.checked = true;
             }
             sortAndHighlightFlightOptions();
+        }
+
+        function toggleBaggage(row) {
+            const checkbox = row.querySelector('.baggage-include');
+            const group = row.querySelector('.baggage-group');
+            if (checkbox.checked) {
+                group.classList.add('show');
+            } else {
+                group.classList.remove('show');
+            }
         }
 
         function toggleIncludeEmailFlight(id) {
@@ -2508,7 +2532,10 @@ function toggleSection(sectionId) {
         }
 
         function addFlightOption() {
-            addFlightTable();
+            addFlightTable({}, false); // Outbound
+            if (currentTripType === 'round-trip') {
+                setTimeout(() => addFlightTable({}, true), 100); // Return
+            }
             sortAndHighlightFlightOptions();
             updateTotals();
             updateEmailTemplate();
@@ -2929,7 +2956,7 @@ function toggleSection(sectionId) {
                 if (!isUpgrade && includeEmail) {
                     netTotal += netPrice * rooms;
                     sellingExact += sellingPrice * rooms;
-                    sellingRounded += Math.ceil(sellingPrice * rooms);
+                    sellingRounded += Math.round(sellingPrice * rooms);
                 }
                 
                 if (includeEmail || isUpgrade) {
@@ -2938,7 +2965,7 @@ function toggleSection(sectionId) {
             });
             
             // Add upgrades to rounded total
-            sellingRounded += Math.ceil(upgradeTotal);
+            sellingRounded += Math.round(upgradeTotal);
             
             document.getElementById(`${sectionId}-total-net`).textContent = `£${netTotal.toFixed(2)}`;
             document.getElementById(`${sectionId}-total-selling-exact`).textContent = `£${sellingExact.toFixed(2)}`;
@@ -2978,11 +3005,12 @@ function toggleSection(sectionId) {
                 const netPrice = parseFloat(item.querySelector('.net-price').value) || 0;
                 const sellingPrice = parseFloat(item.querySelector('.selling-price').value) || 0;
                 const upgradeAmount = parseFloat(item.querySelector('.upgrade-amount').value) || 0;
+                const baggagePrice = parseFloat(item.querySelector('.baggage-price').value) || 0;
                 
                 if (!isUpgrade && includeEmail) {
-                    flightNetTotal += netPrice;
+                    flightNetTotal += netPrice + baggagePrice;
                     flightSellingExact += sellingPrice;
-                    flightSellingRounded += Math.ceil(sellingPrice);
+                    flightSellingRounded += Math.round(sellingPrice);
                 }
                 
                 if (includeEmail || isUpgrade) {
@@ -2991,7 +3019,7 @@ function toggleSection(sectionId) {
             });
             
             // Add upgrades to rounded total
-            flightSellingRounded += Math.ceil(flightUpgradeTotal);
+            flightSellingRounded += Math.round(flightUpgradeTotal);
             
             document.getElementById('flight-total-net').textContent = `£${flightNetTotal.toFixed(2)}`;
             document.getElementById('flight-total-selling-exact').textContent = `£${flightSellingExact.toFixed(2)}`;
@@ -3002,7 +3030,7 @@ function toggleSection(sectionId) {
             document.querySelectorAll('#optional-extras-list .optional-extra-item input[type="checkbox"]:checked').forEach(cb => {
                 const item = cb.closest('.optional-extra-item');
                 const cost = parseFloat(item.querySelector('input[type="number"]').value) || 0;
-                optionalExtrasTotal += Math.ceil(cost * numRooms);
+                optionalExtrasTotal += Math.round(cost * numRooms);
             });
             
             const totalNet = hotelNetTotal + flightNetTotal;
@@ -3040,14 +3068,28 @@ function toggleSection(sectionId) {
             }
         }
 
-        function formatDate(dateString) {
+        function formatDate(dateString, isRangeStart = false, isRangeEnd = false) {
             if (!dateString || dateString === 'Pay Now') return dateString;
             const date = new Date(dateString);
             const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
             const day = date.getDate().toString().padStart(2, '0');
             const month = months[date.getMonth()];
             const year = date.getFullYear().toString().slice(-2);
+            if (isRangeStart && isRangeEnd) {
+                return `${day}-${month}${year}`;
+            }
             return `${day}${month}${year}`;
+        }
+
+        function formatDateRange(startDate, endDate) {
+            if (!startDate || !endDate) return '';
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            if (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()) {
+                return formatDate(startDate, true, true).replace('-', '-');
+            } else {
+                return `${formatDate(endDate)} - ${formatDate(startDate)}`;
+            }
         }
 
         function getChildAgesList() {
@@ -3203,7 +3245,7 @@ function updateEmailTemplate() {
 
                     if (!isUpgrade && includeEmailChecked) {
                         // Base option
-                        let detailText = `${rooms}x ${roomType} on ${boardBasis}\n`;
+                        let detailText = `${rooms} x ${roomType} on ${boardBasis}\n`;
                         const optionPrice = Math.round(sellingPrice * rooms);
                         includedSuppliers.push({
                             detailText,
@@ -3226,7 +3268,7 @@ function updateEmailTemplate() {
                             upgradeAmount = Math.round(sellingPrice - baseSellingPrice);
                             upgradeAmountInput.value = upgradeAmount.toFixed(2); // Update UI
                         }
-                        let upgradeText = upgradeDesc || `${rooms}x ${roomType}, ${boardBasis}`;
+                        let upgradeText = upgradeDesc || `${rooms} x ${roomType}, ${boardBasis}`;
                         upgradeRows.push({ upgradeDesc: upgradeText, upgradeAmount: upgradeAmount * rooms, roomType, rooms, boardBasis, sellingPrice });
                     }
                 }
@@ -3244,7 +3286,7 @@ function updateEmailTemplate() {
 
             // Collect global hotel upgrades
             upgradeRows.forEach(upgrade => {
-                let upgradeText = upgrade.upgradeDesc || `${upgrade.rooms}x ${upgrade.roomType}, ${upgrade.boardBasis}`;
+                let upgradeText = upgrade.upgradeDesc || `${upgrade.rooms} x ${upgrade.roomType}, ${upgrade.boardBasis}`;
                 hotelUpgrades.push(`Upgrade to ${boldWrap(upgradeText)} add ${boldWrap('£' + Math.round(upgrade.upgradeAmount).toFixed(0))}`);
             });
         });
@@ -3258,18 +3300,18 @@ function updateEmailTemplate() {
     let flightBaseSellingPrice = Infinity;
     let flightIncludedRows = [];
     let flightUpgradeRows = [];
-    if (bookingType === 'flight' || bookingType === 'package') {
+    if (bookingType === 'package') {
         const flightItems = document.querySelectorAll('#flight-comparison .supplier-table-row');
         flightItems.forEach(item => {
             const includeInEmail = item.querySelector('input[id$="-include-email"]');
             const upgradeCheckbox = item.querySelector('input[id$="-upgrade"]');
-            const returnFlightCheckbox = item.querySelector('input[id$="-return-flight"]');
-            const returnFlight = returnFlightCheckbox ? returnFlightCheckbox.checked : false;
             const isUpgrade = upgradeCheckbox && upgradeCheckbox.checked;
             const includeEmailChecked = includeInEmail && includeInEmail.checked;
             const shouldInclude = includeEmailChecked || isUpgrade;
+            const isReturn = item.getAttribute('data-return') === 'true';
 
             if (shouldInclude) {
+                const flightNumberInput = item.querySelector('.flight-number');
                 const airlineInput = item.querySelector('.airline');
                 const depAirportInput = item.querySelector('.departure-airport');
                 const arrAirportInput = item.querySelector('.arrival-airport');
@@ -3277,9 +3319,12 @@ function updateEmailTemplate() {
                 const outboundArrTimeInput = item.querySelector('.outbound-arrival-time');
                 const upgradeDescInput = item.querySelector('.upgrade-desc');
                 const upgradeAmountInput = item.querySelector('.upgrade-amount');
-                const baggageSelect = item.querySelector('.baggage-allowance');
+                const baggageCheckbox = item.querySelector('.baggage-include');
                 const baggageNumberInput = item.querySelector('.baggage-number');
+                const baggageSelect = item.querySelector('.baggage-allowance');
+                const baggagePriceInput = item.querySelector('.baggage-price');
                 
+                const flightNumber = flightNumberInput ? flightNumberInput.value : '';
                 const airline = airlineInput ? airlineInput.value || '[Airline]' : '[Airline]';
                 const depAirport = depAirportInput ? depAirportInput.value || '[DEP]' : '[DEP]';
                 const arrAirport = arrAirportInput ? arrAirportInput.value || '[ARR]' : '[ARR]';
@@ -3287,12 +3332,15 @@ function updateEmailTemplate() {
                 const outboundArrTime = outboundArrTimeInput ? outboundArrTimeInput.value : '';
                 const upgradeDesc = upgradeDescInput ? upgradeDescInput.value : '';
                 let upgradeAmount = parseFloat(upgradeAmountInput ? upgradeAmountInput.value : '0') || 0;
+                const includeBaggage = baggageCheckbox ? baggageCheckbox.checked : false;
                 const baggage = baggageSelect ? baggageSelect.value : '';
                 const baggageNumber = parseInt(baggageNumberInput ? baggageNumberInput.value : '1') || 1;
+                const baggagePrice = parseFloat(baggagePriceInput ? baggagePriceInput.value : '0') || 0;
                 
                 const sellingPrice = parseFloat(item.querySelector('.selling-price').value) || 0;
 
                 const flightData = {
+                    flightNumber,
                     airline,
                     depAirport,
                     arrAirport,
@@ -3300,11 +3348,13 @@ function updateEmailTemplate() {
                     outboundArrTime,
                     baggage,
                     baggageNumber,
+                    baggagePrice,
+                    includeBaggage,
                     upgradeDesc,
                     upgradeAmount,
                     isUpgrade,
                     sellingPrice,
-                    returnFlight
+                    isReturn
                 };
                 
                 if (isUpgrade) {
@@ -3320,18 +3370,9 @@ function updateEmailTemplate() {
                     if (sellingPrice < flightBaseSellingPrice) {
                         flightBaseSellingPrice = sellingPrice;
                     }
-                    if (returnFlight) {
-                        returnFlights.push(flightData);
-                    } else {
-                        outboundFlights.push(flightData);
-                    }
-                    flightOptionsCount++;
-                    if (flightOptionsCount > 1) {
-                        flightOptions += `\n${boldWrap('OPTION ' + flightOptionsCount)}\n`;
-                    }
-                    const flightType = returnFlight ? 'RETURN FLIGHT' : 'ONE WAY FLIGHT';
-                    flightOptions += `${boldWrap(flightData.airline.toUpperCase() + ' ' + flightType)}\n`;
-                    const date = returnFlight ? returnDate : departDate;
+                    const flightType = flightData.isReturn ? 'RETURN' : 'DEPARTURE';
+                    flightOptions += `${boldWrap(flightData.airline.toUpperCase() + ' ' + flightType + ' FLIGHT')} ${flightNumber ? '(' + flightNumber + ')' : ''}\n`;
+                    const date = flightData.isReturn ? returnDate : departDate;
                     flightOptions += `${date} ${flightData.depAirport.toUpperCase()} - ${flightData.arrAirport.toUpperCase()}`;
                     if (flightData.outboundDepTime) {
                         flightOptions += ` DEP ${flightData.outboundDepTime.replace(':', '')}`;
@@ -3340,11 +3381,13 @@ function updateEmailTemplate() {
                         flightOptions += ` ARR ${flightData.outboundArrTime.replace(':', '')}`;
                     }
                     flightOptions += `\n`;
-                    if (flightData.baggage) {
-                        flightOptions += `${boldWrap('Baggage: ' + flightData.baggageNumber + ' x ' + flightData.baggage)}\n`;
+                    if (flightData.includeBaggage && flightData.baggage) {
+                        const baggageText = `${flightData.baggageNumber} x ${flightData.baggage}`;
+                        const baggageCost = flightData.baggagePrice > 0 ? ` (£${Math.round(flightData.baggagePrice)})` : ' (included)';
+                        flightOptions += `${boldWrap('Baggage: ' + baggageText + baggageCost)}\n`;
                     }
                     const optionPrice = Math.round(flightData.sellingPrice);
-                    flightOptions += `${boldWrap('Price: £' + optionPrice.toFixed(0) + priceSuffix)}\n\n`;
+                    flightOptions += `${boldWrap('Total Cost: £' + optionPrice.toFixed(0) + priceSuffix)}\n\n`;
                 }
             }
         });
@@ -3410,22 +3453,33 @@ function updateEmailTemplate() {
                 if (quote.hotelName) {
                     templateParts.push(`${boldWrap(quote.hotelName.toUpperCase() + ', ' + quote.destination.toUpperCase())}`);
                 }
-                templateParts.push(`${quote.startDate} - ${quote.endDate} - ${quote.nights} Night${quote.nights > 1 ? 's' : ''}`);
+                templateParts.push(`${formatDateRange(quote.startDate, quote.endDate)} - ${quote.nights} Night${quote.nights > 1 ? 's' : ''}`);
                 templateParts.push('');
                 if (quote.includedSuppliers.length > 0) {
-                    quote.includedSuppliers.forEach((sup, idx) => {
-                        templateParts.push(`${boldWrap(`Room Option ${idx + 1}`)}`);
+                    if (numRooms > 1) {
+                        quote.includedSuppliers.forEach((sup, idx) => {
+                            templateParts.push(`${boldWrap(`Room Option ${idx + 1}`)}`);
+                            templateParts.push(sup.detailText);
+                            const priceLine = `${boldWrap('£' + sup.price.toFixed(0))}${priceSuffix}`;
+                            templateParts.push(`${boldWrap('Total Cost:')} ${boldWrap(priceLine)}`);
+                            if (sup.cancelText) {
+                                templateParts.push(`${boldWrap(sup.cancelText)}`);
+                            }
+                            templateParts.push('');
+                        });
+                    } else {
+                        const sup = quote.includedSuppliers[0];
                         templateParts.push(sup.detailText);
                         const priceLine = `${boldWrap('£' + sup.price.toFixed(0))}${priceSuffix}`;
-                        templateParts.push(`${boldWrap('Price:')} ${boldWrap(priceLine)}`);
+                        templateParts.push(`${boldWrap('Total Cost:')} ${boldWrap(priceLine)}`);
                         if (sup.cancelText) {
                             templateParts.push(`${boldWrap(sup.cancelText)}`);
                         }
                         templateParts.push('');
-                    });
+                    }
                 }
                 if (excludesNote) {
-                    templateParts.push(`Excludes ${excludesNote}\n`);
+                    templateParts.push(`${excludesNote}\n`);
                 }
                 templateParts.push('');
             });
@@ -3434,22 +3488,33 @@ function updateEmailTemplate() {
             if (quote.hotelName) {
                 templateParts.push(`${boldWrap(quote.hotelName.toUpperCase() + ', ' + quote.destination.toUpperCase())}`);
             }
-            templateParts.push(`${quote.startDate} - ${quote.endDate} - ${quote.nights} Night${quote.nights > 1 ? 's' : ''}`);
+            templateParts.push(`${formatDateRange(quote.startDate, quote.endDate)} - ${quote.nights} Night${quote.nights > 1 ? 's' : ''}`);
             templateParts.push('');
             if (quote.includedSuppliers.length > 0) {
-                quote.includedSuppliers.forEach((sup, idx) => {
-                    templateParts.push(`${boldWrap(`Room Option ${idx + 1}`)}`);
+                if (numRooms > 1) {
+                    quote.includedSuppliers.forEach((sup, idx) => {
+                        templateParts.push(`${boldWrap(`Room Option ${idx + 1}`)}`);
+                        templateParts.push(sup.detailText);
+                        const priceLine = `${boldWrap('£' + sup.price.toFixed(0))}${priceSuffix}`;
+                        templateParts.push(`${boldWrap('Total Cost:')} ${boldWrap(priceLine)}`);
+                        if (sup.cancelText) {
+                            templateParts.push(`${boldWrap(sup.cancelText)}`);
+                        }
+                        templateParts.push('');
+                    });
+                } else {
+                    const sup = quote.includedSuppliers[0];
                     templateParts.push(sup.detailText);
                     const priceLine = `${boldWrap('£' + sup.price.toFixed(0))}${priceSuffix}`;
-                    templateParts.push(`${boldWrap('Price:')} ${boldWrap(priceLine)}`);
+                    templateParts.push(`${boldWrap('Total Cost:')} ${boldWrap(priceLine)}`);
                     if (sup.cancelText) {
                         templateParts.push(`${boldWrap(sup.cancelText)}`);
                     }
                     templateParts.push('');
-                });
+                }
             }
             if (excludesNote) {
-                templateParts.push(`Excludes ${excludesNote}\n`);
+                templateParts.push(`${excludesNote}\n`);
             }
             templateParts.push('');
         }
@@ -3480,42 +3545,6 @@ function updateEmailTemplate() {
         templateParts.push('We are fully ATOL bonded for your peace of mind.');
         templateParts.push('');
         templateParts.push(`Your Quote Reference #${quoteReference}`);
-    } else if (bookingType === 'flight') {
-        templateParts.push(`Dear ${customerName},`);
-        templateParts.push('');
-        templateParts.push(`We can offer for ${travelerText}.`);
-        templateParts.push('');
-        templateParts.push(flightOptions);
-        if (optionalExtrasText) {
-            templateParts.push('');
-            templateParts.push(`${boldWrap('Optional Extras:')}`);
-            templateParts.push(optionalExtrasText);
-        }
-        templateParts.push(`${boldWrap('Deposit')} ${boldWrap('£25 pp')}`);
-        if (balanceDueDate !== '[balance_due_date]' && balanceDueDate !== '' && balanceDueDate !== 'Pay Now') {
-            templateParts.push(`${boldWrap('Balance due by')} ${balanceDueDate}`);
-        }
-        templateParts.push('');
-        templateParts.push(`${boldWrap('Our Flight Includes')}`);
-        templateParts.push('');
-        templateParts.push(`${boldWrap('Includes 5GB eSim Promo')}`);
-        templateParts.push(`${boldWrap('Flights and airport taxes')}`);
-        templateParts.push(`${boldWrap('2 x Small Hand Baggage allowance')}`);
-        templateParts.push(`${boldWrap('Fully ATOL bonded')}`);
-        templateParts.push('');
-        templateParts.push('Prices are live and subject to change prior to confirmation.');
-        templateParts.push('');
-        templateParts.push(`Kind regards`);
-        templateParts.push(`${agentName}`);
-        templateParts.push('');
-        templateParts.push('Bradley Travelstore');
-        templateParts.push(`T: ${agentPhone}`);
-        templateParts.push(`E: ${agentEmail}`);
-        templateParts.push(`W: ${websiteUrl}`);
-        templateParts.push('');
-        templateParts.push('We are fully ATOL bonded for your peace of mind.');
-        templateParts.push('');
-        templateParts.push(`Your Quote Reference #${quoteReference}`);
     } else {
         templateParts.push(`Dear ${customerName},`);
         templateParts.push('');
@@ -3529,22 +3558,33 @@ function updateEmailTemplate() {
                 if (quote.hotelName) {
                     templateParts.push(`${boldWrap(quote.hotelName.toUpperCase() + ', ' + quote.destination.toUpperCase())}`);
                 }
-                templateParts.push(`${quote.startDate} - ${quote.endDate} - ${quote.nights} Night${quote.nights > 1 ? 's' : ''}`);
+                templateParts.push(`${formatDateRange(quote.startDate, quote.endDate)} - ${quote.nights} Night${quote.nights > 1 ? 's' : ''}`);
                 templateParts.push('');
                 if (quote.includedSuppliers.length > 0) {
-                    quote.includedSuppliers.forEach((sup, idx) => {
-                        templateParts.push(`${boldWrap(`Room Option ${idx + 1}`)}`);
+                    if (numRooms > 1) {
+                        quote.includedSuppliers.forEach((sup, idx) => {
+                            templateParts.push(`${boldWrap(`Room Option ${idx + 1}`)}`);
+                            templateParts.push(sup.detailText);
+                            const priceLine = `${boldWrap('£' + sup.price.toFixed(0))}${priceSuffix}`;
+                            templateParts.push(`${boldWrap('Total Cost:')} ${boldWrap(priceLine)}`);
+                            if (sup.cancelText) {
+                                templateParts.push(`${boldWrap(sup.cancelText)}`);
+                            }
+                            templateParts.push('');
+                        });
+                    } else {
+                        const sup = quote.includedSuppliers[0];
                         templateParts.push(sup.detailText);
                         const priceLine = `${boldWrap('£' + sup.price.toFixed(0))}${priceSuffix}`;
-                        templateParts.push(`${boldWrap('Price:')} ${boldWrap(priceLine)}`);
+                        templateParts.push(`${boldWrap('Total Cost:')} ${boldWrap(priceLine)}`);
                         if (sup.cancelText) {
                             templateParts.push(`${boldWrap(sup.cancelText)}`);
                         }
                         templateParts.push('');
-                    });
+                    }
                 }
                 if (excludesNote) {
-                    templateParts.push(`Excludes ${excludesNote}\n`);
+                    templateParts.push(`${excludesNote}\n`);
                 }
                 templateParts.push('');
             });
@@ -3553,22 +3593,33 @@ function updateEmailTemplate() {
             if (quote.hotelName) {
                 templateParts.push(`${boldWrap(quote.hotelName.toUpperCase() + ', ' + quote.destination.toUpperCase())}`);
             }
-            templateParts.push(`${quote.startDate} - ${quote.endDate} - ${quote.nights} Night${quote.nights > 1 ? 's' : ''}`);
+            templateParts.push(`${formatDateRange(quote.startDate, quote.endDate)} - ${quote.nights} Night${quote.nights > 1 ? 's' : ''}`);
             templateParts.push('');
             if (quote.includedSuppliers.length > 0) {
-                quote.includedSuppliers.forEach((sup, idx) => {
-                    templateParts.push(`${boldWrap(`Room Option ${idx + 1}`)}`);
+                if (numRooms > 1) {
+                    quote.includedSuppliers.forEach((sup, idx) => {
+                        templateParts.push(`${boldWrap(`Room Option ${idx + 1}`)}`);
+                        templateParts.push(sup.detailText);
+                        const priceLine = `${boldWrap('£' + sup.price.toFixed(0))}${priceSuffix}`;
+                        templateParts.push(`${boldWrap('Total Cost:')} ${boldWrap(priceLine)}`);
+                        if (sup.cancelText) {
+                            templateParts.push(`${boldWrap(sup.cancelText)}`);
+                        }
+                        templateParts.push('');
+                    });
+                } else {
+                    const sup = quote.includedSuppliers[0];
                     templateParts.push(sup.detailText);
                     const priceLine = `${boldWrap('£' + sup.price.toFixed(0))}${priceSuffix}`;
-                    templateParts.push(`${boldWrap('Price:')} ${boldWrap(priceLine)}`);
+                    templateParts.push(`${boldWrap('Total Cost:')} ${boldWrap(priceLine)}`);
                     if (sup.cancelText) {
                         templateParts.push(`${boldWrap(sup.cancelText)}`);
                     }
                     templateParts.push('');
-                });
+                }
             }
             if (excludesNote) {
-                templateParts.push(`Excludes ${excludesNote}\n`);
+                templateParts.push(`${excludesNote}\n`);
             }
             templateParts.push('');
         }
@@ -3698,13 +3749,13 @@ function copyToClipboard() {
             } else {
                 thHTML += `
                     <th>Supplier</th>
+                    <th>Flight No.</th>
                     <th>Airline</th>
                     <th>Dep Airport</th>
                     <th>Arr Airport</th>
                     <th>Dep Time</th>
                     <th>Arr Time</th>
-                    <th>Baggage Num</th>
-                    <th>Baggage Wt</th>
+                    <th>Baggage</th>
                     <th>Net (£)</th>
                     <th>Comm Rate</th>
                     <th>Selling (£)</th>
@@ -3712,7 +3763,6 @@ function copyToClipboard() {
                     <th>Cancellation</th>
                     <th>Best</th>
                     <th>Upgrade</th>
-                    <th>Return Flight</th>
                     <th>Include Email</th>
                     <th>Actions</th>
                 `;
@@ -3748,6 +3798,7 @@ function copyToClipboard() {
                 data.boardBasis = item.querySelector('.board-basis').value;
                 data.destination = document.getElementById(item.closest('.hotel-quote-section').id + '-destination').value;
             } else {
+                data.flightNumber = item.querySelector('.flight-number').value;
                 data.airline = item.querySelector('.airline').value;
                 data.departureAirport = item.querySelector('.departure-airport').value;
                 data.arrivalAirport = item.querySelector('.arrival-airport').value;
@@ -3755,7 +3806,9 @@ function copyToClipboard() {
                 data.outboundArrivalTime = item.querySelector('.outbound-arrival-time').value;
                 data.baggageAllowance = item.querySelector('.baggage-allowance').value;
                 data.baggageNumber = parseInt(item.querySelector('.baggage-number').value) || 1;
-                data.returnFlight = item.querySelector(`input[id="${item.id}-return-flight"]`) ? item.querySelector(`input[id="${item.id}-return-flight"]`).checked : false;
+                data.baggagePrice = parseFloat(item.querySelector('.baggage-price').value) || 0;
+                data.includeBaggage = item.querySelector('.baggage-include') ? item.querySelector('.baggage-include').checked : false;
+                data.isReturn = item.getAttribute('data-return') === 'true';
             }
 
             return data;
@@ -3791,6 +3844,7 @@ function copyToClipboard() {
                 },
                 flight: {
                     dates: document.getElementById('flight-dates').value,
+                    tripType: document.getElementById('trip-type').value,
                     optionalExtras: Array.from(document.querySelectorAll('#optional-extras-list .optional-extra-item')).map(item => ({
                         name: item.querySelector('input[type="text"]').value,
                         cost: item.querySelector('input[type="number"]').value,
@@ -3909,13 +3963,19 @@ function copyToClipboard() {
                 // Load flight suppliers
                 if (state.flight.suppliers) {
                     state.flight.suppliers.forEach(supData => {
-                        addFlightTable(supData);
+                        const isReturn = supData.isReturn || false;
+                        addFlightTable(supData, isReturn);
                     });
                 }
 
                 if (state.flight.dates) {
                     const dates = state.flight.dates.split(' to ');
                     flightDatesFp.setDate(dates.length === 2 ? [dates[0], dates[1]] : dates[0]);
+                }
+
+                if (state.flight.tripType) {
+                    document.getElementById('trip-type').value = state.flight.tripType;
+                    currentTripType = state.flight.tripType;
                 }
             }
 
