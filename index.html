@@ -874,11 +874,12 @@
 
         /* Adjustments for upgrade cell to ensure visibility and scrolling */
         .upgrade-cell {
-            min-width: 220px !important;
-            width: 220px !important;
-            max-width: 220px !important;
+            min-width: 80px !important;
+            width: 80px !important;
+            max-width: 80px !important;
             white-space: normal !important;
             vertical-align: top !important;
+            transition: width 0.3s ease, min-width 0.3s ease;
         }
 
         .upgrade-cell .form-control {
@@ -890,6 +891,31 @@
             display: block !important;
             margin-bottom: 4px !important;
             font-size: 0.75rem !important;
+            white-space: normal !important;
+        }
+
+        /* Expanded upgrade cell when checkbox is checked */
+        .upgrade-cell:has(input[type="checkbox"]:checked) {
+            min-width: 220px !important;
+            width: 220px !important;
+            max-width: 220px !important;
+        }
+
+        /* Ensure flight table upgrade cell expands similarly and fits words */
+        .flight-legs-comparison .upgrade-cell {
+            min-width: 80px !important;
+            width: 80px !important;
+            max-width: 80px !important;
+        }
+
+        .flight-legs-comparison .upgrade-cell:has(input[type="checkbox"]:checked) {
+            min-width: 220px !important;
+            width: 220px !important;
+            max-width: 220px !important;
+        }
+
+        .flight-legs-comparison .upgrade-cell .upgrade-desc {
+            min-width: 150px !important;
             white-space: normal !important;
         }
         
@@ -1120,6 +1146,12 @@
             }
 
             .upgrade-cell {
+                min-width: 60px !important;
+                width: 60px !important;
+                max-width: 60px !important;
+            }
+
+            .upgrade-cell:has(input[type="checkbox"]:checked) {
                 min-width: 180px !important;
                 width: 180px !important;
                 max-width: 180px !important;
@@ -1165,6 +1197,11 @@
             }
 
             .upgrade-cell {
+                min-width: 50px !important;
+                width: 50px !important;
+            }
+
+            .upgrade-cell:has(input[type="checkbox"]:checked) {
                 min-width: 160px !important;
                 width: 160px !important;
             }
@@ -1238,6 +1275,12 @@
             }
 
             .flight-legs-comparison .upgrade-cell {
+                min-width: 60px !important;
+                width: 60px !important;
+                max-width: 60px !important;
+            }
+
+            .flight-legs-comparison .upgrade-cell:has(input[type="checkbox"]:checked) {
                 min-width: 180px !important;
                 width: 180px !important;
                 max-width: 180px !important;
@@ -1255,6 +1298,11 @@
             }
 
             .flight-legs-comparison .upgrade-cell {
+                min-width: 50px !important;
+                width: 50px !important;
+            }
+
+            .flight-legs-comparison .upgrade-cell:has(input[type="checkbox"]:checked) {
                 min-width: 160px !important;
                 width: 160px !important;
             }
