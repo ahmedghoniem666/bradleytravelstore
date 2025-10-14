@@ -1341,6 +1341,10 @@
             color: var(--primary);
             margin-bottom: 8px;
         }
+
+        #commission-interpretation {
+            display: none;
+        }
     </style>
 </head>
 <body>
@@ -2094,9 +2098,6 @@ function toggleSection(sectionId) {
                 document.getElementById('commission-display-text').textContent = 
                     `${(commissionRate * 100).toFixed(2)}% (divisor ${divisor})`;
                 
-                document.getElementById('commission-interpretation').textContent = 
-                    `Interpreted rate: ${(commissionRate * 100).toFixed(2)}% (${commissionRate.toFixed(3)})`;
-                
                 // Update all suppliers
                 document.querySelectorAll('.supplier-table-row, .flight-leg-row').forEach(item => {
                     const id = item.id;
@@ -2252,6 +2253,9 @@ function toggleSection(sectionId) {
             <h4>Supplier Comparisons</h4>
             <div id="${sectionId}-rooms-container">
                 <!-- Dynamic room comparisons -->
+            </div>
+            <div class="comparison-controls">
+                <button class="btn" onclick="copyHotelComparison('${sectionId}')"><i class="fas fa-copy"></i> Copy Comparison</button>
             </div>
             <div class="section-totals">
                 <h3>Local taxes payable locally</h3>
@@ -2586,6 +2590,7 @@ function toggleSection(sectionId) {
                     </div>
                     <div class="comparison-controls">
                         <button class="btn" onclick="addFlightLeg('${sectionId}')"><i class="fas fa-plus"></i> Add Leg</button>
+                        <button class="btn btn-secondary" onclick="copyFlightDetails('${sectionId}')"><i class="fas fa-copy"></i> Copy Flight Details</button>
                     </div>
                     <div class="section-totals">
                         <h3>Flight Totals</h3>
@@ -3319,28 +3324,19 @@ function toggleSection(sectionId) {
             }
         }
 
-        function formatDate(dateString, isRangeStart = false, isRangeEnd = false) {
+        function formatDate(dateString) {
             if (!dateString || dateString === 'Pay Now') return dateString;
             const date = new Date(dateString);
             const months = ['JAN', 'FEB', 'MAR', 'APR', 'MAY', 'JUN', 'JUL', 'AUG', 'SEP', 'OCT', 'NOV', 'DEC'];
             const day = date.getDate().toString().padStart(2, '0');
             const month = months[date.getMonth()];
             const year = date.getFullYear().toString().slice(-2);
-            if (isRangeStart && isRangeEnd) {
-                return `${day}-${month}${year}`;
-            }
             return `${day}${month}${year}`;
         }
 
         function formatDateRange(startDate, endDate) {
             if (!startDate || !endDate) return '';
-            const start = new Date(startDate);
-            const end = new Date(endDate);
-            if (start.getMonth() === end.getMonth() && start.getFullYear() === end.getFullYear()) {
-                return formatDate(startDate, true, true).replace('-', '-');
-            } else {
-                return `${formatDate(endDate)} - ${formatDate(startDate)}`;
-            }
+            return `${formatDate(startDate)} - ${formatDate(endDate)}`;
         }
 
         function getChildAgesList() {
@@ -4445,6 +4441,141 @@ function copyToClipboard() {
                     saveState();
                 }
             }
+        }
+
+        function copyHotelComparison(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (!section) return;
+
+            const number = sectionId.split('-')[2];
+            const hotelName = document.getElementById(`${sectionId}-hotel-name`).value.trim() || '[Hotel Name]';
+            const destination = document.getElementById(`${sectionId}-destination`).value.trim() || '[Destination]';
+            const checkinInput = section.querySelector('.hotel-checkin');
+            const checkin = checkinInput ? checkinInput.value : '';
+            const nightsInput = section.querySelector('.hotel-nights');
+            const nights = nightsInput ? nightsInput.value : '0';
+
+            let startDate = '', endDate = '';
+            if (checkin) {
+                const dates = checkin.split(' to ');
+                startDate = dates[0] ? formatDate(dates[0]) : '';
+                endDate = dates[1] ? formatDate(dates[1]) : '';
+            }
+
+            let comparisonText = `HOTEL COMPARISON - Quote ${number}\n\n`;
+            comparisonText += `Hotel: ${hotelName}, ${destination}\n`;
+            comparisonText += `Dates: ${formatDateRange(startDate, endDate)} - ${nights} Night${nights > 1 ? 's' : ''}\n\n`;
+
+            const numRooms = roomsData.length;
+            for (let room = 0; room < numRooms; room++) {
+                const compId = `${sectionId}-room-${room}-comparison`;
+                const comparison = document.getElementById(compId);
+                if (!comparison) continue;
+
+                comparisonText += `Room ${room + 1}:\n`;
+                const rows = comparison.querySelectorAll('.supplier-table-row');
+                rows.forEach(row => {
+                    const supplierName = row.querySelector('.supplier-name').value.trim() || '[Supplier]';
+                    const roomType = row.querySelector('.room-type').value || '[Room Type]';
+                    const boardBasis = row.querySelector('.board-basis').value || '[Board]';
+                    const rooms = parseInt(row.querySelector('.rooms').value) || 1;
+                    const sellingPrice = parseFloat(row.querySelector('.selling-price').value) || 0;
+                    const cancelPolicy = row.querySelector('.cancellation-policy').value;
+                    const cancelText = getCancellationText(cancelPolicy, parseFloat(row.querySelector('.cancellation-fee')?.value || '0'), row.querySelector('.cancellation-deadline')?.value || '');
+
+                    const cleanSupplierName = supplierName.replace(/ Room \d+ \([^)]*\)$/, '').trim();
+                    comparisonText += `- ${cleanSupplierName}: ${rooms} x ${roomType} on ${boardBasis}, £${Math.round(sellingPrice * rooms)}, ${cancelText}\n`;
+
+                    // Check if best
+                    const bestCb = row.querySelector('input[id$="-best"]');
+                    if (bestCb && bestCb.checked) {
+                        comparisonText += `  (Best Price)\n`;
+                    }
+                });
+                comparisonText += '\n';
+            }
+
+            const netTotal = parseFloat(document.getElementById(`${sectionId}-total-net`).textContent.replace('£', '')) || 0;
+            const sellingRounded = parseFloat(document.getElementById(`${sectionId}-total-selling-rounded`).textContent.replace('£', '')) || 0;
+            comparisonText += `Total Net: £${netTotal.toFixed(2)}\n`;
+            comparisonText += `Total Selling (Rounded): £${sellingRounded.toFixed(2)}\n`;
+
+            navigator.clipboard.writeText(comparisonText).then(() => {
+                alert('Hotel comparison copied to clipboard!');
+            }).catch(() => {
+                const textArea = document.createElement('textarea');
+                textArea.value = comparisonText;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('Hotel comparison copied to clipboard!');
+            });
+        }
+
+        function copyFlightDetails(sectionId) {
+            const section = document.getElementById(sectionId);
+            if (!section) return;
+
+            const number = sectionId.split('-')[2];
+            let detailsText = `FLIGHT DETAILS - Quote ${number}\n\n`;
+
+            const legs = [];
+            section.querySelectorAll('.flight-leg-row').forEach(item => {
+                const legType = item.querySelector('.leg-type').value || '[Type]';
+                const airline = item.querySelector('.airline').value || '[Airline]';
+                const depAirport = item.querySelector('.departure-airport').value.toUpperCase() || '[DEP]';
+                const arrAirport = item.querySelector('.arrival-airport').value.toUpperCase() || '[ARR]';
+                const depTime = item.querySelector('.dep-time').value.replace(':', '') || '';
+                const arrTime = item.querySelector('.arr-time').value.replace(':', '') || '';
+                const sellingPrice = parseFloat(item.querySelector('.selling-price').value) || 0;
+                const cancelPolicy = item.querySelector('.cancellation-policy').value;
+                const cancelText = getCancellationText(cancelPolicy, parseFloat(item.querySelector('.cancellation-fee')?.value || '0'), item.querySelector('.cancellation-deadline')?.value || '');
+                const baggageCheckbox = item.querySelector('.baggage-include');
+                const includeBaggage = baggageCheckbox ? baggageCheckbox.checked : false;
+                let baggageText = '';
+                if (includeBaggage) {
+                    const baggageNumber = parseInt(item.querySelector('.baggage-number').value) || 1;
+                    const baggageAllowance = item.querySelector('.baggage-allowance').value || '';
+                    const baggagePrice = parseFloat(item.querySelector('.baggage-price').value) || 0;
+                    baggageText = `${baggageNumber} x ${baggageAllowance}${baggagePrice > 0 ? ` (£${Math.round(baggagePrice)})` : ' (included)'}`;
+                }
+
+                detailsText += `${legType} ${depAirport} - ${arrAirport} ${depTime ? `DEP ${depTime}` : ''} ${arrTime ? `ARR ${arrTime}` : ''}, ${airline}, £${sellingPrice.toFixed(2)}, ${cancelText}`;
+                if (baggageText) {
+                    detailsText += `, Baggage: ${baggageText}`;
+                }
+                detailsText += '\n';
+
+                // Check if upgrade
+                const upgradeCb = item.querySelector('input[id$="-upgrade"]');
+                if (upgradeCb && upgradeCb.checked) {
+                    const upgradeDesc = item.querySelector('.upgrade-desc').value || '';
+                    const upgradeAmount = parseFloat(item.querySelector('.upgrade-amount').value) || 0;
+                    detailsText += `  (Upgrade: ${upgradeDesc || 'Custom'} +£${upgradeAmount.toFixed(2)})\n`;
+                } else {
+                    detailsText += '\n';
+                }
+
+                legs.push({ sellingPrice });
+            });
+
+            const totalSelling = legs.reduce((sum, leg) => sum + leg.sellingPrice, 0);
+            const sellingRounded = parseFloat(document.getElementById(`${sectionId}-total-selling-rounded`).textContent.replace('£', '')) || 0;
+            detailsText += `\nTotal Selling (Exact): £${totalSelling.toFixed(2)}\n`;
+            detailsText += `Total Selling (Rounded): £${sellingRounded.toFixed(2)}\n`;
+
+            navigator.clipboard.writeText(detailsText).then(() => {
+                alert('Flight details copied to clipboard!');
+            }).catch(() => {
+                const textArea = document.createElement('textarea');
+                textArea.value = detailsText;
+                document.body.appendChild(textArea);
+                textArea.select();
+                document.execCommand('copy');
+                document.body.removeChild(textArea);
+                alert('Flight details copied to clipboard!');
+            });
         }
     </script>
 </body>
