@@ -1538,23 +1538,23 @@
                         <label for="agent-name">Agent Name</label>
                         <select id="agent-name" class="form-control" onchange="updateAgentSignature(); saveState();">
                             <option value="Adam">Adam</option>
-                            <option value="Tara">Tara</option>
-                            <option value="Monique">Monique</option>
-                            <option value="Dalia">Dalia</option>
-                            <option value="Jayne">Jayne</option>
-                            <option value="Laura">Laura</option>
-                            <option value="Francine">Francine</option>
-                            <option value="Ilana">Ilana</option>
-                            <option value="Deborah">Deborah</option>
-                            <option value="Cayra">Cayra</option>
                             <option value="Alicia">Alicia</option>
                             <option value="Andy">Andy</option>
-                            <option value="Rebecca">Rebecca</option>
-                            <option value="Emma">Emma</option>
-                            <option value="Bronwen">Bronwen</option>
                             <option value="Angel">Angel</option>
+                            <option value="Bronwen">Bronwen</option>
+                            <option value="Cayra">Cayra</option>
+                            <option value="Dalia">Dalia</option>
+                            <option value="Deborah">Deborah</option>
+                            <option value="Emma">Emma</option>
+                            <option value="Francine">Francine</option>
                             <option value="Gianny">Gianny</option>
+                            <option value="Ilana">Ilana</option>
+                            <option value="Jayne">Jayne</option>
                             <option value="Joseph">Joseph</option>
+                            <option value="Laura">Laura</option>
+                            <option value="Monique">Monique</option>
+                            <option value="Rebecca">Rebecca</option>
+                            <option value="Tara">Tara</option>
                             <option value="Tracey">Tracey</option>
                             <option value="Trudy">Trudy</option>
                             <option value="custom">Custom Signature</option>
@@ -1613,12 +1613,19 @@
     </footer>
 
     <datalist id="roomTypes">
-        <option value="Standard Double/Twin">
-        <option value="Superior Double/Twin">
-        <option value="Deluxe Double/Twin">
+        <option value="Standard room">
+        <option value="Standard Double room">
+        <option value="Standard Twin room">
+        <option value="Standard Pool View room">
+        <option value="Standard Sea View room">
+        <option value="Partial Sea View room">
+        <option value="Pool View room">
+        <option value="Sea View room">
+        <option value="Superior room">
+        <option value="Deluxe room">
+        <option value="Garden room">
         <option value="Junior Suite">
-        <option value="Family Room">
-        <option value="Other">
+        <option value="Suite">
     </datalist>
 
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
@@ -1639,23 +1646,23 @@
 
         const agentDetails = {
             'Adam': { phone: '020 3355 5060', email: 'reservations@bradleytravelstore.com', website: 'bradleytravelstore.com' },
-            'Tara': { phone: '07956 263778', email: 'tara@bradleytravelstore.com', website: 'bradleytravelstore.com/tara-yadid' },
-            'Monique': { phone: '07887 953005', email: 'monique@bradleytravelstore.com', website: 'bradleytravelstore.com/monique-plein' },
-            'Dalia': { phone: '07922 794683', email: 'dalia@bradleytravelstore.com', website: 'bradleytravelstore.com/dalia-cohen' },
-            'Jayne': { phone: '07712 836610', email: 'jayne@bradleytravelstore.com', website: 'bradleytravelstore.com/jaynelandsman' },
-            'Laura': { phone: '07962 394030', email: 'laura@bradleytravelstore.com', website: 'bradleytravelstore.com/laura-myers' },
-            'Francine': { phone: '07944 187054', email: 'francine@bradleytravelstore.com', website: 'bradleytravelstore.com/francine-ryan' },
-            'Ilana': { phone: '+972 54 873 4585', email: 'ilana@bradleytravelstore.com', website: 'bradleytravelstore.com/ilanashalev' },
-            'Deborah': { phone: '07956 454680', email: 'deborah@bradleytravelstore.com', website: 'bradleytravelstore.com/deborah-roberts' },
-            'Cayra': { phone: '07761 757630', email: 'cayra@bradleytravelstore.com', website: 'bradleytravelstore.com/cayra-gaskin-morris' },
             'Alicia': { phone: '07864 998282', email: 'alicia@bradleytravelstore.com', website: 'bradleytravelstore.com/alicia-wyles' },
             'Andy': { phone: '07825 349055', email: 'andy@bradleytravelstore.com', website: 'bradleytravelstore.com/andy-cromar' },
-            'Rebecca': { phone: '07909 913997', email: 'rebecca@bradleytravelstore.com', website: 'bradleytravelstore.com/rebecca-johnstone' },
-            'Emma': { phone: '07881 487081', email: 'Emma@bradleytravelstore.com', website: 'bradleytravelstore.com/Emma-Morris' },
-            'Bronwen': { phone: '07712 607356', email: 'Bronwen@bradleytravelstore.com', website: 'bradleytravelstore.com/Bronwen-Smith' },
             'Angel': { phone: '020 3355 5060', email: 'reservations@bradleytravelstore.com', website: 'bradleytravelstore.com' },
+            'Bronwen': { phone: '07712 607356', email: 'Bronwen@bradleytravelstore.com', website: 'bradleytravelstore.com/Bronwen-Smith' },
+            'Cayra': { phone: '07761 757630', email: 'cayra@bradleytravelstore.com', website: 'bradleytravelstore.com/cayra-gaskin-morris' },
+            'Dalia': { phone: '07922 794683', email: 'dalia@bradleytravelstore.com', website: 'bradleytravelstore.com/dalia-cohen' },
+            'Deborah': { phone: '07956 454680', email: 'deborah@bradleytravelstore.com', website: 'bradleytravelstore.com/deborah-roberts' },
+            'Emma': { phone: '07881 487081', email: 'Emma@bradleytravelstore.com', website: 'bradleytravelstore.com/Emma-Morris' },
+            'Francine': { phone: '07944 187054', email: 'francine@bradleytravelstore.com', website: 'bradleytravelstore.com/francine-ryan' },
             'Gianny': { phone: '020 3355 5060', email: 'reservations@bradleytravelstore.com', website: 'bradleytravelstore.com' },
+            'Ilana': { phone: '+972 54 873 4585', email: 'ilana@bradleytravelstore.com', website: 'bradleytravelstore.com/ilanashalev' },
+            'Jayne': { phone: '07712 836610', email: 'jayne@bradleytravelstore.com', website: 'bradleytravelstore.com/jaynelandsman' },
             'Joseph': { phone: '020 3355 5060', email: 'reservations@bradleytravelstore.com', website: 'bradleytravelstore.com' },
+            'Laura': { phone: '07962 394030', email: 'laura@bradleytravelstore.com', website: 'bradleytravelstore.com/laura-myers' },
+            'Monique': { phone: '07887 953005', email: 'monique@bradleytravelstore.com', website: 'bradleytravelstore.com/monique-plein' },
+            'Rebecca': { phone: '07909 913997', email: 'rebecca@bradleytravelstore.com', website: 'bradleytravelstore.com/rebecca-johnstone' },
+            'Tara': { phone: '07956 263778', email: 'tara@bradleytravelstore.com', website: 'bradleytravelstore.com/tara-yadid' },
             'Tracey': { phone: '07743 025088', email: 'Tracey@bradleytravelstore.com', website: 'bradleytravelstore.com/Tracey-Borthwick' },
             'Trudy': { phone: '07864 255166', email: 'Trudy@bradleytravelstore.com', website: 'bradleytravelstore.com/Trudy-Stewart' }
         };
@@ -2298,10 +2305,15 @@ function toggleSection(sectionId) {
 
 function updateHotelTitle(sectionId) {
     const hotelName = document.getElementById(`${sectionId}-hotel-name`).value.trim();
+    const destination = document.getElementById(`${sectionId}-destination`).value.trim();
     const titleEl = document.querySelector(`#${sectionId} .section-title`);
     if (titleEl) {
-        if (hotelName) {
-            titleEl.textContent = hotelName;
+        if (hotelName && destination) {
+            titleEl.textContent = `${hotelName}, ${destination}`;
+        } else if (hotelName) {
+            titleEl.textContent = `${hotelName}`;
+        } else if (destination) {
+            titleEl.textContent = `Hotel Quote ${sectionId.split('-')[2]} - ${destination}`;
         } else {
             const number = sectionId.split('-')[2];
             titleEl.textContent = `Hotel Quote ${number}`;
