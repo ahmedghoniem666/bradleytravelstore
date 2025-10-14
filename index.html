@@ -1823,6 +1823,7 @@ function sortAllRoomsInSection(sectionId) {
 }
 
 function sortAndHighlightComparison(compId) {
+    autoSelectBestForComparison(compId);
     const comparison = document.getElementById(compId);
     if (!comparison) return;
     const table = comparison.querySelector('table');
