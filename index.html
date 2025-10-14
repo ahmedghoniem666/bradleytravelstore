@@ -1412,6 +1412,11 @@
                         <input type="text" id="flight-dates" class="form-control" placeholder="Select dates">
                     </div>
                 </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="include-hand-baggage" checked onchange="updateEmailTemplate(); saveState();"> Include Hand Baggage
+                    </label>
+                </div>
 
                 <h3>Flight Quotes</h3>
                 <div id="flight-quotes-container">
@@ -2552,10 +2557,6 @@ function toggleSection(sectionId) {
                         </label>
                         <button class="btn btn-danger btn-sm" onclick="removeFlightQuoteSection('${sectionId}', ${number})"><i class="fas fa-trash"></i> Remove</button>
                     </div>
-                    <div class="form-group">
-                        <label for="${sectionId}-supplier-name">Supplier Name</label>
-                        <input type="text" id="${sectionId}-supplier-name" class="form-control" placeholder="Supplier name" value="${data.supplierName || ''}" onchange="updateEmailTemplate(); saveState();">
-                    </div>
                     <h4>Flight Legs</h4>
                     <div id="${sectionId}-legs-container" class="flight-legs-comparison">
                         <!-- Dynamic legs table added here -->
@@ -3415,8 +3416,6 @@ function updateEmailTemplate() {
             if (!checkbox || !checkbox.checked) return;
             
             const section = document.getElementById(sectionId);
-            const supplierNameInput = document.getElementById(`${sectionId}-supplier-name`);
-            const supplierName = supplierNameInput ? supplierNameInput.value.trim() : '';
             
             let legs = [];
             let upgradeRows = [];
@@ -3501,7 +3500,6 @@ function updateEmailTemplate() {
             const totalSelling = legs.reduce((sum, leg) => sum + leg.sellingPrice, 0);
             
             checkedFlightQuotes.push({
-                supplierName,
                 legs,
                 totalSelling
             });
@@ -3669,9 +3667,6 @@ function updateEmailTemplate() {
             checkedFlightQuotes.forEach((quote, index) => {
                 templateParts.push(`${boldWrap('FLIGHT OPTION ' + (index + 1))}`);
                 templateParts.push('');
-                if (quote.supplierName) {
-                    templateParts.push(`${boldWrap(quote.supplierName.toUpperCase())}`);
-                }
                 templateParts.push('');
                 quote.legs.forEach(leg => {
                     templateParts.push(`${boldWrap(leg.legType)} ${leg.depAirport} - ${leg.arrAirport} ${leg.depTime ? `DEP ${leg.depTime}` : ''} ${leg.arrTime ? `ARR ${leg.arrTime}` : ''}`);
@@ -3689,9 +3684,6 @@ function updateEmailTemplate() {
             });
         } else if (checkedFlightQuotes.length === 1) {
             const quote = checkedFlightQuotes[0];
-            if (quote.supplierName) {
-                templateParts.push(`${boldWrap(quote.supplierName.toUpperCase())}`);
-            }
             templateParts.push('');
             quote.legs.forEach(leg => {
                 templateParts.push(`${boldWrap(leg.legType)} ${leg.depAirport} - ${leg.arrAirport} ${leg.depTime ? `DEP ${leg.depTime}` : ''} ${leg.arrTime ? `ARR ${leg.arrTime}` : ''}`);
@@ -3797,7 +3789,9 @@ function updateEmailTemplate() {
         templateParts.push('');
         templateParts.push(`${boldWrap('Free 5GB eSim Promo included')}`);
         templateParts.push(`${boldWrap('Flights and airport taxes')}`);
-        templateParts.push(`${boldWrap('2 x Small Hand Baggage allowance')}`);
+        if (document.getElementById('include-hand-baggage').checked) {
+            templateParts.push(`${boldWrap(`${adults} x Small Hand Baggage allowance`)}`);
+        }
         if (checkedHotelQuotes.length > 0) {
             const quote = checkedHotelQuotes[0];
             templateParts.push(`${quote.nights} Nights accommodation`);
@@ -4001,16 +3995,16 @@ function copyToClipboard() {
                 },
                 flight: {
                     dates: document.getElementById('flight-dates').value,
+                    includeHandBaggage: document.getElementById('include-hand-baggage').checked,
                     quoteSections: flightQuoteSections.map(sectionId => {
                         const number = parseInt(sectionId.split('-')[2]);
                         const checkbox = document.querySelector(`#${sectionId} .quote-include`);
                         const include = checkbox ? checkbox.checked : true;
-                        const supplierName = document.getElementById(`${sectionId}-supplier-name`).value;
                         const legs = [];
                         document.querySelectorAll(`#${sectionId} .flight-leg-row`).forEach(item => {
                             legs.push(collectFlightLegData(item));
                         });
-                        return { number, include, supplierName, legs };
+                        return { number, include, legs };
                     }),
                     optionalExtras: Array.from(document.querySelectorAll('#optional-extras-list .optional-extra-item')).map(item => ({
                         name: item.querySelector('input[type="text"]').value,
@@ -4091,6 +4085,9 @@ function copyToClipboard() {
                 document.getElementById('agent-email').value = state.email.agentEmail || '';
                 document.getElementById('agent-phone').value = state.email.agentPhone || '';
                 document.getElementById('price-per-room').checked = state.email.pricePerRoom || false;
+                if (state.flight && state.flight.includeHandBaggage !== undefined) {
+                    document.getElementById('include-hand-baggage').checked = state.flight.includeHandBaggage;
+                }
                 updateAgentSignature();
 
                 currentDeliveryOption = state.email.delivery || 'email';
