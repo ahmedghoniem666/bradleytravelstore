@@ -798,6 +798,22 @@
             color: var(--primary);
         }
         
+        .totals-row.grand-total {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 12px;
+            border-radius: var(--border-radius);
+            margin: 8px 0;
+            border: 2px solid white;
+            font-size: 1.15rem;
+        }
+        
+        .totals-row.grand-total .totals-label,
+        .totals-row.grand-total .totals-value {
+            color: white;
+            font-weight: 700;
+        }
+        
         .airport-display {
             font-size: 0.8rem;
             color: var(--muted-text);
@@ -1312,6 +1328,19 @@
                 width: 160px !important;
             }
         }
+
+        .totals-subsection {
+            margin-bottom: 16px;
+            padding: 12px;
+            background: var(--light);
+            border-radius: var(--border-radius);
+            border: 1px solid var(--border);
+        }
+
+        .totals-subsection h4 {
+            color: var(--primary);
+            margin-bottom: 8px;
+        }
     </style>
 </head>
 <body>
@@ -1417,6 +1446,11 @@
                         <input type="checkbox" id="include-hand-baggage" checked onchange="updateEmailTemplate(); saveState();"> Include Hand Baggage
                     </label>
                 </div>
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="price-per-route" onchange="updateTotals(); updateEmailTemplate(); saveState();"> Price per Route (Departure and Return)
+                    </label>
+                </div>
 
                 <h3>Flight Quotes</h3>
                 <div id="flight-quotes-container">
@@ -1460,19 +1494,8 @@
                     </div>
                 </div>
                 
-                <div class="totals-panel">
-                    <div class="totals-row">
-                        <span class="totals-label">Total Net:</span>
-                        <span id="total-net" class="totals-value">£0.00</span>
-                    </div>
-                    <div class="totals-row">
-                        <span class="totals-label">Total Selling (exact):</span>
-                        <span id="total-selling-exact" class="totals-value">£0.00</span>
-                    </div>
-                    <div class="totals-row">
-                        <span class="totals-label">Total Selling (rounded):</span>
-                        <span id="total-selling-rounded" class="totals-value">£0.00</span>
-                    </div>
+                <div class="totals-panel" id="totals-breakdown">
+                    <!-- Dynamic totals breakdown will be inserted here -->
                 </div>
             </div>
         </section>
@@ -3148,9 +3171,126 @@ function toggleSection(sectionId) {
             const totalSellingExact = hotelSellingExact + flightSellingExact;
             const totalSellingRounded = hotelSellingRounded + flightSellingRounded + optionalExtrasTotal;
             
-            document.getElementById('total-net').textContent = `£${totalNet.toFixed(2)}`;
-            document.getElementById('total-selling-exact').textContent = `£${totalSellingExact.toFixed(2)}`;
-            document.getElementById('total-selling-rounded').textContent = `£${totalSellingRounded.toFixed(2)}`;
+            // Build breakdown HTML
+            const totalsPanel = document.getElementById('totals-breakdown');
+            let html = '';
+            const bookingType = document.getElementById('booking-type').value;
+            const pricePerRoute = document.getElementById('price-per-route').checked;
+            
+            if (bookingType === 'hotel' || bookingType === 'package') {
+                // Hotel breakdowns
+                hotelQuoteSections.forEach(sectionId => {
+                    const checkbox = document.querySelector(`#${sectionId} .quote-include`);
+                    if (!checkbox || !checkbox.checked) return;
+                    
+                    html += `<div class="totals-subsection"><h4>Hotel Quote ${sectionId.split('-')[2]}</h4>`;
+                    
+                    const numRooms = roomsData.length;
+                    for (let room = 0; room < numRooms; room++) {
+                        const compId = `${sectionId}-room-${room}-comparison`;
+                        const includedRow = document.querySelector(`#${compId} .supplier-table-row input[id$="-include-email"]:checked`)?.closest('.supplier-table-row');
+                        if (includedRow) {
+                            const selling = parseFloat(includedRow.querySelector('.selling-price').value) || 0;
+                            const roomsInSup = parseInt(includedRow.querySelector('.rooms').value) || 1;
+                            const supName = includedRow.querySelector('.supplier-name').value;
+                            html += `<div class="totals-row"><span class="totals-label">Room ${room + 1} (${supName}):</span><span class="totals-value">£${(selling * roomsInSup).toFixed(2)}</span></div>`;
+                        }
+                    }
+                    
+                    const hotelNet = parseFloat(document.getElementById(`${sectionId}-total-net`).textContent.replace('£', '')) || 0;
+                    const hotelSellExact = parseFloat(document.getElementById(`${sectionId}-total-selling-exact`).textContent.replace('£', '')) || 0;
+                    const hotelSellRounded = parseFloat(document.getElementById(`${sectionId}-total-selling-rounded`).textContent.replace('£', '')) || 0;
+                    
+                    html += `<div class="totals-row"><span class="totals-label">Hotel Net Total:</span><span class="totals-value">£${hotelNet.toFixed(2)}</span></div>`;
+                    html += `<div class="totals-row"><span class="totals-label">Hotel Selling Exact:</span><span class="totals-value">£${hotelSellExact.toFixed(2)}</span></div>`;
+                    html += `<div class="totals-row"><span class="totals-label">Hotel Selling Rounded:</span><span class="totals-value">£${hotelSellRounded.toFixed(2)}</span></div></div>`;
+                });
+            }
+            
+            if (bookingType === 'package') {
+                // Flight breakdowns
+                flightQuoteSections.forEach(sectionId => {
+                    const checkbox = document.querySelector(`#${sectionId} .quote-include`);
+                    if (!checkbox || !checkbox.checked) return;
+                    
+                    html += `<div class="totals-subsection"><h4>Flight Quote ${sectionId.split('-')[2]}</h4>`;
+                    
+                    if (pricePerRoute) {
+                        let departureTotal = 0;
+                        let returnTotal = 0;
+                        let multiTotal = 0;
+                        
+                        document.querySelectorAll(`#${sectionId} .flight-leg-row`).forEach(row => {
+                            const legType = row.querySelector('.leg-type').value;
+                            const selling = parseFloat(row.querySelector('.selling-price').value) || 0;
+                            const upgradeAmt = parseFloat(row.querySelector('.upgrade-amount').value) || 0;
+                            const totalLeg = selling + upgradeAmt;
+                            const airline = row.querySelector('.airline').value;
+                            const dep = row.querySelector('.departure-airport').value;
+                            const arr = row.querySelector('.arrival-airport').value;
+                            const route = dep + '-' + arr;
+                            
+                            html += `<div class="totals-row"><span class="totals-label">${legType} ${route} (${airline}):</span><span class="totals-value">£${totalLeg.toFixed(2)}</span></div>`;
+                            
+                            if (legType === 'Departure Flight') {
+                                departureTotal += totalLeg;
+                            } else if (legType === 'Return Flight') {
+                                returnTotal += totalLeg;
+                            } else {
+                                multiTotal += totalLeg;
+                            }
+                        });
+                        
+                        if (departureTotal > 0) {
+                            html += `<div class="totals-row"><span class="totals-label">Departure Total:</span><span class="totals-value">£${departureTotal.toFixed(2)}</span></div>`;
+                        }
+                        if (returnTotal > 0) {
+                            html += `<div class="totals-row"><span class="totals-label">Return Total:</span><span class="totals-value">£${returnTotal.toFixed(2)}</span></div>`;
+                        }
+                        if (multiTotal > 0) {
+                            html += `<div class="totals-row"><span class="totals-label">Multi-City Total:</span><span class="totals-value">£${multiTotal.toFixed(2)}</span></div>`;
+                        }
+                    } else {
+                        const flightNet = parseFloat(document.getElementById(`${sectionId}-total-net`).textContent.replace('£', '')) || 0;
+                        const flightSellExact = parseFloat(document.getElementById(`${sectionId}-total-selling-exact`).textContent.replace('£', '')) || 0;
+                        const flightSellRounded = parseFloat(document.getElementById(`${sectionId}-total-selling-rounded`).textContent.replace('£', '')) || 0;
+                        
+                        html += `<div class="totals-row"><span class="totals-label">Flight Net Total:</span><span class="totals-value">£${flightNet.toFixed(2)}</span></div>`;
+                        html += `<div class="totals-row"><span class="totals-label">Flight Selling Exact:</span><span class="totals-value">£${flightSellExact.toFixed(2)}</span></div>`;
+                        html += `<div class="totals-row"><span class="totals-label">Flight Selling Rounded:</span><span class="totals-value">£${flightSellRounded.toFixed(2)}</span></div>`;
+                    }
+                    
+                    html += `</div>`;
+                });
+            }
+            
+            // Optional extras
+            document.querySelectorAll('#optional-extras-list .optional-extra-item input[type="checkbox"]:checked').forEach(cb => {
+                const item = cb.closest('.optional-extra-item');
+                const cost = parseFloat(item.querySelector('input[type="number"]').value) || 0;
+                const extraTotal = Math.round(cost * numRooms);
+                const name = item.querySelector('input[type="text"]').value;
+                html += `<div class="totals-row"><span class="totals-label">${name}:</span><span class="totals-value">£${extraTotal.toFixed(2)}</span></div>`;
+            });
+            
+            // Grand totals
+            const grandPrefix = bookingType === 'package' ? 'Package ' : 'Grand ';
+            html += `
+                <div class="totals-row grand-total">
+                    <span class="totals-label">${grandPrefix}Total Net:</span>
+                    <span class="totals-value">£${totalNet.toFixed(2)}</span>
+                </div>
+                <div class="totals-row grand-total">
+                    <span class="totals-label">${grandPrefix}Total Selling (exact):</span>
+                    <span class="totals-value">£${totalSellingExact.toFixed(2)}</span>
+                </div>
+                <div class="totals-row grand-total">
+                    <span class="totals-label">${grandPrefix}Total Selling (rounded):</span>
+                    <span class="totals-value">£${totalSellingRounded.toFixed(2)}</span>
+                </div>
+            `;
+            
+            totalsPanel.innerHTML = html;
         }
 
         function displayAirport(input) {
@@ -3996,6 +4136,7 @@ function copyToClipboard() {
                 flight: {
                     dates: document.getElementById('flight-dates').value,
                     includeHandBaggage: document.getElementById('include-hand-baggage').checked,
+                    pricePerRoute: document.getElementById('price-per-route').checked,
                     quoteSections: flightQuoteSections.map(sectionId => {
                         const number = parseInt(sectionId.split('-')[2]);
                         const checkbox = document.querySelector(`#${sectionId} .quote-include`);
@@ -4087,6 +4228,9 @@ function copyToClipboard() {
                 document.getElementById('price-per-room').checked = state.email.pricePerRoom || false;
                 if (state.flight && state.flight.includeHandBaggage !== undefined) {
                     document.getElementById('include-hand-baggage').checked = state.flight.includeHandBaggage;
+                }
+                if (state.flight && state.flight.pricePerRoute !== undefined) {
+                    document.getElementById('price-per-route').checked = state.flight.pricePerRoute;
                 }
                 updateAgentSignature();
 
