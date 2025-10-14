@@ -1826,38 +1826,10 @@ function sortAndHighlightComparison(compId) {
     autoSelectBestForComparison(compId);
     const comparison = document.getElementById(compId);
     if (!comparison) return;
-    const table = comparison.querySelector('table');
-    if (!table) return;
-    const tbody = table.querySelector('tbody');
-    if (!tbody) return;
-    const rows = Array.from(tbody.querySelectorAll('.supplier-table-row'));
+    const rows = comparison.querySelectorAll('.supplier-table-row');
     
-    // Find the best row
-    const bestRow = rows.find(row => {
-        const checkbox = row.querySelector('input[id$="-best"]');
-        return checkbox && checkbox.checked;
-    });
-    
-    // Remove best row if found
-    if (bestRow) {
-        rows.splice(rows.indexOf(bestRow), 1);
-    }
-    
-    // Reorder: best first, then original order of others
-    const reorderedRows = [];
-    if (bestRow) {
-        reorderedRows.push(bestRow);
-    }
-    reorderedRows.push(...rows);
-    
-    // Clear and re-append
-    tbody.innerHTML = '';
-    reorderedRows.forEach(row => {
-        tbody.appendChild(row);
-    });
-    
-    // Highlight best
-    reorderedRows.forEach(row => {
+    // Highlight best without reordering
+    rows.forEach(row => {
         row.classList.remove('best-price');
         const checkbox = row.querySelector('input[id$="-best"]');
         if (checkbox && checkbox.checked) {
@@ -2544,7 +2516,6 @@ function updateHotelTitle(sectionId) {
             const section = row.closest('.hotel-quote-section');
             if (section) {
                 calculateBalanceDueDateForSection(section.id);
-                sortAllRoomsInSection(section.id);
             }
             updateEmailTemplate();
             saveState();
@@ -2570,7 +2541,6 @@ function updateHotelTitle(sectionId) {
             }
             const section = row.closest('.hotel-quote-section');
             if (section) {
-                sortAllRoomsInSection(section.id);
                 updateQuoteTotals(section.id);
             }
             updateTotals();
@@ -2913,7 +2883,6 @@ function updateHotelTitle(sectionId) {
             const section = item.closest('.card');
             const sectionId = section.id;
             if (section.classList.contains('hotel-quote-section')) {
-                sortAllRoomsInSection(sectionId);
                 updateQuoteTotals(sectionId);
                 calculateBalanceDueDateForSection(sectionId);
             } else if (section.classList.contains('flight-quote-section')) {
@@ -3087,7 +3056,6 @@ function updateHotelTitle(sectionId) {
             const section = item.closest('.card');
             const sectionId = section.id;
             if (sectionId && !section.classList.contains('flight-quote-section')) {
-                sortAllRoomsInSection(sectionId);
                 const numRooms = roomsData.length;
                 for (let i = 0; i < numRooms; i++) {
                     autoSelectBestForComparison(`${sectionId}-room-${i}-comparison`);
@@ -4445,7 +4413,6 @@ function copyToClipboard() {
                     const sectionId = section.id;
                     element.remove();
                     if (sectionId && !section.classList.contains('flight-quote-section')) {
-                        sortAllRoomsInSection(sectionId);
                         updateQuoteTotals(sectionId);
                         calculateBalanceDueDateForSection(sectionId);
                     } else {
