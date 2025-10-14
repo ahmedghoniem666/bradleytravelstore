@@ -2243,7 +2243,7 @@ function toggleSection(sectionId) {
             <div class="form-row">
                 <div class="form-group" style="flex: 2;">
                     <label for="${sectionId}-hotel-name">Hotel Name</label>
-                    <input type="text" id="${sectionId}-hotel-name" class="form-control" placeholder="Hotel name" value="${data.hotelName || ''}" onchange="updateEmailTemplate(); saveState();">
+                    <input type="text" id="${sectionId}-hotel-name" class="form-control" placeholder="Hotel name" value="${data.hotelName || ''}" onchange="updateHotelTitle('${sectionId}'); updateEmailTemplate(); saveState();">
                 </div>
                 <div class="form-group" style="flex: 1;">
                     <label>Destination</label>
@@ -2317,9 +2317,23 @@ function toggleSection(sectionId) {
     initCancellationPickers(card);
     updateQuoteTotals(sectionId);
     calculateBalanceDueDateForSection(sectionId);
+    updateHotelTitle(sectionId);
     updateTotals();
     updateEmailTemplate();
     saveState();
+}
+
+function updateHotelTitle(sectionId) {
+    const hotelName = document.getElementById(`${sectionId}-hotel-name`).value.trim();
+    const titleEl = document.querySelector(`#${sectionId} .section-title`);
+    if (titleEl) {
+        if (hotelName) {
+            titleEl.textContent = hotelName;
+        } else {
+            const number = sectionId.split('-')[2];
+            titleEl.textContent = `Hotel Quote ${number}`;
+        }
+    }
 }
 
         function updateAllHotelDestinations() {
