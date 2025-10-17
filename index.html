@@ -1391,8 +1391,12 @@
                 
                 <div class="form-row">
                     <div class="form-group">
-                        <label for="customer-name">Customer Name *</label>
-                        <input type="text" id="customer-name" class="form-control" placeholder="Customer name" onchange="validateCustomerInfo(); updateEmailTemplate(); saveState();">
+                        <label for="customer-first-name">Customer First Name *</label>
+                        <input type="text" id="customer-first-name" class="form-control" placeholder="First name" onchange="validateCustomerInfo(); updateEmailTemplate(); saveState();">
+                    </div>
+                    <div class="form-group">
+                        <label for="customer-last-name">Customer Last Name</label>
+                        <input type="text" id="customer-last-name" class="form-control" placeholder="Last name" onchange="saveState();">
                     </div>
                     <div class="form-group">
                         <label for="quote-reference">Quote Reference #</label>
@@ -2227,7 +2231,7 @@ function toggleSection(sectionId) {
                 </div>
                 <div class="form-group" style="flex: 1;">
                     <label>Destination</label>
-                    <input type="text" id="${sectionId}-destination" class="form-control" placeholder="Destination" value="${dest}" onchange="updateEmailTemplate(); saveState();">
+                    <input type="text" id="${sectionId}-destination" class="form-control" placeholder="Destination" value="${dest}" onchange="updateHotelTitle('${sectionId}'); updateEmailTemplate(); saveState();">
                 </div>
             </div>
             <h4>Supplier Comparisons</h4>
@@ -2238,7 +2242,8 @@ function toggleSection(sectionId) {
                 <button class="btn" onclick="copyHotelComparison('${sectionId}')"><i class="fas fa-copy"></i> Copy Comparison</button>
             </div>
             <div class="section-totals">
-                <h3>Local taxes payable locally</h3>
+                <h3>Local taxes payable locally (not included in price)</h3>
+                <p>If you wish to include this in the total, please fill in the currency and amount per night below:</p>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Currency</label>
@@ -2910,7 +2915,7 @@ function updateHotelTitle(sectionId) {
             const manualSection = document.getElementById(id + '-manual-section');
             const upgradeCb = document.getElementById(id + '-upgrade');
             if (upgradeCb.checked) {
-                const choice = prompt("Upgrade type:\n1 - Auto-upgrade from base (link to existing included option)\n2 - Manual custom upgrade");
+                const choice = prompt("Upgrade type:\n1 - Upgrade to this room option (link to existing included option)\n2 - Manual upgrade");
                 if (choice === '1') {
                     document.getElementById(id + '-upgrade-auto').checked = true;
                     document.getElementById(id + '-upgrade-manual').checked = false;
@@ -3344,7 +3349,9 @@ function updateHotelTitle(sectionId) {
 
         function boldWrap(text) {
             if (currentDeliveryOption === 'whatsapp') {
-                return `*${text}*`;
+                // Escape * in text to prevent multiple stars
+                const escapedText = text.replace(/\*/g, '\\*');
+                return `*${escapedText}*`;
             } else {
                 return `<b>${text}</b>`;
             }
@@ -3377,7 +3384,7 @@ function updateHotelTitle(sectionId) {
 function updateEmailTemplate() {
     if (isEditing) return;
     const bookingType = document.getElementById('booking-type').value;
-    const customerName = document.getElementById('customer-name').value || '[Customer Name]';
+    const customerFirstName = document.getElementById('customer-first-name').value || '[First Name]';
     let agentName = document.getElementById('agent-name').value;
     if (agentName === 'custom') {
         agentName = document.getElementById('custom-agent-name').value || '[Agent Name]';
@@ -3686,7 +3693,7 @@ function updateEmailTemplate() {
     }
     
     if (bookingType === 'hotel') {
-        templateParts.push(`Dear ${customerName},`);
+        templateParts.push(`Dear ${customerFirstName},`);
         templateParts.push('');
         templateParts.push(`We can offer for ${travelerText}`);
         templateParts.push('');
@@ -3704,7 +3711,7 @@ function updateEmailTemplate() {
                         quote.includedSuppliers.forEach((sup, idx) => {
                             templateParts.push(`${boldWrap(`Room Option ${idx + 1}`)}`);
                             templateParts.push(sup.detailText);
-                            const priceLine = `${boldWrap('£' + sup.price.toFixed(0))}${priceSuffix}`;
+                            const priceLine = `£${sup.price.toFixed(0)}${priceSuffix}`;
                             templateParts.push(`${boldWrap('Total Cost:')} ${boldWrap(priceLine)}`);
                             if (sup.cancelText) {
                                 templateParts.push(`${boldWrap(sup.cancelText)}`);
@@ -3714,7 +3721,7 @@ function updateEmailTemplate() {
                     } else {
                         const sup = quote.includedSuppliers[0];
                         templateParts.push(sup.detailText);
-                        const priceLine = `${boldWrap('£' + sup.price.toFixed(0))}${priceSuffix}`;
+                        const priceLine = `£${sup.price.toFixed(0)}${priceSuffix}`;
                         templateParts.push(`${boldWrap('Total Cost:')} ${boldWrap(priceLine)}`);
                         if (sup.cancelText) {
                             templateParts.push(`${boldWrap(sup.cancelText)}`);
@@ -3723,7 +3730,7 @@ function updateEmailTemplate() {
                     }
                 }
                 if (excludesNote) {
-                    templateParts.push(`${excludesNote}\n`);
+                    templateParts.push(`${excludesNote}`);
                 }
                 templateParts.push('');
             });
@@ -3739,7 +3746,7 @@ function updateEmailTemplate() {
                     quote.includedSuppliers.forEach((sup, idx) => {
                         templateParts.push(`${boldWrap(`Room Option ${idx + 1}`)}`);
                         templateParts.push(sup.detailText);
-                        const priceLine = `${boldWrap('£' + sup.price.toFixed(0))}${priceSuffix}`;
+                        const priceLine = `£${sup.price.toFixed(0)}${priceSuffix}`;
                         templateParts.push(`${boldWrap('Total Cost:')} ${boldWrap(priceLine)}`);
                         if (sup.cancelText) {
                             templateParts.push(`${boldWrap(sup.cancelText)}`);
@@ -3749,7 +3756,7 @@ function updateEmailTemplate() {
                 } else {
                     const sup = quote.includedSuppliers[0];
                     templateParts.push(sup.detailText);
-                    const priceLine = `${boldWrap('£' + sup.price.toFixed(0))}${priceSuffix}`;
+                    const priceLine = `£${sup.price.toFixed(0)}${priceSuffix}`;
                     templateParts.push(`${boldWrap('Total Cost:')} ${boldWrap(priceLine)}`);
                     if (sup.cancelText) {
                         templateParts.push(`${boldWrap(sup.cancelText)}`);
@@ -3758,7 +3765,7 @@ function updateEmailTemplate() {
                 }
             }
             if (excludesNote) {
-                templateParts.push(`${excludesNote}\n`);
+                templateParts.push(`${excludesNote}`);
             }
             templateParts.push('');
         }
@@ -3790,7 +3797,7 @@ function updateEmailTemplate() {
         templateParts.push('');
         templateParts.push(`Your Quote Reference #${quoteReference}`);
     } else {
-        templateParts.push(`Dear ${customerName},`);
+        templateParts.push(`Dear ${customerFirstName},`);
         templateParts.push('');
         templateParts.push(`We can offer for ${travelerText}.`);
         templateParts.push('');
@@ -3809,7 +3816,7 @@ function updateEmailTemplate() {
                     }
                     templateParts.push('');
                 });
-                const priceLine = `${boldWrap('£' + Math.round(quote.totalSelling).toFixed(0))}${priceSuffix}`;
+                const priceLine = `£${Math.round(quote.totalSelling).toFixed(0)}${priceSuffix}`;
                 templateParts.push(`${boldWrap('Total Cost:')} ${boldWrap(priceLine)}`);
                 templateParts.push('');
             });
@@ -3826,7 +3833,7 @@ function updateEmailTemplate() {
                 }
                 templateParts.push('');
             });
-            const priceLine = `${boldWrap('£' + Math.round(quote.totalSelling).toFixed(0))}${priceSuffix}`;
+            const priceLine = `£${Math.round(quote.totalSelling).toFixed(0)}${priceSuffix}`;
             templateParts.push(`${boldWrap('Total Cost:')} ${boldWrap(priceLine)}`);
             templateParts.push('');
         }
@@ -3844,7 +3851,7 @@ function updateEmailTemplate() {
                         quote.includedSuppliers.forEach((sup, idx) => {
                             templateParts.push(`${boldWrap(`Room Option ${idx + 1}`)}`);
                             templateParts.push(sup.detailText);
-                            const priceLine = `${boldWrap('£' + sup.price.toFixed(0))}${priceSuffix}`;
+                            const priceLine = `£${sup.price.toFixed(0)}${priceSuffix}`;
                             templateParts.push(`${boldWrap('Total Cost:')} ${boldWrap(priceLine)}`);
                             if (sup.cancelText) {
                                 templateParts.push(`${boldWrap(sup.cancelText)}`);
@@ -3854,7 +3861,7 @@ function updateEmailTemplate() {
                     } else {
                         const sup = quote.includedSuppliers[0];
                         templateParts.push(sup.detailText);
-                        const priceLine = `${boldWrap('£' + sup.price.toFixed(0))}${priceSuffix}`;
+                        const priceLine = `£${sup.price.toFixed(0)}${priceSuffix}`;
                         templateParts.push(`${boldWrap('Total Cost:')} ${boldWrap(priceLine)}`);
                         if (sup.cancelText) {
                             templateParts.push(`${boldWrap(sup.cancelText)}`);
@@ -3863,7 +3870,7 @@ function updateEmailTemplate() {
                     }
                 }
                 if (excludesNote) {
-                    templateParts.push(`${excludesNote}\n`);
+                    templateParts.push(`${excludesNote}`);
                 }
                 templateParts.push('');
             });
@@ -3879,7 +3886,7 @@ function updateEmailTemplate() {
                     quote.includedSuppliers.forEach((sup, idx) => {
                         templateParts.push(`${boldWrap(`Room Option ${idx + 1}`)}`);
                         templateParts.push(sup.detailText);
-                        const priceLine = `${boldWrap('£' + sup.price.toFixed(0))}${priceSuffix}`;
+                        const priceLine = `£${sup.price.toFixed(0)}${priceSuffix}`;
                         templateParts.push(`${boldWrap('Total Cost:')} ${boldWrap(priceLine)}`);
                         if (sup.cancelText) {
                             templateParts.push(`${boldWrap(sup.cancelText)}`);
@@ -3889,7 +3896,7 @@ function updateEmailTemplate() {
                 } else {
                     const sup = quote.includedSuppliers[0];
                     templateParts.push(sup.detailText);
-                    const priceLine = `${boldWrap('£' + sup.price.toFixed(0))}${priceSuffix}`;
+                    const priceLine = `£${sup.price.toFixed(0)}${priceSuffix}`;
                     templateParts.push(`${boldWrap('Total Cost:')} ${boldWrap(priceLine)}`);
                     if (sup.cancelText) {
                         templateParts.push(`${boldWrap(sup.cancelText)}`);
@@ -3898,7 +3905,7 @@ function updateEmailTemplate() {
                 }
             }
             if (excludesNote) {
-                templateParts.push(`${excludesNote}\n`);
+                templateParts.push(`${excludesNote}`);
             }
             templateParts.push('');
         }
@@ -4100,7 +4107,8 @@ function copyToClipboard() {
         function saveState() {
             const state = {
                 customer: {
-                    name: document.getElementById('customer-name').value,
+                    firstName: document.getElementById('customer-first-name').value,
+                    lastName: document.getElementById('customer-last-name').value,
                     roomsData: roomsData
                 },
                 hotel: {
@@ -4192,7 +4200,8 @@ function copyToClipboard() {
             }
 
             if (state) {
-                document.getElementById('customer-name').value = state.customer.name || '';
+                document.getElementById('customer-first-name').value = state.customer.firstName || '';
+                document.getElementById('customer-last-name').value = state.customer.lastName || '';
 
                 if (state.customer.roomsData) {
                     roomsData = state.customer.roomsData;
@@ -4337,9 +4346,9 @@ function copyToClipboard() {
         }
 
         function validateCustomerInfo() {
-            const customerName = document.getElementById('customer-name').value.trim();
+            const customerFirstName = document.getElementById('customer-first-name').value.trim();
             
-            return customerName !== '';
+            return customerFirstName !== '';
         }
 
         function isPolicyComplete(row) {
@@ -4462,6 +4471,9 @@ function copyToClipboard() {
 
             const numRooms = roomsData.length;
             for (let room = 0; room < numRooms; room++) {
+                const roomData = roomsData[room];
+                const agesList = roomData.childAges.join(', ');
+                comparisonText += `Room ${room + 1} Occupancy: ${roomData.adults} Adults, ${roomData.children} Children${agesList ? ` (ages: ${agesList})` : ''}, ${roomData.infants} Infants\n`;
                 const compId = `${sectionId}-room-${room}-comparison`;
                 const comparison = document.getElementById(compId);
                 if (!comparison) continue;
@@ -4470,6 +4482,7 @@ function copyToClipboard() {
                 const rows = comparison.querySelectorAll('.supplier-table-row');
                 rows.forEach(row => {
                     const supplierName = row.querySelector('.supplier-name').value.trim() || '[Supplier]';
+                    const netPrice = parseFloat(row.querySelector('.net-price').value) || 0;
                     const roomType = row.querySelector('.room-type').value || '[Room Type]';
                     const boardBasis = row.querySelector('.board-basis').value || '[Board]';
                     const rooms = parseInt(row.querySelector('.rooms').value) || 1;
@@ -4478,7 +4491,7 @@ function copyToClipboard() {
                     const cancelText = getCancellationText(cancelPolicy, parseFloat(row.querySelector('.cancellation-fee')?.value || '0'), row.querySelector('.cancellation-deadline')?.value || '');
 
                     const cleanSupplierName = supplierName.replace(/ Room \d+ \([^)]*\)$/, '').trim();
-                    comparisonText += `- ${cleanSupplierName}: ${rooms} x ${roomType} on ${boardBasis}, £${Math.round(sellingPrice * rooms)}, ${cancelText}\n`;
+                    comparisonText += `- ${cleanSupplierName}: ${rooms} x ${roomType} on ${boardBasis}, Net £${(netPrice * rooms).toFixed(2)}, Selling £${Math.round(sellingPrice * rooms)}, ${cancelText}\n`;
 
                     // Check if best
                     const bestCb = row.querySelector('input[id$="-best"]');
