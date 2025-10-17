@@ -1557,6 +1557,7 @@
                             <option value="Joseph">Joseph</option>
                             <option value="Laura">Laura</option>
                             <option value="Monique">Monique</option>
+                            <option value="Paul">Paul</option>
                             <option value="Rebecca">Rebecca</option>
                             <option value="Tara">Tara</option>
                             <option value="Tracey">Tracey</option>
@@ -1632,6 +1633,12 @@
         <option value="Suite">
     </datalist>
 
+    <datalist id="extraSuggestions">
+        <option value="Standard seating">
+        <option value="Upgrade to Half Board or All Inclusive">
+        <option value="Return Private airport transfers">
+    </datalist>
+
     <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
     <script>
         let currentDeliveryOption = 'email';
@@ -1665,6 +1672,7 @@
             'Joseph': { phone: '020 3355 5060', email: 'reservations@bradleytravelstore.com', website: 'bradleytravelstore.com' },
             'Laura': { phone: '07962 394030', email: 'laura@bradleytravelstore.com', website: 'bradleytravelstore.com/laura-myers' },
             'Monique': { phone: '07887 953005', email: 'monique@bradleytravelstore.com', website: 'bradleytravelstore.com/monique-plein' },
+            'Paul': { phone: '07751 234922', email: 'Paul@bradleytravelstore.com', website: 'bradleytravelstore.com/paul-cundell' },
             'Rebecca': { phone: '07909 913997', email: 'rebecca@bradleytravelstore.com', website: 'bradleytravelstore.com/rebecca-johnstone' },
             'Tara': { phone: '07956 263778', email: 'tara@bradleytravelstore.com', website: 'bradleytravelstore.com/tara-yadid' },
             'Tracey': { phone: '07743 025088', email: 'Tracey@bradleytravelstore.com', website: 'bradleytravelstore.com/Tracey-Borthwick' },
@@ -2173,9 +2181,8 @@ function toggleSection(sectionId) {
             div.className = 'optional-extra-item';
             div.id = id;
             div.innerHTML = `
-                <input type="text" class="form-control" placeholder="Optional Extra Name (e.g., Return private airport transfers add £5)" onchange="updateEmailTemplate(); saveState();">
+                <input type="text" class="form-control" list="extraSuggestions" placeholder="Optional Extra Name (e.g., Return private airport transfers add £5)" onchange="updateEmailTemplate(); saveState();">
                 <input type="number" class="form-control" placeholder="0.00" step="0.01" onchange="updateEmailTemplate(); saveState();">
-                <input type="checkbox" onchange="updateEmailTemplate(); saveState();"> Include in Email
                 <button class="btn btn-danger btn-sm" onclick="removeOptionalExtra('${id}')"><i class="fas fa-trash"></i></button>
             `;
             list.appendChild(div);
@@ -2184,11 +2191,13 @@ function toggleSection(sectionId) {
         }
 
         function removeOptionalExtra(id) {
-            const item = document.getElementById(id);
-            if (item) {
-                item.remove();
-                updateEmailTemplate();
-                saveState();
+            if (confirm('Are you sure you want to remove this optional extra?')) {
+                const item = document.getElementById(id);
+                if (item) {
+                    item.remove();
+                    updateEmailTemplate();
+                    saveState();
+                }
             }
         }
 
@@ -3166,10 +3175,13 @@ function updateHotelTitle(sectionId) {
             
             let optionalExtrasTotal = 0;
             const numRooms = parseInt(document.getElementById('rooms-count').textContent);
-            document.querySelectorAll('#optional-extras-list .optional-extra-item input[type="checkbox"]:checked').forEach(cb => {
-                const item = cb.closest('.optional-extra-item');
-                const cost = parseFloat(item.querySelector('input[type="number"]').value) || 0;
-                optionalExtrasTotal += Math.round(cost * numRooms);
+            document.querySelectorAll('#optional-extras-list .optional-extra-item input[type="text"]').forEach(input => {
+                const item = input.closest('.optional-extra-item');
+                const name = input.value.trim();
+                if (name !== '') {
+                    const cost = parseFloat(item.querySelector('input[type="number"]').value) || 0;
+                    optionalExtrasTotal += Math.round(cost * numRooms);
+                }
             });
             
             const totalNet = hotelNetTotal + flightNetTotal;
@@ -3270,12 +3282,15 @@ function updateHotelTitle(sectionId) {
             }
             
             // Optional extras
-            document.querySelectorAll('#optional-extras-list .optional-extra-item input[type="checkbox"]:checked').forEach(cb => {
-                const item = cb.closest('.optional-extra-item');
-                const cost = parseFloat(item.querySelector('input[type="number"]').value) || 0;
-                const extraTotal = Math.round(cost * numRooms);
-                const name = item.querySelector('input[type="text"]').value;
-                html += `<div class="totals-row"><span class="totals-label">${name}:</span><span class="totals-value">£${extraTotal.toFixed(2)}</span></div>`;
+            document.querySelectorAll('#optional-extras-list .optional-extra-item input[type="text"]').forEach(input => {
+                const item = input.closest('.optional-extra-item');
+                const name = input.value.trim();
+                if (name !== '') {
+                    const cost = parseFloat(item.querySelector('input[type="number"]').value) || 0;
+                    const extraTotal = Math.round(cost * numRooms);
+                    const extraName = name;
+                    html += `<div class="totals-row"><span class="totals-label">${extraName}:</span><span class="totals-value">£${extraTotal.toFixed(2)}</span></div>`;
+                }
             });
             
             // Grand totals
@@ -3653,15 +3668,12 @@ function updateEmailTemplate() {
     // Collect user optional extras (always, for all types)
     let optionalExtrasText = '';
     document.querySelectorAll('#optional-extras-list .optional-extra-item').forEach(item => {
-        const checkbox = item.querySelector('input[type="checkbox"]');
-        if (checkbox && checkbox.checked) {
-            const nameInput = item.querySelector('input[type="text"]');
-            const costInput = item.querySelector('input[type="number"]');
-            const name = nameInput ? nameInput.value : '';
-            const cost = parseFloat(costInput ? costInput.value : '0') || 0;
-            if (name && cost > 0) {
-                optionalExtrasText += `${boldWrap(name)} ${boldWrap('£' + Math.round(cost * numRooms).toFixed(0))}${pricePerRoom ? ' per room' : ''}\n`;
-            }
+        const nameInput = item.querySelector('input[type="text"]');
+        const costInput = item.querySelector('input[type="number"]');
+        const name = nameInput ? nameInput.value.trim() : '';
+        const cost = parseFloat(costInput ? costInput.value : '0') || 0;
+        if (name !== '' && cost > 0) {
+            optionalExtrasText += `${boldWrap(name)} ${boldWrap('£' + Math.round(cost * numRooms).toFixed(0))}${pricePerRoom ? ' per room' : ''}\n`;
         }
     });
 
@@ -4148,8 +4160,7 @@ function copyToClipboard() {
                     }),
                     optionalExtras: Array.from(document.querySelectorAll('#optional-extras-list .optional-extra-item')).map(item => ({
                         name: item.querySelector('input[type="text"]').value,
-                        cost: item.querySelector('input[type="number"]').value,
-                        include: item.querySelector('input[type="checkbox"]').checked
+                        cost: item.querySelector('input[type="number"]').value
                     }))
                 },
                 commission: document.getElementById('commission-rate').value,
@@ -4258,7 +4269,6 @@ function copyToClipboard() {
                         if (lastItem) {
                             lastItem.querySelector('input[type="text"]').value = extra.name;
                             lastItem.querySelector('input[type="number"]').value = extra.cost;
-                            lastItem.querySelector('input[type="checkbox"]').checked = extra.include;
                         }
                     });
                 }
