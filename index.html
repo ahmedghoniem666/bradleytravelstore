@@ -2648,6 +2648,9 @@ function updateHotelTitle(sectionId) {
                             <div class="totals-row"><span class="totals-label">Total Selling - Exact:</span><span id="${sectionId}-total-selling-exact" class="totals-value">£0.00</span></div>
                             <div class="totals-row"><span class="totals-label">Total Selling - Rounded:</span><span id="${sectionId}-total-selling-rounded" class="totals-value">£0.00</span></div>
                         </div>
+                        <div id="${sectionId}-baggage" class="totals-subsection" style="display: none;">
+                            <h4>Baggage Charges</h4>
+                        </div>
                         <div id="${sectionId}-upgrades" class="totals-subsection" style="display: none;">
                             <h4>Upgrades</h4>
                         </div>
@@ -2731,9 +2734,9 @@ function updateHotelTitle(sectionId) {
                 <td><input type="time" class="form-control dep-time" value="${data.depTime || ''}" onchange="updateEmailTemplate(); saveState();"></td>
                 <td><input type="time" class="form-control arr-time" value="${data.arrTime || ''}" onchange="updateEmailTemplate(); saveState();"></td>
                 <td>
-                    <input type="checkbox" class="baggage-include" onchange="toggleBaggage(this.closest('tr'));"> Include Baggage
+                    <input type="checkbox" class="baggage-include" onchange="toggleBaggage(this.closest('tr')); updateFlightQuoteTotals('${sectionId}');"> Include Baggage
                     <div class="baggage-group">
-                        <input type="number" class="form-control baggage-number" min="0" value="${data.baggageNumber || 1}" onchange="updateEmailTemplate(); saveState();">
+                        <input type="number" class="form-control baggage-number" min="0" value="${data.baggageNumber || 1}" onchange="updateFlightQuoteTotals('${sectionId}'); updateEmailTemplate(); saveState();">
                         <select class="baggage-weight-select baggage-allowance" onchange="updateEmailTemplate(); saveState();">
                             <option ${data.baggageAllowance === '10kg' ? 'selected' : ''}>10kg</option>
                             <option ${data.baggageAllowance === '15kg' ? 'selected' : ''}>15kg</option>
@@ -2742,11 +2745,11 @@ function updateHotelTitle(sectionId) {
                             <option ${data.baggageAllowance === '25kg' ? 'selected' : ''}>25kg</option>
                             <option ${data.baggageAllowance === '30kg' ? 'selected' : ''}>30kg</option>
                         </select>
-                        <input type="number" class="form-control baggage-price" step="0.01" placeholder="0.00 (if extra)" value="${data.baggagePrice || ''}" onchange="updateEmailTemplate(); saveState();">
+                        <input type="number" class="form-control baggage-price" step="0.01" placeholder="0.00 (if extra)" value="${data.baggagePrice || ''}" onchange="updateFlightQuoteTotals('${sectionId}'); updateEmailTemplate(); saveState();">
                     </div>
                 </td>
-                <td><input type="number" class="form-control net-price" step="0.01" placeholder="0.00" value="${data.netPrice || ''}" onchange="updateFlightLegPrice('${id}'); saveState();"></td>
-                <td><input type="text" class="form-control commission-rate" placeholder="Use global" value="${data.commissionRate || ''}" onchange="updateFlightLegPrice('${id}'); saveState();"></td>
+                <td><input type="number" class="form-control net-price" step="0.01" placeholder="0.00" value="${data.netPrice || ''}" onchange="updateFlightLegPrice('${id}', '${sectionId}'); saveState();"></td>
+                <td><input type="text" class="form-control commission-rate" placeholder="Use global" value="${data.commissionRate || ''}" onchange="updateFlightLegPrice('${id}', '${sectionId}'); saveState();"></td>
                 <td><input type="text" class="form-control selling-price" readonly placeholder="0.00" value=""></td>
                 <td><input type="text" class="form-control commission-amount" readonly placeholder="0.00" value=""></td>
                 <td>
@@ -2764,17 +2767,17 @@ function updateHotelTitle(sectionId) {
                     </div>
                 </td>
                 <td class="upgrade-cell">
-                    <input type="checkbox" id="${id}-upgrade" ${data.upgrade ? 'checked' : ''} onchange="toggleUpgrade('${id}'); updateEmailTemplate(); saveState();">
+                    <input type="checkbox" id="${id}-upgrade" ${data.upgrade ? 'checked' : ''} onchange="toggleUpgrade('${id}'); updateFlightQuoteTotals('${sectionId}'); updateEmailTemplate(); saveState();">
                     <div class="upgrade-modes" style="display: ${data.upgrade ? 'block' : 'none'};">
-                        <label for="${id}-upgrade-auto"><input type="checkbox" id="${id}-upgrade-auto" ${data.upgradeAuto ? 'checked' : ''} onchange="handleUpgradeMode('${id}', 'auto'); updateEmailTemplate(); saveState();"> Auto-upgrade from base</label>
-                        <label for="${id}-upgrade-manual"><input type="checkbox" id="${id}-upgrade-manual" ${data.upgradeManual ? 'checked' : ''} onchange="handleUpgradeMode('${id}', 'manual'); updateEmailTemplate(); saveState();"> Manual upgrade</label>
+                        <label for="${id}-upgrade-auto"><input type="checkbox" id="${id}-upgrade-auto" ${data.upgradeAuto ? 'checked' : ''} onchange="handleUpgradeMode('${id}', 'auto'); updateFlightQuoteTotals('${sectionId}'); updateEmailTemplate(); saveState();"> Auto-upgrade from base</label>
+                        <label for="${id}-upgrade-manual"><input type="checkbox" id="${id}-upgrade-manual" ${data.upgradeManual ? 'checked' : ''} onchange="handleUpgradeMode('${id}', 'manual'); updateFlightQuoteTotals('${sectionId}'); updateEmailTemplate(); saveState();"> Manual upgrade</label>
                     </div>
                     <div id="${id}-auto-section" style="display: ${data.upgrade && data.upgradeAuto ? 'block' : 'none'}; margin-top: 5px;">
                         <small>Upgrade amount: <span id="${id}-auto-amount" class="auto-upgrade-amount">£0.00</span></small>
                     </div>
                     <div id="${id}-manual-section" style="display: ${data.upgrade && data.upgradeManual ? 'block' : 'none'}; margin-top: 5px;">
-                        <input type="text" class="form-control upgrade-desc" placeholder="Upgrade description" value="${data.upgradeDesc || ''}" style="margin-bottom: 5px;" onchange="updateEmailTemplate(); saveState();">
-                        <input type="number" class="form-control upgrade-amount" step="0.01" placeholder="0.00" value="0.00" onchange="updateEmailTemplate(); saveState();">
+                        <input type="text" class="form-control upgrade-desc" placeholder="Upgrade description" value="${data.upgradeDesc || ''}" style="margin-bottom: 5px;" onchange="updateFlightQuoteTotals('${sectionId}'); updateEmailTemplate(); saveState();">
+                        <input type="number" class="form-control upgrade-amount" step="0.01" placeholder="0.00" value="0.00" onchange="updateFlightQuoteTotals('${sectionId}'); updateEmailTemplate(); saveState();">
                     </div>
                 </td>
                 <td>
@@ -2782,7 +2785,7 @@ function updateHotelTitle(sectionId) {
                 </td>
             `;
             tbody.appendChild(tr);
-            updateFlightLegPrice(id);
+            updateFlightLegPrice(id, sectionId);
             initCancellationPickers(tr);
             toggleCancellationFee(id);
             if (data.upgrade) {
@@ -2837,7 +2840,7 @@ function updateHotelTitle(sectionId) {
             }
         }
 
-        function updateFlightLegPrice(id) {
+        function updateFlightLegPrice(id, sectionId) {
             const item = document.getElementById(id);
             if (!item) return;
             
@@ -2863,7 +2866,7 @@ function updateHotelTitle(sectionId) {
             if (sellingPriceInput) sellingPriceInput.value = sellingPrice.toFixed(2);
             if (commissionAmountInput) commissionAmountInput.value = commissionAmount.toFixed(2);
             
-            // Update auto upgrade if applicable
+            // Update auto upgrade if applicable - this will automatically calculate difference
             const upgradeCb = document.getElementById(id + '-upgrade');
             if (upgradeCb && upgradeCb.checked) {
                 const autoCb = document.getElementById(id + '-upgrade-auto');
@@ -2872,7 +2875,6 @@ function updateHotelTitle(sectionId) {
                 }
             }
             
-            const sectionId = item.closest('.flight-quote-section').id;
             updateFlightQuoteTotals(sectionId);
             updateTotals();
             updateEmailTemplate();
@@ -2883,6 +2885,7 @@ function updateHotelTitle(sectionId) {
             let netTotal = 0;
             let sellingExact = 0;
             let sellingRounded = 0;
+            let baggageDetails = []; // Collect baggage for display
             let upgrades = []; // Collect upgrades for display
             
             const section = document.getElementById(sectionId);
@@ -2896,9 +2899,24 @@ function updateHotelTitle(sectionId) {
                 const sellingPrice = parseFloat(item.querySelector('.selling-price').value) || 0;
                 const upgradeAmount = parseFloat(item.querySelector('.upgrade-amount').value) || 0;
                 const baggagePrice = parseFloat(item.querySelector('.baggage-price').value) || 0;
+                const baggageCheckbox = item.querySelector('.baggage-include');
+                const includeBaggage = baggageCheckbox ? baggageCheckbox.checked : false;
+                const baggageNumber = parseInt(item.querySelector('.baggage-number').value) || 1;
+                const baggageAllowance = item.querySelector('.baggage-allowance').value || '';
                 
-                if (!isUpgrade) {
+                // Add baggage to net and selling if included
+                if (includeBaggage) {
                     netTotal += netPrice + baggagePrice;
+                    sellingExact += sellingPrice + baggagePrice; // Assuming baggage is net, but add directly for simplicity
+                    sellingRounded += Math.round(sellingPrice + baggagePrice);
+                    
+                    // Collect baggage details
+                    baggageDetails.push({
+                        desc: `${baggageNumber} x ${baggageAllowance}`,
+                        amount: Math.round(baggagePrice)
+                    });
+                } else {
+                    netTotal += netPrice;
                     sellingExact += sellingPrice;
                     sellingRounded += Math.round(sellingPrice);
                 }
@@ -2909,6 +2927,10 @@ function updateHotelTitle(sectionId) {
                 }
             });
             
+            // Calculate baggage subtotal
+            const baggageTotalRounded = baggageDetails.reduce((sum, b) => sum + b.amount, 0);
+            sellingRounded += baggageTotalRounded;
+            
             // Calculate upgrade subtotal
             const upgradeTotalRounded = upgrades.reduce((sum, u) => sum + u.amount, 0);
             sellingRounded += upgradeTotalRounded;
@@ -2918,6 +2940,20 @@ function updateHotelTitle(sectionId) {
             document.getElementById(`${sectionId}-total-selling-exact`).textContent = `£${sellingExact.toFixed(2)}`;
             document.getElementById(`${sectionId}-total-selling-rounded`).textContent = `£${sellingRounded.toFixed(2)}`;
             document.getElementById(`${sectionId}-total-selling-rounded-display`).innerHTML = `£${sellingRounded.toFixed(2)} <button class="details-toggle" onclick="toggleDetails('${sectionId}-details')">Price Details</button>`;
+
+            // Handle baggage in separate section
+            const baggageDiv = document.getElementById(`${sectionId}-baggage`);
+            if (baggageDetails.length > 0) {
+                let bagHtml = '<h4>Baggage Charges</h4>';
+                baggageDetails.forEach(bag => {
+                    bagHtml += `<div class="totals-row"><span class="totals-label">${bag.desc}:</span><span class="totals-value">+£${bag.amount}</span></div>`;
+                });
+                bagHtml += `<div class="totals-row"><span class="totals-label">Baggage total:</span><span class="totals-value">£${baggageTotalRounded.toFixed(2)}</span></div>`;
+                baggageDiv.innerHTML = bagHtml;
+                baggageDiv.style.display = 'block';
+            } else {
+                baggageDiv.style.display = 'none';
+            }
 
             // Handle upgrades in separate section
             const upgradeDiv = document.getElementById(`${sectionId}-upgrades`);
@@ -2942,6 +2978,8 @@ function updateHotelTitle(sectionId) {
             } else {
                 group.classList.remove('show');
             }
+            const sectionId = row.closest('.flight-quote-section').id;
+            updateFlightQuoteTotals(sectionId);
         }
 
         function toggleCancellationFee(id) {
@@ -3074,6 +3112,8 @@ function updateHotelTitle(sectionId) {
                 autoLabel.style.display = 'none';
                 manualLabel.style.display = 'block';
             }
+            const sectionId = item.closest('.flight-quote-section') ? item.closest('.flight-quote-section').id : item.closest('.hotel-quote-section').id;
+            updateFlightQuoteTotals(sectionId);
             updateEmailTemplate();
             saveState();
         }
@@ -3130,6 +3170,8 @@ function updateHotelTitle(sectionId) {
             if (span) {
                 span.textContent = '£' + diff.toFixed(2);
             }
+            const sectionId = section.id;
+            updateFlightQuoteTotals(sectionId);
         }
 
         function updateSupplierPrice(id) {
@@ -3262,6 +3304,7 @@ function updateHotelTitle(sectionId) {
             let flightSellingRounded = 0;
             let optionalExtrasTotal = 0;
             let allUpgrades = []; // Collect all upgrades
+            let allBaggage = []; // Collect all baggage
             
             // Collect from checked hotel quote sections
             hotelQuoteSections.forEach(sectionId => {
@@ -3315,7 +3358,7 @@ function updateHotelTitle(sectionId) {
                     flightSellingExact += flightSellExact;
                     flightSellingRounded += flightSellRounded;
                     
-                    // Collect flight upgrades
+                    // Collect flight upgrades and baggage
                     const section = document.getElementById(sectionId);
                     section.querySelectorAll('.flight-leg-row').forEach(item => {
                         const isUpgrade = item.querySelector('input[id$="-upgrade"]')?.checked || false;
@@ -3324,6 +3367,16 @@ function updateHotelTitle(sectionId) {
                             const upgradeDesc = item.querySelector('.upgrade-desc').value || 'Flight Upgrade';
                             if (upgradeAmount > 0) {
                                 allUpgrades.push({ desc: upgradeDesc, amount: Math.round(upgradeAmount), source: 'Flight section' });
+                            }
+                        }
+                        const baggageCheckbox = item.querySelector('.baggage-include');
+                        const includeBaggage = baggageCheckbox ? baggageCheckbox.checked : false;
+                        if (includeBaggage) {
+                            const baggagePrice = parseFloat(item.querySelector('.baggage-price').value) || 0;
+                            const baggageNumber = parseInt(item.querySelector('.baggage-number').value) || 1;
+                            const baggageAllowance = item.querySelector('.baggage-allowance').value || '';
+                            if (baggagePrice > 0) {
+                                allBaggage.push({ desc: `${baggageNumber} x ${baggageAllowance}`, amount: Math.round(baggagePrice), source: 'Flight section' });
                             }
                         }
                     });
@@ -3341,12 +3394,13 @@ function updateHotelTitle(sectionId) {
                 }
             });
             
-            // Sum all upgrades
+            // Sum all upgrades and baggage
             const totalUpgradesAmount = allUpgrades.reduce((sum, u) => sum + u.amount, 0);
+            const totalBaggageAmount = allBaggage.reduce((sum, b) => sum + b.amount, 0);
             
             const totalNet = hotelNetTotal + flightNetTotal;
             const totalSellingExact = hotelSellingExact + flightSellingExact;
-            const totalSellingRounded = hotelSellingRounded + flightSellingRounded + optionalExtrasTotal + totalUpgradesAmount;
+            const totalSellingRounded = hotelSellingRounded + flightSellingRounded + optionalExtrasTotal + totalUpgradesAmount + totalBaggageAmount;
             
             // Build breakdown HTML
             const totalsPanel = document.getElementById('totals-breakdown');
@@ -3410,7 +3464,8 @@ function updateHotelTitle(sectionId) {
                             const legType = row.querySelector('.leg-type').value;
                             const selling = parseFloat(row.querySelector('.selling-price').value) || 0;
                             const upgradeAmt = parseFloat(row.querySelector('.upgrade-amount').value) || 0;
-                            const totalLeg = selling + upgradeAmt;
+                            const baggagePrice = parseFloat(row.querySelector('.baggage-price').value) || 0;
+                            const totalLeg = selling + upgradeAmt + baggagePrice;
                             const airline = row.querySelector('.airline').value;
                             const dep = row.querySelector('.departure-airport').value;
                             const arr = row.querySelector('.arrival-airport').value;
@@ -3452,6 +3507,16 @@ function updateHotelTitle(sectionId) {
             if (optionalExtrasTotal > 0) {
                 html += `<div class="totals-subsection"><h4>Optional Extras</h4>`;
                 html += `<div class="totals-row"><span class="totals-label">Total Selling:</span><span class="totals-value">£${optionalExtrasTotal.toFixed(2)}</span></div></div>`;
+            }
+            
+            // Baggage subsection
+            if (allBaggage.length > 0) {
+                html += `<div class="totals-subsection"><h4>Baggage Charges</h4>`;
+                allBaggage.forEach(bag => {
+                    html += `<div class="totals-row"><span class="totals-label">${bag.desc} (from ${bag.source}):</span><span class="totals-value">+£${bag.amount}</span></div>`;
+                });
+                html += `<div class="totals-row"><span class="totals-label">Total baggage charges:</span><span class="totals-value">£${totalBaggageAmount.toFixed(2)}</span></div>`;
+                html += `</div>`;
             }
             
             // Upgrades subsection
@@ -3784,7 +3849,7 @@ function updateEmailTemplate() {
                     let baseSellingPrice = Infinity;
                     const rows = section.querySelectorAll('.flight-leg-row');
                     rows.forEach(row => {
-                        if (row.id === id) return;
+                        if (row.id === item.id) return;
                         const upCb = row.querySelector('input[id$="-upgrade"]');
                         if (!(upCb && upCb.checked)) {
                             const sell = parseFloat(row.querySelector('.selling-price').value) || Infinity;
