@@ -366,6 +366,11 @@
             background: #059669;
         }
         
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+        
         .conversion-box {
             background: #eff6ff;
             padding: 16px;
@@ -981,11 +986,6 @@
             flex: 0;
         }
         
-        .btn-sm {
-            padding: 6px 12px;
-            font-size: 0.85rem;
-        }
-        
         .price-per-room-group {
             display: flex;
             align-items: center;
@@ -1344,6 +1344,34 @@
 
         #commission-interpretation {
             display: none;
+        }
+
+        .details-toggle {
+            background: var(--secondary);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.8rem;
+            margin-left: 8px;
+            cursor: pointer;
+            border: none;
+        }
+
+        .details-toggle:hover {
+            background: var(--primary);
+        }
+
+        .details-content {
+            margin-top: 8px;
+            padding: 8px;
+            background: rgba(0,0,0,0.05);
+            border-radius: var(--border-radius);
+            display: none;
+        }
+
+        .upgrade-row {
+            color: var(--accent);
+            font-style: italic;
         }
     </style>
 </head>
@@ -2264,16 +2292,16 @@ function toggleSection(sectionId) {
                     </div>
                 </div>
                 <div class="totals-row">
-                    <span class="totals-label">Total Net:</span>
-                    <span id="${sectionId}-total-net" class="totals-value">£0.00</span>
+                    <span class="totals-label">Total Selling (Rounded):</span>
+                    <span class="totals-value" id="${sectionId}-total-selling-rounded-display">£0.00 <button class="details-toggle" onclick="toggleDetails('${sectionId}-details')">Price Details</button></span>
                 </div>
-                <div class="totals-row">
-                    <span class="totals-label">Total Selling - Exact:</span>
-                    <span id="${sectionId}-total-selling-exact" class="totals-value">£0.00</span>
+                <div id="${sectionId}-details" class="details-content">
+                    <div class="totals-row"><span class="totals-label">Total Net:</span><span id="${sectionId}-total-net" class="totals-value">£0.00</span></div>
+                    <div class="totals-row"><span class="totals-label">Total Selling - Exact:</span><span id="${sectionId}-total-selling-exact" class="totals-value">£0.00</span></div>
+                    <div class="totals-row"><span class="totals-label">Total Selling - Rounded:</span><span id="${sectionId}-total-selling-rounded" class="totals-value">£0.00</span></div>
                 </div>
-                <div class="totals-row">
-                    <span class="totals-label">Total Selling - Rounded:</span>
-                    <span id="${sectionId}-total-selling-rounded" class="totals-value">£0.00</span>
+                <div id="${sectionId}-upgrades" class="totals-subsection" style="display: none;">
+                    <h4>Upgrades</h4>
                 </div>
             </div>
         </div>
@@ -2458,15 +2486,15 @@ function updateHotelTitle(sectionId) {
         <td class="upgrade-cell">
             <input type="checkbox" id="${supId}-upgrade" ${data.upgrade ? 'checked' : ''} onchange="toggleUpgrade('${supId}'); updateEmailTemplate(); saveState();">
             <div class="upgrade-modes" style="display: ${data.upgrade ? 'block' : 'none'};">
-                <label><input type="checkbox" id="${supId}-upgrade-auto" ${data.upgradeAuto ? 'checked' : ''} onchange="handleUpgradeMode('${supId}', 'auto'); updateEmailTemplate(); saveState();"> Auto-upgrade from base</label>
-                <label><input type="checkbox" id="${supId}-upgrade-manual" ${data.upgradeManual ? 'checked' : ''} onchange="handleUpgradeMode('${supId}', 'manual'); updateEmailTemplate(); saveState();"> Manual upgrade</label>
+                <label for="${supId}-upgrade-auto"><input type="checkbox" id="${supId}-upgrade-auto" ${data.upgradeAuto ? 'checked' : ''} onchange="handleUpgradeMode('${supId}', 'auto'); updateEmailTemplate(); saveState();"> Auto-upgrade from base</label>
+                <label for="${supId}-upgrade-manual"><input type="checkbox" id="${supId}-upgrade-manual" ${data.upgradeManual ? 'checked' : ''} onchange="handleUpgradeMode('${supId}', 'manual'); updateEmailTemplate(); saveState();"> Manual upgrade</label>
             </div>
             <div id="${supId}-auto-section" style="display: ${data.upgrade && data.upgradeAuto ? 'block' : 'none'}; margin-top: 5px;">
                 <small>Upgrade amount: <span id="${supId}-auto-amount" class="auto-upgrade-amount">£0.00</span></small>
             </div>
             <div id="${supId}-manual-section" style="display: ${data.upgrade && data.upgradeManual ? 'block' : 'none'}; margin-top: 5px;">
                 <input type="text" class="form-control upgrade-desc" placeholder="Upgrade description" value="${data.upgradeDesc || ''}" style="margin-bottom: 5px;" onchange="updateEmailTemplate(); saveState();">
-                <input type="number" class="form-control upgrade-amount" step="0.01" placeholder="0.00" value="${(data.upgradeAmount || 0).toFixed(2)}" onchange="updateEmailTemplate(); saveState();">
+                <input type="number" class="form-control upgrade-amount" step="0.01" placeholder="0.00" value="0.00" onchange="updateEmailTemplate(); saveState();">
             </div>
         </td>
         <td><input type="checkbox" id="${supId}-include-email" ${includeEmailChecked ? 'checked' : ''} onchange="toggleIncludeEmail('${supId}'); updateEmailTemplate();"></td>
@@ -2479,14 +2507,20 @@ function updateHotelTitle(sectionId) {
     initCancellationPickers(tr);
     toggleCancellationFee(supId);
     if (data.best) toggleBestPrice(supId);
-    if (data.upgrade) toggleUpgrade(supId);
-    if (data.upgradeAuto) {
-        document.getElementById(supId + '-upgrade-auto').checked = true;
-        handleUpgradeMode(supId, 'auto');
-    }
-    if (data.upgradeManual) {
-        document.getElementById(supId + '-upgrade-manual').checked = true;
-        handleUpgradeMode(supId, 'manual');
+    if (data.upgrade) {
+        toggleUpgrade(supId);
+        // Set disabled and hide non-selected after toggle
+        const autoCb = document.getElementById(supId + '-upgrade-auto');
+        const manualCb = document.getElementById(supId + '-upgrade-manual');
+        autoCb.disabled = true;
+        manualCb.disabled = true;
+        const autoLabel = tr.querySelector(`label[for="${supId}-upgrade-auto"]`);
+        const manualLabel = tr.querySelector(`label[for="${supId}-upgrade-manual"]`);
+        if (data.upgradeAuto) {
+            manualLabel.style.display = 'none';
+        } else if (data.upgradeManual) {
+            autoLabel.style.display = 'none';
+        }
     }
     sortAndHighlightComparison(compId);
     updateQuoteTotals(sectionId);
@@ -2606,16 +2640,16 @@ function updateHotelTitle(sectionId) {
                     <div class="section-totals">
                         <h3>Flight Totals</h3>
                         <div class="totals-row">
-                            <span class="totals-label">Total Net:</span>
-                            <span id="${sectionId}-total-net" class="totals-value">£0.00</span>
+                            <span class="totals-label">Total Selling (Rounded):</span>
+                            <span class="totals-value" id="${sectionId}-total-selling-rounded-display">£0.00 <button class="details-toggle" onclick="toggleDetails('${sectionId}-details')">Price Details</button></span>
                         </div>
-                        <div class="totals-row">
-                            <span class="totals-label">Total Selling - Exact:</span>
-                            <span id="${sectionId}-total-selling-exact" class="totals-value">£0.00</span>
+                        <div id="${sectionId}-details" class="details-content">
+                            <div class="totals-row"><span class="totals-label">Total Net:</span><span id="${sectionId}-total-net" class="totals-value">£0.00</span></div>
+                            <div class="totals-row"><span class="totals-label">Total Selling - Exact:</span><span id="${sectionId}-total-selling-exact" class="totals-value">£0.00</span></div>
+                            <div class="totals-row"><span class="totals-label">Total Selling - Rounded:</span><span id="${sectionId}-total-selling-rounded" class="totals-value">£0.00</span></div>
                         </div>
-                        <div class="totals-row">
-                            <span class="totals-label">Total Selling - Rounded:</span>
-                            <span id="${sectionId}-total-selling-rounded" class="totals-value">£0.00</span>
+                        <div id="${sectionId}-upgrades" class="totals-subsection" style="display: none;">
+                            <h4>Upgrades</h4>
                         </div>
                     </div>
                 </div>
@@ -2732,15 +2766,15 @@ function updateHotelTitle(sectionId) {
                 <td class="upgrade-cell">
                     <input type="checkbox" id="${id}-upgrade" ${data.upgrade ? 'checked' : ''} onchange="toggleUpgrade('${id}'); updateEmailTemplate(); saveState();">
                     <div class="upgrade-modes" style="display: ${data.upgrade ? 'block' : 'none'};">
-                        <label><input type="checkbox" id="${id}-upgrade-auto" ${data.upgradeAuto ? 'checked' : ''} onchange="handleUpgradeMode('${id}', 'auto'); updateEmailTemplate(); saveState();"> Auto-upgrade from base</label>
-                        <label><input type="checkbox" id="${id}-upgrade-manual" ${data.upgradeManual ? 'checked' : ''} onchange="handleUpgradeMode('${id}', 'manual'); updateEmailTemplate(); saveState();"> Manual upgrade</label>
+                        <label for="${id}-upgrade-auto"><input type="checkbox" id="${id}-upgrade-auto" ${data.upgradeAuto ? 'checked' : ''} onchange="handleUpgradeMode('${id}', 'auto'); updateEmailTemplate(); saveState();"> Auto-upgrade from base</label>
+                        <label for="${id}-upgrade-manual"><input type="checkbox" id="${id}-upgrade-manual" ${data.upgradeManual ? 'checked' : ''} onchange="handleUpgradeMode('${id}', 'manual'); updateEmailTemplate(); saveState();"> Manual upgrade</label>
                     </div>
                     <div id="${id}-auto-section" style="display: ${data.upgrade && data.upgradeAuto ? 'block' : 'none'}; margin-top: 5px;">
                         <small>Upgrade amount: <span id="${id}-auto-amount" class="auto-upgrade-amount">£0.00</span></small>
                     </div>
                     <div id="${id}-manual-section" style="display: ${data.upgrade && data.upgradeManual ? 'block' : 'none'}; margin-top: 5px;">
                         <input type="text" class="form-control upgrade-desc" placeholder="Upgrade description" value="${data.upgradeDesc || ''}" style="margin-bottom: 5px;" onchange="updateEmailTemplate(); saveState();">
-                        <input type="number" class="form-control upgrade-amount" step="0.01" placeholder="0.00" value="${(data.upgradeAmount || 0).toFixed(2)}" onchange="updateEmailTemplate(); saveState();">
+                        <input type="number" class="form-control upgrade-amount" step="0.01" placeholder="0.00" value="0.00" onchange="updateEmailTemplate(); saveState();">
                     </div>
                 </td>
                 <td>
@@ -2751,14 +2785,20 @@ function updateHotelTitle(sectionId) {
             updateFlightLegPrice(id);
             initCancellationPickers(tr);
             toggleCancellationFee(id);
-            if (data.upgrade) toggleUpgrade(id);
-            if (data.upgradeAuto) {
-                document.getElementById(id + '-upgrade-auto').checked = true;
-                handleUpgradeMode(id, 'auto');
-            }
-            if (data.upgradeManual) {
-                document.getElementById(id + '-upgrade-manual').checked = true;
-                handleUpgradeMode(id, 'manual');
+            if (data.upgrade) {
+                toggleUpgrade(id);
+                // Set disabled and hide non-selected after toggle
+                const autoCb = document.getElementById(id + '-upgrade-auto');
+                const manualCb = document.getElementById(id + '-upgrade-manual');
+                autoCb.disabled = true;
+                manualCb.disabled = true;
+                const autoLabel = tr.querySelector(`label[for="${id}-upgrade-auto"]`);
+                const manualLabel = tr.querySelector(`label[for="${id}-upgrade-manual"]`);
+                if (data.upgradeAuto) {
+                    manualLabel.style.display = 'none';
+                } else if (data.upgradeManual) {
+                    autoLabel.style.display = 'none';
+                }
             }
             displayAirport(tr.querySelector('.departure-airport'));
             displayAirport(tr.querySelector('.arrival-airport'));
@@ -2843,7 +2883,7 @@ function updateHotelTitle(sectionId) {
             let netTotal = 0;
             let sellingExact = 0;
             let sellingRounded = 0;
-            let upgradeTotal = 0;
+            let upgrades = []; // Collect upgrades for display
             
             const section = document.getElementById(sectionId);
             if (!section) return;
@@ -2863,14 +2903,35 @@ function updateHotelTitle(sectionId) {
                     sellingRounded += Math.round(sellingPrice);
                 }
                 
-                upgradeTotal += upgradeAmount;
+                if (isUpgrade && upgradeAmount > 0) {
+                    const upgradeDesc = item.querySelector('.upgrade-desc').value || 'Flight Upgrade';
+                    upgrades.push({ desc: upgradeDesc, amount: Math.round(upgradeAmount) });
+                }
             });
             
-            sellingRounded += Math.round(upgradeTotal);
+            // Calculate upgrade subtotal
+            const upgradeTotalRounded = upgrades.reduce((sum, u) => sum + u.amount, 0);
+            sellingRounded += upgradeTotalRounded;
             
+            // Set base totals
             document.getElementById(`${sectionId}-total-net`).textContent = `£${netTotal.toFixed(2)}`;
             document.getElementById(`${sectionId}-total-selling-exact`).textContent = `£${sellingExact.toFixed(2)}`;
             document.getElementById(`${sectionId}-total-selling-rounded`).textContent = `£${sellingRounded.toFixed(2)}`;
+            document.getElementById(`${sectionId}-total-selling-rounded-display`).innerHTML = `£${sellingRounded.toFixed(2)} <button class="details-toggle" onclick="toggleDetails('${sectionId}-details')">Price Details</button>`;
+
+            // Handle upgrades in separate section
+            const upgradeDiv = document.getElementById(`${sectionId}-upgrades`);
+            if (upgrades.length > 0) {
+                let upHtml = '<h4>Upgrades</h4>';
+                upgrades.forEach(upgrade => {
+                    upHtml += `<div class="totals-row upgrade-row"><span class="totals-label">${upgrade.desc}:</span><span class="totals-value">+£${upgrade.amount}</span></div>`;
+                });
+                upHtml += `<div class="totals-row"><span class="totals-label">Upgrade total to be collected:</span><span class="totals-value">£${upgradeTotalRounded.toFixed(2)}</span></div>`;
+                upgradeDiv.innerHTML = upHtml;
+                upgradeDiv.style.display = 'block';
+            } else {
+                upgradeDiv.style.display = 'none';
+            }
         }
 
         function toggleBaggage(row) {
@@ -2938,13 +2999,36 @@ function updateHotelTitle(sectionId) {
                     modesDiv.style.display = 'none';
                     if (autoSection) autoSection.style.display = 'none';
                     if (manualSection) manualSection.style.display = 'none';
+                    // Enable sub-checkboxes for next time
+                    const autoCb = document.getElementById(id + '-upgrade-auto');
+                    const manualCb = document.getElementById(id + '-upgrade-manual');
+                    if (autoCb) autoCb.disabled = false;
+                    if (manualCb) manualCb.disabled = false;
+                    const autoLabel = item.querySelector(`label[for="${id}-upgrade-auto"]`);
+                    const manualLabel = item.querySelector(`label[for="${id}-upgrade-manual"]`);
+                    if (autoLabel) autoLabel.style.display = 'block';
+                    if (manualLabel) manualLabel.style.display = 'block';
                     return;
                 }
                 modesDiv.style.display = 'block';
+                // Disable sub-checkboxes to prevent switching
+                const autoCb = document.getElementById(id + '-upgrade-auto');
+                const manualCb = document.getElementById(id + '-upgrade-manual');
+                autoCb.disabled = true;
+                manualCb.disabled = true;
             } else {
                 modesDiv.style.display = 'none';
                 if (autoSection) autoSection.style.display = 'none';
                 if (manualSection) manualSection.style.display = 'none';
+                // Enable sub-checkboxes for next time
+                const autoCb = document.getElementById(id + '-upgrade-auto');
+                const manualCb = document.getElementById(id + '-upgrade-manual');
+                if (autoCb) autoCb.disabled = false;
+                if (manualCb) manualCb.disabled = false;
+                const autoLabel = item.querySelector(`label[for="${id}-upgrade-auto"]`);
+                const manualLabel = item.querySelector(`label[for="${id}-upgrade-manual"]`);
+                if (autoLabel) autoLabel.style.display = 'block';
+                if (manualLabel) manualLabel.style.display = 'block';
             }
             const section = item.closest('.card');
             if (section && !section.classList.contains('flight-quote-section')) {
@@ -2964,6 +3048,8 @@ function updateHotelTitle(sectionId) {
             const autoSection = document.getElementById(id + '-auto-section');
             const manualSection = document.getElementById(id + '-manual-section');
             const amtInput = item.querySelector('.upgrade-amount');
+            const autoLabel = item.querySelector(`label[for="${id}-upgrade-auto"]`);
+            const manualLabel = item.querySelector(`label[for="${id}-upgrade-manual"]`);
             if (mode === 'auto') {
                 manualCb.checked = false;
                 autoSection.style.display = 'block';
@@ -2971,6 +3057,8 @@ function updateHotelTitle(sectionId) {
                 if (amtInput) {
                     amtInput.readOnly = true;
                 }
+                manualLabel.style.display = 'none';
+                autoLabel.style.display = 'block';
                 updateUpgradeAutoAmount(id);
             } else {
                 autoCb.checked = false;
@@ -2978,7 +3066,13 @@ function updateHotelTitle(sectionId) {
                 manualSection.style.display = 'block';
                 if (amtInput) {
                     amtInput.readOnly = false;
+                    // Set to 0.00 initially for manual
+                    if (!amtInput.value || parseFloat(amtInput.value) === 0) {
+                        amtInput.value = '0.00';
+                    }
                 }
+                autoLabel.style.display = 'none';
+                manualLabel.style.display = 'block';
             }
             updateEmailTemplate();
             saveState();
@@ -3099,7 +3193,7 @@ function updateHotelTitle(sectionId) {
             let netTotal = 0;
             let sellingExact = 0;
             let sellingRounded = 0;
-            let upgradeTotal = 0;
+            let upgrades = []; // Collect upgrades for display
             
             const section = document.getElementById(sectionId);
             if (!section) return;
@@ -3119,23 +3213,55 @@ function updateHotelTitle(sectionId) {
                     sellingRounded += Math.round(sellingPrice * rooms);
                 }
                 
-                if (includeEmail || isUpgrade) {
-                    upgradeTotal += upgradeAmount * rooms;
+                if (isUpgrade && upgradeAmount > 0) {
+                    const upgradeDesc = item.querySelector('.upgrade-desc').value || 'Hotel Upgrade';
+                    upgrades.push({ desc: upgradeDesc, amount: Math.round(upgradeAmount * rooms) });
                 }
             });
             
-            // Add upgrades to rounded total
-            sellingRounded += Math.round(upgradeTotal);
+            // Calculate upgrade subtotal
+            const upgradeTotalRounded = upgrades.reduce((sum, u) => sum + u.amount, 0);
+            sellingRounded += upgradeTotalRounded;
             
+            // Set base totals
             document.getElementById(`${sectionId}-total-net`).textContent = `£${netTotal.toFixed(2)}`;
             document.getElementById(`${sectionId}-total-selling-exact`).textContent = `£${sellingExact.toFixed(2)}`;
             document.getElementById(`${sectionId}-total-selling-rounded`).textContent = `£${sellingRounded.toFixed(2)}`;
+            document.getElementById(`${sectionId}-total-selling-rounded-display`).innerHTML = `£${sellingRounded.toFixed(2)} <button class="details-toggle" onclick="toggleDetails('${sectionId}-details')">Price Details</button>`;
+
+            // Handle upgrades in separate section
+            const upgradeDiv = document.getElementById(`${sectionId}-upgrades`);
+            if (upgrades.length > 0) {
+                let upHtml = '<h4>Upgrades</h4>';
+                upgrades.forEach(upgrade => {
+                    upHtml += `<div class="totals-row upgrade-row"><span class="totals-label">${upgrade.desc}:</span><span class="totals-value">+£${upgrade.amount}</span></div>`;
+                });
+                upHtml += `<div class="totals-row"><span class="totals-label">Upgrade total to be collected:</span><span class="totals-value">£${upgradeTotalRounded.toFixed(2)}</span></div>`;
+                upgradeDiv.innerHTML = upHtml;
+                upgradeDiv.style.display = 'block';
+            } else {
+                upgradeDiv.style.display = 'none';
+            }
+        }
+
+        function toggleDetails(detailsId) {
+            const detailsDiv = document.getElementById(detailsId);
+            if (detailsDiv.style.display === 'none' || detailsDiv.style.display === '') {
+                detailsDiv.style.display = 'block';
+            } else {
+                detailsDiv.style.display = 'none';
+            }
         }
 
         function updateTotals() {
             let hotelNetTotal = 0;
             let hotelSellingExact = 0;
             let hotelSellingRounded = 0;
+            let flightNetTotal = 0;
+            let flightSellingExact = 0;
+            let flightSellingRounded = 0;
+            let optionalExtrasTotal = 0;
+            let allUpgrades = []; // Collect all upgrades
             
             // Collect from checked hotel quote sections
             hotelQuoteSections.forEach(sectionId => {
@@ -3147,15 +3273,29 @@ function updateHotelTitle(sectionId) {
                 const roundedEl = document.getElementById(`${sectionId}-total-selling-rounded`);
                 
                 if (netEl && exactEl && roundedEl) {
-                    hotelNetTotal += parseFloat(netEl.textContent.replace('£', '')) || 0;
-                    hotelSellingExact += parseFloat(exactEl.textContent.replace('£', '')) || 0;
-                    hotelSellingRounded += parseFloat(roundedEl.textContent.replace('£', '')) || 0;
+                    const hotelNet = parseFloat(netEl.textContent.replace('£', '')) || 0;
+                    const hotelSellExact = parseFloat(exactEl.textContent.replace('£', '')) || 0;
+                    const hotelSellRounded = parseFloat(roundedEl.textContent.replace('£', '')) || 0;
+                    
+                    hotelNetTotal += hotelNet;
+                    hotelSellingExact += hotelSellExact;
+                    hotelSellingRounded += hotelSellRounded;
+                    
+                    // Collect hotel upgrades
+                    const section = document.getElementById(sectionId);
+                    section.querySelectorAll('.supplier-table-row').forEach(item => {
+                        const isUpgrade = item.querySelector('input[type="checkbox"][id$="-upgrade"]')?.checked || false;
+                        if (isUpgrade) {
+                            const upgradeAmount = parseFloat(item.querySelector('.upgrade-amount').value) || 0;
+                            const rooms = parseInt(item.querySelector('.rooms').value) || 1;
+                            const upgradeDesc = item.querySelector('.upgrade-desc').value || 'Hotel Upgrade';
+                            if (upgradeAmount > 0) {
+                                allUpgrades.push({ desc: upgradeDesc, amount: Math.round(upgradeAmount * rooms), source: 'Hotel section' });
+                            }
+                        }
+                    });
                 }
             });
-            
-            let flightNetTotal = 0;
-            let flightSellingExact = 0;
-            let flightSellingRounded = 0;
             
             // Collect from checked flight quote sections
             flightQuoteSections.forEach(sectionId => {
@@ -3167,14 +3307,31 @@ function updateHotelTitle(sectionId) {
                 const roundedEl = document.getElementById(`${sectionId}-total-selling-rounded`);
                 
                 if (netEl && exactEl && roundedEl) {
-                    flightNetTotal += parseFloat(netEl.textContent.replace('£', '')) || 0;
-                    flightSellingExact += parseFloat(exactEl.textContent.replace('£', '')) || 0;
-                    flightSellingRounded += parseFloat(roundedEl.textContent.replace('£', '')) || 0;
+                    const flightNet = parseFloat(netEl.textContent.replace('£', '')) || 0;
+                    const flightSellExact = parseFloat(exactEl.textContent.replace('£', '')) || 0;
+                    const flightSellRounded = parseFloat(roundedEl.textContent.replace('£', '')) || 0;
+                    
+                    flightNetTotal += flightNet;
+                    flightSellingExact += flightSellExact;
+                    flightSellingRounded += flightSellRounded;
+                    
+                    // Collect flight upgrades
+                    const section = document.getElementById(sectionId);
+                    section.querySelectorAll('.flight-leg-row').forEach(item => {
+                        const isUpgrade = item.querySelector('input[id$="-upgrade"]')?.checked || false;
+                        if (isUpgrade) {
+                            const upgradeAmount = parseFloat(item.querySelector('.upgrade-amount').value) || 0;
+                            const upgradeDesc = item.querySelector('.upgrade-desc').value || 'Flight Upgrade';
+                            if (upgradeAmount > 0) {
+                                allUpgrades.push({ desc: upgradeDesc, amount: Math.round(upgradeAmount), source: 'Flight section' });
+                            }
+                        }
+                    });
                 }
             });
             
-            let optionalExtrasTotal = 0;
             const numRooms = parseInt(document.getElementById('rooms-count').textContent);
+            // Optional Extras - single total
             document.querySelectorAll('#optional-extras-list .optional-extra-item input[type="text"]').forEach(input => {
                 const item = input.closest('.optional-extra-item');
                 const name = input.value.trim();
@@ -3184,23 +3341,30 @@ function updateHotelTitle(sectionId) {
                 }
             });
             
+            // Sum all upgrades
+            const totalUpgradesAmount = allUpgrades.reduce((sum, u) => sum + u.amount, 0);
+            
             const totalNet = hotelNetTotal + flightNetTotal;
             const totalSellingExact = hotelSellingExact + flightSellingExact;
-            const totalSellingRounded = hotelSellingRounded + flightSellingRounded + optionalExtrasTotal;
+            const totalSellingRounded = hotelSellingRounded + flightSellingRounded + optionalExtrasTotal + totalUpgradesAmount;
             
             // Build breakdown HTML
             const totalsPanel = document.getElementById('totals-breakdown');
             let html = '';
             const bookingType = document.getElementById('booking-type').value;
-            const pricePerRoute = document.getElementById('price-per-route').checked;
             
             if (bookingType === 'hotel' || bookingType === 'package') {
-                // Hotel breakdowns
+                // Hotel subsections with summary and details
                 hotelQuoteSections.forEach(sectionId => {
                     const checkbox = document.querySelector(`#${sectionId} .quote-include`);
                     if (!checkbox || !checkbox.checked) return;
                     
+                    const roundedEl = document.getElementById(`${sectionId}-total-selling-rounded`);
+                    const roundedValue = parseFloat(roundedEl.textContent.replace('£', '')) || 0;
+                    
                     html += `<div class="totals-subsection"><h4>Hotel Quote ${sectionId.split('-')[2]}</h4>`;
+                    html += `<div class="totals-row"><span class="totals-label">Total Selling (Rounded):</span><span class="totals-value">£${roundedValue.toFixed(2)} <button class="details-toggle" onclick="toggleDetails('${sectionId}-summary-details')">Price Details</button></span></div>`;
+                    html += `<div id="${sectionId}-summary-details" class="details-content">`;
                     
                     const numRooms = roomsData.length;
                     for (let room = 0; room < numRooms; room++) {
@@ -3216,22 +3380,27 @@ function updateHotelTitle(sectionId) {
                     
                     const hotelNet = parseFloat(document.getElementById(`${sectionId}-total-net`).textContent.replace('£', '')) || 0;
                     const hotelSellExact = parseFloat(document.getElementById(`${sectionId}-total-selling-exact`).textContent.replace('£', '')) || 0;
-                    const hotelSellRounded = parseFloat(document.getElementById(`${sectionId}-total-selling-rounded`).textContent.replace('£', '')) || 0;
                     
                     html += `<div class="totals-row"><span class="totals-label">Hotel Net Total:</span><span class="totals-value">£${hotelNet.toFixed(2)}</span></div>`;
                     html += `<div class="totals-row"><span class="totals-label">Hotel Selling Exact:</span><span class="totals-value">£${hotelSellExact.toFixed(2)}</span></div>`;
-                    html += `<div class="totals-row"><span class="totals-label">Hotel Selling Rounded:</span><span class="totals-value">£${hotelSellRounded.toFixed(2)}</span></div></div>`;
+                    html += `<div class="totals-row"><span class="totals-label">Hotel Selling Rounded:</span><span class="totals-value">£${roundedValue.toFixed(2)}</span></div></div></div>`;
                 });
             }
             
             if (bookingType === 'package') {
-                // Flight breakdowns
+                // Flight subsections with summary and details
                 flightQuoteSections.forEach(sectionId => {
                     const checkbox = document.querySelector(`#${sectionId} .quote-include`);
                     if (!checkbox || !checkbox.checked) return;
                     
-                    html += `<div class="totals-subsection"><h4>Flight Quote ${sectionId.split('-')[2]}</h4>`;
+                    const roundedEl = document.getElementById(`${sectionId}-total-selling-rounded`);
+                    const roundedValue = parseFloat(roundedEl.textContent.replace('£', '')) || 0;
                     
+                    html += `<div class="totals-subsection"><h4>Flight Quote ${sectionId.split('-')[2]}</h4>`;
+                    html += `<div class="totals-row"><span class="totals-label">Total Selling (Rounded):</span><span class="totals-value">£${roundedValue.toFixed(2)} <button class="details-toggle" onclick="toggleDetails('${sectionId}-summary-details')">Price Details</button></span></div>`;
+                    html += `<div id="${sectionId}-summary-details" class="details-content">`;
+                    
+                    const pricePerRoute = document.getElementById('price-per-route').checked;
                     if (pricePerRoute) {
                         let departureTotal = 0;
                         let returnTotal = 0;
@@ -3270,43 +3439,42 @@ function updateHotelTitle(sectionId) {
                     } else {
                         const flightNet = parseFloat(document.getElementById(`${sectionId}-total-net`).textContent.replace('£', '')) || 0;
                         const flightSellExact = parseFloat(document.getElementById(`${sectionId}-total-selling-exact`).textContent.replace('£', '')) || 0;
-                        const flightSellRounded = parseFloat(document.getElementById(`${sectionId}-total-selling-rounded`).textContent.replace('£', '')) || 0;
                         
                         html += `<div class="totals-row"><span class="totals-label">Flight Net Total:</span><span class="totals-value">£${flightNet.toFixed(2)}</span></div>`;
                         html += `<div class="totals-row"><span class="totals-label">Flight Selling Exact:</span><span class="totals-value">£${flightSellExact.toFixed(2)}</span></div>`;
-                        html += `<div class="totals-row"><span class="totals-label">Flight Selling Rounded:</span><span class="totals-value">£${flightSellRounded.toFixed(2)}</span></div>`;
+                        html += `<div class="totals-row"><span class="totals-label">Flight Selling Rounded:</span><span class="totals-value">£${roundedValue.toFixed(2)}</span></div>`;
                     }
-                    
-                    html += `</div>`;
+                    html += `</div></div>`;
                 });
             }
             
-            // Optional extras
-            document.querySelectorAll('#optional-extras-list .optional-extra-item input[type="text"]').forEach(input => {
-                const item = input.closest('.optional-extra-item');
-                const name = input.value.trim();
-                if (name !== '') {
-                    const cost = parseFloat(item.querySelector('input[type="number"]').value) || 0;
-                    const extraTotal = Math.round(cost * numRooms);
-                    const extraName = name;
-                    html += `<div class="totals-row"><span class="totals-label">${extraName}:</span><span class="totals-value">£${extraTotal.toFixed(2)}</span></div>`;
-                }
-            });
+            // Optional Extras - single total line
+            if (optionalExtrasTotal > 0) {
+                html += `<div class="totals-subsection"><h4>Optional Extras</h4>`;
+                html += `<div class="totals-row"><span class="totals-label">Total Selling:</span><span class="totals-value">£${optionalExtrasTotal.toFixed(2)}</span></div></div>`;
+            }
             
-            // Grand totals
+            // Upgrades subsection
+            if (allUpgrades.length > 0) {
+                html += `<div class="totals-subsection"><h4>Upgrades</h4>`;
+                allUpgrades.forEach(upgrade => {
+                    html += `<div class="totals-row upgrade-row"><span class="totals-label">${upgrade.desc} (from ${upgrade.source}):</span><span class="totals-value">+£${upgrade.amount}</span></div>`;
+                });
+                html += `<div class="totals-row"><span class="totals-label">Total upgrades to be collected:</span><span class="totals-value">£${totalUpgradesAmount.toFixed(2)}</span></div>`;
+                html += `</div>`;
+            }
+            
+            // Grand totals with details toggle
             const grandPrefix = bookingType === 'package' ? 'Package ' : 'Grand ';
             html += `
                 <div class="totals-row grand-total">
-                    <span class="totals-label">${grandPrefix}Total Net:</span>
-                    <span class="totals-value">£${totalNet.toFixed(2)}</span>
+                    <span class="totals-label">${grandPrefix}Total Selling (Rounded):</span>
+                    <span class="totals-value">£${totalSellingRounded.toFixed(2)} <button class="details-toggle" onclick="toggleDetails('grand-details')">Price Details</button></span>
                 </div>
-                <div class="totals-row grand-total">
-                    <span class="totals-label">${grandPrefix}Total Selling (exact):</span>
-                    <span class="totals-value">£${totalSellingExact.toFixed(2)}</span>
-                </div>
-                <div class="totals-row grand-total">
-                    <span class="totals-label">${grandPrefix}Total Selling (rounded):</span>
-                    <span class="totals-value">£${totalSellingRounded.toFixed(2)}</span>
+                <div id="grand-details" class="details-content">
+                    <div class="totals-row"><span class="totals-label">Total Net:</span><span class="totals-value">£${totalNet.toFixed(2)}</span></div>
+                    <div class="totals-row"><span class="totals-label">Total Selling Exact:</span><span class="totals-value">£${totalSellingExact.toFixed(2)}</span></div>
+                    <div class="totals-row"><span class="totals-label">Total Selling Rounded:</span><span class="totals-value">£${totalSellingRounded.toFixed(2)}</span></div>
                 </div>
             `;
             
@@ -4351,8 +4519,50 @@ function copyToClipboard() {
                 });
             }
 
+            // Initialize upgrade states after load
+            initUpgradeStates();
+
             updateTotals();
             updateEmailTemplate();
+        }
+
+        function initUpgradeStates() {
+            // For hotel suppliers
+            document.querySelectorAll('.supplier-table-row').forEach(item => {
+                const id = item.id;
+                const upgradeCb = document.getElementById(id + '-upgrade');
+                if (upgradeCb && upgradeCb.checked) {
+                    const autoCb = document.getElementById(id + '-upgrade-auto');
+                    const manualCb = document.getElementById(id + '-upgrade-manual');
+                    autoCb.disabled = true;
+                    manualCb.disabled = true;
+                    const autoLabel = item.querySelector(`label[for="${id}-upgrade-auto"]`);
+                    const manualLabel = item.querySelector(`label[for="${id}-upgrade-manual"]`);
+                    if (autoCb.checked) {
+                        manualLabel.style.display = 'none';
+                    } else if (manualCb.checked) {
+                        autoLabel.style.display = 'none';
+                    }
+                }
+            });
+            // For flight legs
+            document.querySelectorAll('.flight-leg-row').forEach(item => {
+                const id = item.id;
+                const upgradeCb = document.getElementById(id + '-upgrade');
+                if (upgradeCb && upgradeCb.checked) {
+                    const autoCb = document.getElementById(id + '-upgrade-auto');
+                    const manualCb = document.getElementById(id + '-upgrade-manual');
+                    autoCb.disabled = true;
+                    manualCb.disabled = true;
+                    const autoLabel = item.querySelector(`label[for="${id}-upgrade-auto"]`);
+                    const manualLabel = item.querySelector(`label[for="${id}-upgrade-manual"]`);
+                    if (autoCb.checked) {
+                        manualLabel.style.display = 'none';
+                    } else if (manualCb.checked) {
+                        autoLabel.style.display = 'none';
+                    }
+                }
+            });
         }
 
         function validateCustomerInfo() {
